@@ -247,22 +247,27 @@ xi.msg.basic =
     EATS_FINDS_NOTHING      = 604,  -- <actor> eats a <item>, but finds nothing inside...
 
     -- Items
-    ITEM_USES                       = 28,  -- <actor> uses a <item>.
-    ITEM_UNABLE_TO_USE              = 55,  -- Unable to use item.
-    ITEM_UNABLE_TO_USE_2            = 56,  -- Unable to use item.
-    ITEM_FAILS_TO_ACTIVATE          = 62,  -- The <item> fails to activate.
-    ITEM_NO_PETRAS                  = 65,  -- You are not carrying any Petras.<br>You cannot use the <item>.
-    ITEM_DOES_NOT_HAVE              = 91,  -- <actor> does not have any <item>.
-    ITEM_CANNOT_USE_ON              = 92,  -- Cannot use the <item> on <target>.
-    ITEM_YOU_OBTAIN_FROM            = 98,  -- You obtain a <item> from <target>.
-    ITEM_NO_USE_LEVEL               = 104, -- Unable to use item.<br>You do not meet the level requirement.
-    ITEM_NO_USE_MEDICATED           = 111, -- You cannot use <item> while medicated.
-    ITEM_NO_USE_INVENTORY           = 308, -- Unable to use the <item>.<br><target>'s inventory is full.
-    ITEM_RECEIVES_EFFECT            = 375, -- <actor> uses a <item>.<br><target> receives the effect of <status>.
-    ITEM_OBTAINS_A                  = 376, -- <actor> uses a <item>.<br><target> obtains a <item2>.
-    ITEM_OBTAINS                    = 377, -- <actor> uses a <item>.<br><target> obtains <item2>.
-    ITEM_EFFECT_DISAPPEARS          = 378, -- <actor> uses a <item>.<br><target>'s <status> effect disappears!
-    ITEM_UNABLE_TO_USE_PARTY_LEADER = 580, -- Unable to use <item>. The party leader is in either an area beyond warping range or a place you have yet to visit.
+    ITEM_USES               = 28,   -- ${actor} uses a ${item}.
+    ITEM_UNABLE_TO_USE      = 55,   -- Unable to use item.
+    ITEM_UNABLE_TO_USE_2    = 56,   -- Unable to use item.
+    ITEM_FAILS_TO_ACTIVATE  = 62,   -- The ${item} fails to activate.
+    ITEM_NO_PETRAS          = 65,   -- You are not carrying any Petras.${lb}You cannot use the ${item}.
+    ITEM_DOES_NOT_HAVE      = 91,   -- ${actor} does not have any ${item}.
+    ITEM_CANNOT_USE_ON      = 92,   -- Cannot use the ${item} on ${target}.
+    ITEM_CANNOT_USE_TARGET  = 517,   -- The ${item} cannot bed used on that target.
+    ITEM_YOU_OBTAIN_FROM    = 98,   -- You obtain a ${item} from ${target}.
+    ITEM_NO_USE_LEVEL       = 104,  -- Unable to use item.${lb}You do not meet the level requirement.
+    ITEM_NO_USE_MEDICATED   = 111,  -- You cannot use ${item} while medicated.
+    ITEM_NO_USE_INVENTORY   = 308,  -- Unable to use the ${item}.${lb}${target}'s inventory is full.
+    ITEM_RECEIVES_EFFECT    = 375,  -- ${actor} uses a ${item}.${lb}${target} receives the effect of ${status}.
+    ITEM_OBTAINS_A          = 376,  -- ${actor} uses a ${item}.${lb}${target} obtains a ${item2}.
+    ITEM_OBTAINS            = 377,  -- ${actor} uses a ${item}.${lb}${target} obtains ${item2}.
+    ITEM_EFFECT_DISAPPEARS  = 378,  -- ${actor} uses a ${item}.${lb}${target}'s ${status} effect disappears!
+    ITEM_NO_ITEMS_EQUIPPED  = 514,  -- You do not have the proper items equipped to use the ${item}.
+
+    -- Two-handed Weapon Grips
+    GRIP_NO_2HAND_EQUIPPED = 512, -- You must have a two-handed weapon equipped in the main weapon slot in order to equip a grip
+    GRIP_NOT_COMPATIBLE    = 513, -- This grip is not compatible with the two-handed weapon you currently have equipped
 
     -- Ranged
     NO_RANGED_WEAPON       = 216, -- You do not have an appropriate ranged weapon equipped.
@@ -319,7 +324,7 @@ xi.msg.basic =
 
     -- Soultrapper (Pankration)
     SOULTRAPPER_SUCCESS    = 515,	-- <actor> has successfully recorded the target's image onto an <item>.
-    SOULTRAPPER_FAILED		= 516,	-- <actor> was unable to capture the target's image.
+    SOULTRAPPER_FAILED	   = 516,	-- <actor> was unable to capture the target's image.
 
     -- BLU
     LEARNS_SPELL           = 419, -- <target> learns (NULL)!
