@@ -97,7 +97,7 @@ xi.znm.soultrapper = xi.znm.soultrapper or {}
 -----------------------------------
 -- onItemCheck
 -----------------------------------
-xi.znm.soultrapper.onItemCheck = function(target, user)
+xi.znm.soultrapper.onItemCheck = function(target, item, param, caster)
     if target:isMob() == false or xi.pankration.prohibitedFamilies[target:getFamily()] ~= nil then
         return xi.msg.basic.ITEM_NO_USE_ON_TARGET
     end
