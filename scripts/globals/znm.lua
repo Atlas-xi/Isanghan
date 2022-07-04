@@ -94,8 +94,15 @@ end
 -----------------------------------
 xi.znm.soultrapper = xi.znm.soultrapper or {}
 
-xi.znm.soultrapper.onItemCheck = function(target, item, param, caster)
-    -- Target checks.
+-----------------------------------
+-- onItemCheck
+-----------------------------------
+xi.znm.soultrapper.onItemCheck = function(target, user)
+    if target:isMob() == false or xi.pankration.prohibitedFamilies[target:getFamily()] ~= nil then
+        return xi.msg.basic.ITEM_NO_USE_ON_TARGET
+    end
+
+    local id = user:getEquipID(xi.slot.AMMO)
     if
         target == nil or -- Players can use a macro to bypass the client side targeting restriction.
         not target:isMob() or
@@ -125,6 +132,31 @@ xi.znm.soultrapper.onItemCheck = function(target, item, param, caster)
     return 0
 end
 
+-----------------------------------
+-- onItemUse
+-----------------------------------
+xi.znm.soultrapper.onItemUse = function(target, user, item)
+    -- Soul plate not guaranteed
+    if math.random(100) > xi.znm.SOULTRAPPER_SUCCESS then
+        user:messageBasic(xi.msg.basic.SOULTRAPPER_FAILED)
+    else
+        -- Determine Zeni starting value
+        local zeni = xi.znm.soultrapper.getZeniValue(target, user, item)
+
+        -- Pick a skill totally at random...
+        local skillIndex, skillEntry = utils.randomEntryIdx(xi.pankration.feralSkills)
+
+        -- Add plate
+        local plate = user:addSoulPlate(target:getName(), target:getFamily(), zeni, skillIndex, skillEntry.fp)
+        local data = plate:getSoulPlateData()
+        utils.unused(data)
+        user:messageBasic(xi.msg.basic.SOULTRAPPER_SUCCESS, 0, xi.items.SOUL_PLATE)
+    end
+end
+
+-----------------------------------
+-- onItemUse Helpers
+-----------------------------------
 xi.znm.soultrapper.getZeniValue = function(target, user, item)
     local hpp = target:getHPP()
     local isNM = target:isNM()
@@ -168,28 +200,9 @@ xi.znm.soultrapper.getZeniValue = function(target, user, item)
 
     -- Sanitize Zeni
     zeni = math.floor(zeni) -- Remove any floating point information
-    zeni = utils.clamp(zeni, 1, 150)
+    zeni = utils.clamp(zeni, xi.znm.SOULPLATE_MIN_VALUE, xi.znm.SOULPLATE_MAX_VALUE)
 
     return zeni
-end
-
-xi.znm.soultrapper.onItemUse = function(target, user, item)
-    -- Soul plate not guaranteed
-    if math.random(100) > xi.znm.SOULTRAPPER_SUCCESS then
-        user:messageBasic(xi.msg.basic.SOULTRAPPER_FAILED)
-    else
-        -- Determine Zeni starting value
-        local zeni = xi.znm.soultrapper.getZeniValue(target, user, item)
-
-        -- Pick a skill totally at random...
-        local skillIndex, skillEntry = utils.randomEntryIdx(xi.pankration.feralSkills)
-
-        -- Add plate
-        local plate = user:addSoulPlate(target:getName(), target:getFamily(), zeni, skillIndex, skillEntry.fp)
-        local data = plate:getSoulPlateData()
-        utils.unused(data)
-        user:messageBasic(xi.msg.basic.SOULTRAPPER_SUCCESS, 0, xi.items.SOUL_PLATE)
-    end
 end
 
 -----------------------------------
@@ -197,18 +210,24 @@ end
 -----------------------------------
 xi.znm.ryo = xi.znm.ryo or {}
 
+-----------------------------------
+-- onTrade
+-----------------------------------
 xi.znm.ryo.onTrade = function(player, npc, trade)
     if npcUtil.tradeHasExactly(trade, xi.item.SOUL_PLATE) then
         -- Cache the soulplate value on the player
         local item = trade:getItem(0)
         local plateData = item:getSoulPlateData()
 
-        xi.znm.setTradedPlateValue(player, plateData.zeni)
+        xi.znm.ryo.setTradedPlateValue(player, plateData.zeni)
 
         player:startEvent(914)
     end
 end
 
+-----------------------------------
+-- onTrigger
+-----------------------------------
 xi.znm.ryo.onTrigger = function(player, npc)
     if xi.znm.playerHasSpokenToSanrakuBefore(player) then
         player:startEvent(913)
@@ -217,17 +236,23 @@ xi.znm.ryo.onTrigger = function(player, npc)
     end
 end
 
+-----------------------------------
+-- onEventUpdate
+-----------------------------------
 xi.znm.ryo.onEventUpdate = function(player, csid, option)
     if csid == 914 then  -- Get approximate value of traded soulplate
-        local zeniValue = xi.znm.tradedPlateValue(player)
-        xi.znm.setTradedPlateValue(player, 0)
+        local zeniValue = xi.znm.ryo.tradedPlateValue(player)
+
+        xi.znm.ryo.setTradedPlateValue(player, 0)
         player:updateEvent(zeniValue)
     elseif csid == 913 then
         if option == 200 then -- "Sanraku's subject of interest"
             local param = xi.znm.getSanrakusInterest()
+
             player:updateEvent(param,0)
         elseif option == 201 then -- "Sanraku's recommended fauna"
             local param = xi.znm.getSanrakusFauna()
+
             player:updateEvent(param, 0)
         elseif option == 300 then -- "My zeni balance"
             player:updateEvent(player:getCurrency("zeni_point"), 0)
@@ -241,11 +266,58 @@ xi.znm.ryo.onEventFinish = function(player, csid, option, npc)
 end
 
 -----------------------------------
+-- Ryo General Helpers
+-----------------------------------
+xi.znm.ryo.tradedPlateValue = function(player)
+    return player:getLocalVar("[ZNM][Ryo]SoulPlateValue")
+end
+
+xi.znm.ryo.setTradedPlateValue = function(player, zeni)
+    player:setLocalVar("[ZNM][Ryo]SoulPlateValue", zeni)
+end
+
+-----------------------------------
 -- Sanraku
 -----------------------------------
 xi.znm.sanraku = xi.znm.sanraku or {}
 
-xi.znm.platesTradedToday = function(player)
+------------------------------------
+-- onTrade
+------------------------------------
+xi.znm.sanraku.onTrade = function(player, npc, trade)
+    if trade:getItemCount() == 1 then -- One soul plate or trophy at a time
+        local item = trade:getItem(0)
+
+        if trade:getItemId() == xi.items.SOUL_PLATE then
+            xi.znm.sanraku.handleTradeWithPlate(player, npc, item)
+        else -- Check Trophy trading (for ZNM seals)
+            xi.znm.sanraku.handleTradeWithTrophy(player, npc, item)
+        end
+    end
+end
+
+------------------------------------
+-- onTrade Helpers
+------------------------------------
+xi.znm.sanraku.handleTradeWithPlate = function(player, npc, item)
+    if not player:hasKeyItem(xi.ki.RHAPSODY_IN_AZURE) then
+        local trade_limit = xi.znm.SOULPLATE_TRADE_LIMIT
+
+        if xi.znm.sanraku.platesTradedToday(player) >= trade_limit then
+            player:showText(npc, 13125, 1, xi.items.SOUL_PLATE,trade_limit)
+            return
+        end
+    else -- If you have the KI, clear out the tracking vars!
+        xi.znm.resetDailyTrackingVars(player)
+    end
+    -- Cache the soulplate value on the player
+    local plateData = item:getSoulPlateData()
+
+    xi.znm.sanraku.setTradedPlateValue(player, plateData.zeni)
+    player:startEvent(910, plateData.zeni)
+end
+
+xi.znm.sanraku.platesTradedToday = function(player)
     local currentDay = VanadielUniqueDay()
     local storedDay = xi.znm.playerTradingDay(player)
 
@@ -254,44 +326,41 @@ xi.znm.platesTradedToday = function(player)
         return 0
     end
 
-    return xi.znm.playerTradingDay(player)
+    return xi.znm.numberOfTradedPlates(player)
 end
 
-xi.znm.sanraku.onTrade = function(player, npc, trade)
-    if (trade:getItemCount() == 1) then -- One soul plate or trophy at a time
-        local item = trade:getItem(0)
-        if trade:getItemId() == xi.items.SOUL_PLATE then
-            if not player:hasKeyItem(xi.ki.RHAPSODY_IN_AZURE) then
-                local trade_limit = xi.znm.SOULPLATE_TRADE_LIMIT
-                if xi.znm.platesTradedToday(player) >= trade_limit then
-                    player:showText(npc,13125,1,xi.items.SOUL_PLATE,trade_limit)
-                    return
-                end
-            else -- If you have the KI, clear out the tracking vars!
-                xi.znm.resetDailyTrackingVars(player)
-            end
-            -- Cache the soulplate value on the player
-            local plateData = item:getSoulPlateData()
-            player:setLocalVar("[ZNM][Sanraku]SoulPlateValue", plateData.zeni)
-            player:startEvent(910, plateData.zeni)
+xi.znm.sanraku.handleTradeWithTrophy = function(player, npc, item)
+    local znm_seal = xi.znm.TROPHIES[item:getID()]
 
-        else -- Check Trophy trading (for ZNM seals)
-            local znm_seal = xi.znm.TROPHIES[trade:getItemId()]
-            if (znm_seal ~= nil) then
-                if player:hasKeyItem(znm_seal) then
-                    player:showText(npc,13155) -- TODO: csid instead?
-                else
-                    player:setCharVar("[ZNM]TrophyTrade", znm_seal)
-                    player:startEvent(912, 0, 0, 1, znm_seal)
-                end
-            end
+    if znm_seal ~= nil then
+        if player:hasKeyItem(znm_seal) then
+            player:showText(npc, 13155) -- TODO: csid instead?
+        else
+            xi.znm.sanraku.setTradedTrophySeal(player, znm_seal)
+            player:startEvent(912, 0, 0, 1, znm_seal)
         end
     end
 end
 
------ Helper Function for onTrigger
+
+------------------------------------
+-- onTrigger
+------------------------------------
+xi.znm.sanraku.onTrigger = function(player, npc)
+    -- ZNM and Zeni Ineractions
+    if xi.znm.playerHasSpokenToSanrakuBefore(player) then
+        local param = xi.znm.sanraku.menu(player)
+        player:startEvent(909,param)
+    else -- First time introduction
+        player:startEvent(908)
+    end
+end
+
+------------------------------------
+-- onTrigger Helpers
+------------------------------------
 -- Update Sanraku's ZNM menu (csid 909) based on owned seals
-xi.znm.SanrakuMenu = function(player)
+xi.znm.sanraku.menu = function(player)
     -- Default: Tier 1 ZNMs + "Don't Ask"
     -- (if bit = 0: add ZNM to Sanraku's Menu)
     local param = xi.znm.DefaultMenu
@@ -308,96 +377,147 @@ xi.znm.SanrakuMenu = function(player)
             end
         end
     end
+
     return param
 end
 
-xi.znm.sanraku.onTrigger = function(player, npc)
-    -- ZNM and Zeni Ineractions
-    if xi.znm.playerHasSpokenToSanrakuBefore(player) then
-        local param = xi.znm.SanrakuMenu(player)
-        player:startEvent(909,param)
-    else -- First time introduction
-        player:startEvent(908)
-    end
-end
-
-xi.znm.sanraku.onEventUpdate = function(player, csid, option, npc)
+------------------------------------
+-- onEventUpdate
+------------------------------------
+xi.znm.sanraku.onEventUpdate = function(player, csid, option)
     if csid == 909 then
         if option >= 300 and option <= 302 then -- "Gaining access to islets"
-            local zeni_cost = 500 -- Base cost charged by Sanraku
-            if player:hasKeyItem(xi.keyItem.RHAPSODY_IN_AZURE) then -- Reduced zeni cost
-                zeni_cost = 50
-            end
-            -- Give the correct island's information + salt
-            local key_item = xi.keyItem.SICKLEMOON_SALT + option - 300
-            if player:getCurrency("zeni_point") < zeni_cost then -- Not enough zeni
-                player:updateEvent(2)
-            elseif player:hasKeyItem(key_item) then -- Already have the salt
-                local SANRAKU_ID = ID.npc.SANRAKU
-                player:showText(GetNPCByID(SANRAKU_ID),13124) -- TODO: csid instead?
-            else
-                player:addKeyItem(key_item)
-                player:delCurrency("zeni_point", zeni_cost)
-                player:updateEvent(1, zeni_cost, 0, key_item)
-            end
+            xi.znm.sanraku.handleGainingAccessToIslets(player, option)
         elseif option >= 100 and option <= 130 then -- Are you sure you want info on <ZNM_mob>?
-            -- Give the correct ZNM's zeni cost
-             local diff = option - 99
-             local zeni_cost = xi.znm.getPopPrice(xi.znm.POP_ITEMS[diff].tier)
-            player:updateEvent(0,0,0,0,0,0,zeni_cost)
+            xi.znm.sanraku.handleConfirmingDesiredZNMInfo(player, option)
         elseif option >= 400 and option <= 440 then -- Yes, I want info on <ZNM_mob>
-            -- (440 because Warden's option is offset by 10 for some reason)
-            local diff = math.min(option - 399, 31) -- Determine the desired ZNM
-            local pop_item = xi.znm.POP_ITEMS[diff].item
-            local znm_tier = xi.znm.POP_ITEMS[diff].tier
-            local zeni_cost = xi.znm.getPopPrice(znm_tier)
-            if player:getCurrency("zeni_point") < zeni_cost then -- Not enough zeni
-                player:updateEvent(2)
-            elseif player:getFreeSlotsCount() == 0 then -- No inventory space
-                player:updateEvent(4)
-            elseif player:hasItem(pop_item) then -- Own pop already
-                local SANRAKU_ID = ID.npc.SANRAKU
-                player:showText(GetNPCByID(SANRAKU_ID),13124) -- TODO: csid instead?
-            else
-                -- Deduct zeni from player, increase future pop-item costs
-                player:delCurrency("zeni_point", zeni_cost)
-                xi.znm.updatePopPrice(znm_tier)
-                -- Give the pop item and remove the corresponding seal(s), if applicable
-                player:addItem(pop_item)
-                local seal = xi.znm.POP_ITEMS[diff].seal
-                if type(seal) == "table" then -- Three-seal ZNMs (Tinnin, etc.)
-                    player:delKeyItem(seal[1])
-                    player:delKeyItem(seal[2])
-                    player:delKeyItem(seal[3])
-                    player:updateEvent(1, zeni_cost, pop_item,seal[1],seal[2],seal[3])
-                elseif seal == 0 then -- Tier 1s have no seal
-                    player:updateEvent(1, zeni_cost, pop_item)
-                else -- One-seal ZNMs
-                    player:delKeyItem(seal)
-                    player:updateEvent(1, zeni_cost, pop_item,seal)
-                end
-            end
+            xi.znm.sanraku.handleConfirmedZNMInfo(player, option)
         end
     end
 end
 
-xi.znm.sanraku.onEventFinish = function(player, csid, option, npc)
+------------------------------------
+-- onEventUpdate Helpers
+------------------------------------
+xi.znm.sanraku.handleGainingAccessToIslets = function(player, option)
+    local zeni_cost = 500 -- Base cost charged by Sanraku
+
+    if player:hasKeyItem(xi.keyItem.RHAPSODY_IN_AZURE) then -- Reduced zeni cost
+        zeni_cost = 50
+    end
+
+    -- Give the correct island's information + salt
+    local key_item = xi.keyItem.SICKLEMOON_SALT + option - 300
+
+    if player:getCurrency("zeni_point") < zeni_cost then -- Not enough zeni
+        player:updateEvent(2)
+    elseif player:hasKeyItem(key_item) then -- Already have the salt
+        local SANRAKU_ID = ID.npc.SANRAKU
+        player:showText(GetNPCByID(SANRAKU_ID), 13124) -- TODO: csid instead?
+    else
+        player:addKeyItem(key_item)
+        player:delCurrency("zeni_point", zeni_cost)
+        player:updateEvent(1, zeni_cost, 0, key_item)
+    end
+end
+
+xi.znm.sanraku.handleConfirmingDesiredZNMInfo = function(player, option)
+    -- Give the correct ZNM's zeni cost
+    local diff = option - 99
+    local zeni_cost = xi.znm.getPopPrice(xi.znm.POP_ITEMS[diff].tier)
+
+    player:updateEvent(0,0,0,0,0,0,zeni_cost)
+end
+
+xi.znm.sanraku.handleConfirmedZNMInfo = function(player, option)
+    -- (440 because Warden's option is offset by 10 for some reason)
+    local diff = math.min(option - 399, 31) -- Determine the desired ZNM
+    local pop_item = xi.znm.POP_ITEMS[diff].item
+    local znm_tier = xi.znm.POP_ITEMS[diff].tier
+    local zeni_cost = xi.znm.getPopPrice(znm_tier)
+
+    if player:getCurrency("zeni_point") < zeni_cost then -- Not enough zeni
+        player:updateEvent(2)
+    elseif player:getFreeSlotsCount() == 0 then -- No inventory space
+        player:updateEvent(4)
+    elseif player:hasItem(pop_item) then -- Own pop already
+        local SANRAKU_ID = ID.npc.SANRAKU
+
+        player:showText(GetNPCByID(SANRAKU_ID),13124) -- TODO: csid instead?
+    else
+        -- Deduct zeni from player, increase future pop-item costs
+        player:delCurrency("zeni_point", zeni_cost)
+        xi.znm.updatePopPrice(znm_tier)
+
+        -- Give the pop item and remove the corresponding seal(s), if applicable
+        player:addItem(pop_item)
+
+        local seal = xi.znm.POP_ITEMS[diff].seal
+
+        if type(seal) == "table" then -- Three-seal ZNMs (Tinnin, etc.)
+            player:delKeyItem(seal[1])
+            player:delKeyItem(seal[2])
+            player:delKeyItem(seal[3])
+            player:updateEvent(1, zeni_cost, pop_item,seal[1],seal[2],seal[3])
+        elseif seal == 0 then -- Tier 1s have no seal
+            player:updateEvent(1, zeni_cost, pop_item)
+        else -- One-seal ZNMs
+            player:delKeyItem(seal)
+            player:updateEvent(1, zeni_cost, pop_item,seal)
+        end
+    end
+end
+
+------------------------------------
+-- onEventFinish
+------------------------------------
+xi.znm.sanraku.onEventFinish = function(player, csid, option)
     if csid == 910 then
-        player:tradeComplete()
-        xi.znm.setPlayerTradingDay(player, VanadielUniqueDay())
-        xi.znm.incrementTradedPlates(player)
-
-        local zeniValue = player:getLocalVar('[ZNM][Sanraku]SoulPlateValue')
-        player:setLocalVar('[ZNM][Sanraku]SoulPlateValue', 0)
-
-        player:addCurrency("zeni_point", zeniValue)
+        xi.znm.sanraku.handleCompletedTradeWithPlate(player)
     elseif csid == 908 then
         xi.znm.setPlayerHasSpokenToSanrakuBefore(player)
     elseif csid == 912 then
-        player:tradeComplete()
-        player:addKeyItem(player:getCharVar("[ZNM]TrophyTrade"))
-        player:setCharVar("[ZNM]TrophyTrade",0)
+        xi.znm.sanraku.handleCompletedTradeWithTrophy(player)
     end
+end
+
+------------------------------------
+-- onEventFinish Helpers
+------------------------------------
+xi.znm.sanraku.handleCompletedTradeWithPlate = function(player)
+    player:tradeComplete()
+    xi.znm.setPlayerTradingDay(player, VanadielUniqueDay())
+    xi.znm.incrementTradedPlates(player)
+
+    local zeniValue = xi.znm.sanraku.tradedPlateValue(player)
+    xi.znm.sanraku.setTradedPlateValue(player, 0)
+
+    player:addCurrency("zeni_point", zeniValue)
+end
+
+xi.znm.sanraku.handleCompletedTradeWithTrophy = function(player)
+    player:tradeComplete()
+    player:addKeyItem(xi.znm.sanraku.tradedTrophySeal(player))
+    xi.znm.sanraku.setTradedTrophySeal(player, 0)
+end
+
+-----------------------------------
+-- Sanraku General Helpers
+-----------------------------------
+xi.znm.sanraku.tradedPlateValue = function(player)
+    return player:getLocalVar("[ZNM][Sanraku]SoulPlateValue")
+end
+
+xi.znm.sanraku.setTradedPlateValue = function(player, zeni)
+    player:setLocalVar("[ZNM][Sanraku]SoulPlateValue", zeni)
+end
+
+xi.znm.sanraku.tradedTrophySeal = function(player)
+    return player:getLocalVar("[ZNM]TrophyTrade")
+end
+
+xi.znm.sanraku.setTradedTrophySeal = function(player, trophy)
+    player:setLocalVar("[ZNM]TrophyTrade", trophy)
 end
 
 -----------------------------------
@@ -446,14 +566,6 @@ end
 
 xi.znm.setPlayerHasSpokenToSanrakuBefore = function(player)
     player:setCharVar("ZeniStatus", 1)
-end
-
-xi.znm.tradedPlateValue = function(player)
-    return player:getLocalVar("[ZNM][Ryo]SoulPlateValue")
-end
-
-xi.znm.setTradedPlateValue = function(player, zeni)
-    player:setLocalVar("[ZNM][Ryo]SoulPlateValue", zeni)
 end
 
 xi.znm.playerTradingDay = function(player)
