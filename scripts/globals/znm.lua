@@ -208,7 +208,7 @@ xi.znm.ryo.onTrade = function(player, npc, trade)
 end
 
 xi.znm.ryo.onTrigger = function(player, npc)
-    if player:getCharVar("ZeniStatus") == 1 then
+    if xi.znm.playerHasSpokenToSanrakuBefore(player) then
         player:startEvent(913)
     else
         player:showText(npc,13156)  -- TODO: csid instead?
@@ -313,7 +313,7 @@ end
 
 xi.znm.sanraku.onTrigger = function(player, npc)
     -- ZNM and Zeni Ineractions
-    if player:getCharVar("ZeniStatus") == 1 then
+    if xi.znm.playerHasSpokenToSanrakuBefore(player) then
         local param = xi.znm.SanrakuMenu(player)
         player:startEvent(909,param)
     else -- First time introduction
@@ -392,7 +392,7 @@ xi.znm.sanraku.onEventFinish = function(player, csid, option, npc)
 
         player:addCurrency("zeni_point", zeniValue)
     elseif csid == 908 then
-        player:setCharVar("ZeniStatus",1)
+        xi.znm.setPlayerHasSpokenToSanrakuBefore(player)
     elseif csid == 912 then
         player:tradeComplete()
         player:addKeyItem(player:getCharVar("[ZNM]TrophyTrade"))
@@ -433,4 +433,17 @@ xi.znm.ZNMPopPriceDecay = function()
             SetServerVariable("[ZNM][T" .. znm_tier .. "]PopCost", pop_cost)
         end
     end
+end
+
+-----------------------------------
+---- General Utility Helpers
+-----------------------------------
+
+
+xi.znm.playerHasSpokenToSanrakuBefore = function(player)
+    return player:getCharVar("ZeniStatus") == 1
+end
+
+xi.znm.setPlayerHasSpokenToSanrakuBefore = function(player)
+    player:setCharVar("ZeniStatus", 1)
 end
