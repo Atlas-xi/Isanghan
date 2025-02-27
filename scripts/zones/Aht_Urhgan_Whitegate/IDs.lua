@@ -89,7 +89,7 @@ zones[xi.zone.AHT_URHGAN_WHITEGATE] =
     },
     npc =
     {
-        SANRAKU = 16982568,
+        SANRAKU = GetFirstID('Sanraku'),
     },
 }
 

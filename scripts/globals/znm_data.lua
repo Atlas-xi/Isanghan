@@ -40,11 +40,11 @@ xi.znm.ZNM_POP_COSTS =
     [5] = {minPrice = 5000, maxPrice = 12000, addedPrice = 500, decayPrice = 500}
 }
 
-------------------------------------------------------------
+-----------------------------------
 --- Sanraku's "Subjects of Interest" and "Recommended Fauna"
 --- Their order matches Ryo's csid (913) 'eventUpdate' value
 --- 61 "Subjects of Interest", 54 "Recommended Fauna"
-------------------------------------------------------------
+-----------------------------------
 xi.znm.SANRAKUS_INTEREST =
 { -- [interest ID] = {superFamily ID, ecoSystem, optional Name},
     [1]  = {superFamily = 113, ecoSystem = {48, 108, 113, 124, 130, 142, 160, 169, 170} }, -- Pugil, Aquans
@@ -171,9 +171,9 @@ xi.znm.SANRAKUS_FAUNA =
     [54] = {zone = xi.zone.AL_ZAHBI,                    name = 'Medusa'}
 }
 
-------------------------------------------------------------
+-----------------------------------
 ---- Sanraku's Trophy Trades and Pop Items
-------------------------------------------------------------
+-----------------------------------
 xi.znm.TROPHIES =
 { -- [mob_trophy] = seal_rewarded
     [xi.items.VULPANGUES_WING]          = xi.keyItem.MAROON_SEAL,
@@ -253,10 +253,10 @@ xi.znm.POP_ITEMS =
                                                                  xi.keyItem.BRIGHT_BLUE_SEAL}}
 }
 
-------------------------------------------------------------
+-----------------------------------
 ---- Sanraku's ZNM Menu Options
 ---- ZNM bitmask order is the same as pop_items' order
-------------------------------------------------------------
+-----------------------------------
 -- Default: Tier 1 ZNMs + 'Don't Ask'
 -- (if bit = 0: add ZNM to Sanraku's Menu)
 xi.znm.DefaultMenu = 0x7F8FE3F8
