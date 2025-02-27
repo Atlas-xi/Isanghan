@@ -158,6 +158,8 @@ xi.znm.calculatePlateZeni = function(player, plateData)
         bonus = 'ecoSystem'
     end
 
+    utils.unused(bonus)
+
     -- to avoid pictures being handed to low level chars, adding this check
     -- low level chars get 1/3 less when they take the pic, customizing to also affect trade in.
     if player:getMainLvl() <= 10 then
@@ -166,9 +168,9 @@ xi.znm.calculatePlateZeni = function(player, plateData)
 
     zeni = utils.clamp(zeni, xi.znm.SOULPLATE_MIN_VALUE, xi.znm.SOULPLATE_MAX_VALUE)
 
-    if player:getDebugMode() then
-        player:PrintToPlayer(string.format('name: %s zeni %i, bonus: %s', plateData.name, zeni, bonus))
-    end
+    -- if player:getDebugMode() then
+    --     player:printToPlayer(string.format('name: %s zeni %i, bonus: %s', plateData.name, zeni, bonus))
+    -- end
 
     return zeni
 end
@@ -243,10 +245,11 @@ xi.znm.soultrapper.onItemUse = function(target, item, player)
         local plate = player:addSoulPlate(target:getName(), interestData, zeni, skillIndex, skillEntry.fp)
         local data = plate:getSoulPlateData()
 
-        if player:getDebugMode() then
-            player:PrintToPlayer(string.format('mobName: %s zone: %i superID: %i SystemID: %i base zeni: %i', data.name, target:getZoneID(), target:getSuperFamily(), target:getSystem(), zeni))
-        end
+        -- if player:getDebugMode() then
+        --     player:printToPlayer(string.format('mobName: %s zone: %i superID: %i SystemID: %i base zeni: %i', data.name, target:getZoneID(), target:getSuperFamily(), target:getSystem(), zeni))
+        -- end
 
+        utils.unused(plate)
         utils.unused(data)
 
         -- todo, message should show to all in area

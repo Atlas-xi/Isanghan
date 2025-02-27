@@ -13094,6 +13094,30 @@ void CLuaBaseEntity::updateClaim(sol::object const& entity)
 }
 
 /************************************************************************
+ *  Function: hasClaim()
+ *  Purpose :
+ *  Example : player:hasClaim(mob)
+ *  Notes   :
+ ************************************************************************/
+
+bool CLuaBaseEntity::hasClaim(CBattleEntity* PTarget)
+{
+    if (m_PBaseEntity->objtype == TYPE_NPC)
+    {
+        ShowWarning("Attempting to check claim for invalid entity type (%s).", m_PBaseEntity->getName());
+        return false;
+    }
+
+    if (PTarget->objtype == TYPE_NPC)
+    {
+        ShowWarning("Attempting to check claim for invalid target type (%s).", PTarget->getName());
+        return false;
+    }
+
+    return battleutils::HasClaim(dynamic_cast<CBattleEntity*>(m_PBaseEntity), PTarget);
+}
+
+/************************************************************************
  *  Function: hasEnmity()
  *  Purpose : Check if a an entity is on any mob's enmity list or is supertanked by
  *  Example : if player:hasEnmity() then
@@ -19492,6 +19516,7 @@ void CLuaBaseEntity::Register()
     SOL_REGISTER("updateEnmityFromCure", CLuaBaseEntity::updateEnmityFromCure);
     SOL_REGISTER("resetEnmity", CLuaBaseEntity::resetEnmity);
     SOL_REGISTER("updateClaim", CLuaBaseEntity::updateClaim);
+    SOL_REGISTER("hasClaim", CLuaBaseEntity::hasClaim);
     SOL_REGISTER("hasEnmity", CLuaBaseEntity::hasEnmity);
     SOL_REGISTER("getNotorietyList", CLuaBaseEntity::getNotorietyList);
     SOL_REGISTER("clearEnmityForEntity", CLuaBaseEntity::clearEnmityForEntity);
