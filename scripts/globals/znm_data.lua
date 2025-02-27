@@ -11,16 +11,19 @@ xi.znm = xi.znm or {}
 -----------------------------------
 
 -- Soultrapper Variables
-xi.znm.SOULTRAPPER_SUCCESS      = 70  -- Base success rate (%)
-xi.znm.SOULPLATE_HPP_MULT       = 1   -- Zeni multiplier for low hp %
-xi.znm.SOULPLATE_INTEREST_MULT  = 3   -- Sanraku subject of interest multiplier
-xi.znm.SOULPLATE_FAUNA_MULT     = 4   -- Sanraku recommended fauna multiplier
-xi.znm.SOULPLATE_NM_MULT        = 2   -- Generic NM multiplier (won't stack with rec. fauna)
-xi.znm.SOULPLATE_FACING_MULT    = 1.5 -- Soultrapper used while facing the target
-xi.znm.SOULPLATE_HS_MULT        = 1.5 -- Using a High Speed soul plate
-xi.znm.SOULPLATE_TRADE_LIMIT    = 10  -- The number of soul plates players can trade per day
-xi.znm.SOULPLATE_MIN_VALUE      = 1   -- The minimum amount of zeni per plate
-xi.znm.SOULPLATE_MAX_VALUE      = 150 -- The maximum amount of zeni per plate
+xi.znm.SOULTRAPPER_SUCCESS      = 70   -- Base success rate (%)
+xi.znm.SOULPLATE_HPP_MULT       = 1.5  -- Zeni multiplier for low hp %
+xi.znm.SOULPLATE_ECOSYSTEM      = 25   -- Sanraku subject of interest ecosystem bonus
+xi.znm.SOULPLATE_INTEREST       = 40   -- Sanraku subject of interest superFamily bonus
+xi.znm.SOULPLATE_FAUNA          = 50   -- Sanraku recommended fauna bonus
+xi.znm.SOULPLATE_NM_MULT        = 1.5  -- Generic NM multiplier
+xi.znm.SOULPLATE_HNM_MULT       = 1.75 -- HNM multiplier
+xi.znm.SOULPLATE_FACING_MULT    = 1.05 -- Soultrapper used while facing the target
+xi.znm.SOULPLATE_HS_MULT        = 1.25 -- Using a High Speed soul plate (success rate bonus only)
+xi.znm.SOULPLATE_TRADE_LIMIT    = 10   -- The number of soul plates players can trade per day
+xi.znm.SOULPLATE_MIN_VALUE      = 5    -- The minimum amount of zeni per plate
+xi.znm.SOULPLATE_MAX_VALUE      = 150  -- The maximum amount of zeni per plate
+xi.znm.SOULPLATE_UNIQUE_AMOUNT  = 30   -- Certain special mobs get bonus
 
 -----------------------------------
 ---- ZNM Pop-Item Prices
@@ -43,131 +46,129 @@ xi.znm.ZNM_POP_COSTS =
 --- 61 "Subjects of Interest", 54 "Recommended Fauna"
 ------------------------------------------------------------
 xi.znm.SANRAKUS_INTEREST =
-{
-    -- Some families were easier to verify using superfamilies, so the first value is a bool to check
-    -- {isSuperFamID?, (super)familyID}
-    [1]  = {isSuperFamID = 0, familyID = 197}, -- Pugil
-    [2]  = {isSuperFamID = 1, familyID = 129}, -- Sea Monk
-    [3]  = {isSuperFamID = 0, familyID = 191}, -- Orobon
-    [4]  = {isSuperFamID = 0, familyID = 258}, -- Worm
-    [5]  = {isSuperFamID = 0, familyID = 172}, -- Leech
-    [6]  = {isSuperFamID = 1, familyID = 42},  -- Slime
-    [7]  = {isSuperFamID = 0, familyID = 112}, -- Flan
-    [8]  = {isSuperFamID = 0, familyID = 56},  -- Bomb
-    [9]  = {isSuperFamID = 1, familyID = 32},  -- Cluster Bomb
-    [10] = {isSuperFamID = 0, familyID = 121}, -- Ghost
-    [11] = {isSuperFamID = 0, familyID = 227}, -- Skeleton
-    [12] = {isSuperFamID = 0, familyID = 86},  -- Doomed
-    [13] = {isSuperFamID = 0, familyID = 64},  -- Chigoe
-    [14] = {isSuperFamID = 0, familyID = 235}, -- Spider
-    [15] = {isSuperFamID = 0, familyID = 48},  -- Bee
-    [16] = {isSuperFamID = 0, familyID = 79},  -- Crawler
-    [17] = {isSuperFamID = 0, familyID = 253}, -- Wamoura Larvae
-    [18] = {isSuperFamID = 0, familyID = 113}, -- Fly
-    [19] = {isSuperFamID = 0, familyID = 81},  -- Diremite
-    [20] = {isSuperFamID = 0, familyID = 217}, -- Scorpion
-    [21] = {isSuperFamID = 0, familyID = 254}, -- Wamoura
-    [22] = {isSuperFamID = 0, familyID = 89},  -- Imp
-    [23] = {isSuperFamID = 0, familyID = 198}, -- Puk
-    [24] = {isSuperFamID = 1, familyID = 109}, -- Wyvern
-    [25] = {isSuperFamID = 0, familyID = 87},  -- Dragon
-    [26] = {isSuperFamID = 0, familyID = 46},  -- Bat
-    [27] = {isSuperFamID = 0, familyID = 47},  -- Bat Trio
-    [28] = {isSuperFamID = 0, familyID = 72},  -- Colibri
-    [29] = {isSuperFamID = 0, familyID = 55},  -- Bird
-    [30] = {isSuperFamID = 0, familyID = 27},  -- Apkallu
-    [31] = {isSuperFamID = 0, familyID = 70},  -- Cockatrice
-    [32] = {isSuperFamID = 0, familyID = 226}, -- Sheep
-    [33] = {isSuperFamID = 0, familyID = 242}, -- Tiger
-    [34] = {isSuperFamID = 0, familyID = 180}, -- Marid
-    [35] = {isSuperFamID = 0, familyID = 208}, -- Ram
-    [36] = {isSuperFamID = 0, familyID = 216}, -- Sapling
-    [37] = {isSuperFamID = 0, familyID = 114}, -- Flytrap
-    [38] = {isSuperFamID = 0, familyID = 116}, -- Funguar
-    [39] = {isSuperFamID = 0, familyID = 245}, -- Treant
-    [40] = {isSuperFamID = 0, familyID = 186}, -- Morbol
-    [41] = {isSuperFamID = 0, familyID = 174}, -- Lizard
-    [42] = {isSuperFamID = 0, familyID = 210}, -- Raptor
-    [43] = {isSuperFamID = 0, familyID = 58},  -- Bugard
-    [44] = {isSuperFamID = 0, familyID = 257}, -- Wivre
-    [45] = {isSuperFamID = 0, familyID = 102}, -- Fire Elemental
-    [46] = {isSuperFamID = 0, familyID = 103}, -- Ice Elemental
-    [47] = {isSuperFamID = 0, familyID = 99},  -- Wind Elemental
-    [48] = {isSuperFamID = 0, familyID = 101}, -- Earth Elemental
-    [49] = {isSuperFamID = 0, familyID = 105}, -- Thunder Elemental
-    [50] = {isSuperFamID = 0, familyID = 106}, -- Water Elemental
-    [51] = {isSuperFamID = 0, familyID = 100}, -- Dark Elemental
-    [52] = {isSuperFamID = 0, familyID = 184}, -- Moblin
-    [53] = {isSuperFamID = 0, familyID = 196}, -- Poroggo
-    [54] = {isSuperFamID = 0, familyID = 213}, -- Sahagin
-    [55] = {isSuperFamID = 0, familyID = 176}, -- Mamool Ja
-    [56] = {isSuperFamID = 0, familyID = 171}, -- Lamiae
-    [57] = {isSuperFamID = 0, familyID = 182}, -- Merrow
-    [58] = {isSuperFamID = 0, familyID = 199}, -- Qiqirn
-    [59] = {isSuperFamID = 0, familyID = 246}, -- Troll
-    [60] = {isSuperFamID = 0, familyID = 117}, -- Qutrub
-    [61] = {isSuperFamID = 0, familyID = 233}, -- Soulflayer
+{ -- [interest ID] = {superFamily ID, ecoSystem, optional Name},
+    [1]  = {superFamily = 113, ecoSystem = {48, 108, 113, 124, 130, 142, 160, 169, 170} }, -- Pugil, Aquans
+    [2]  = {superFamily = 130, ecoSystem = {48, 108, 113, 124, 130, 142, 160, 169, 170} }, -- Sea Monk
+    [3]  = {superFamily = 108, ecoSystem = {48, 108, 113, 124, 130, 142, 160, 169, 170} }, -- Verified Orobon
+    [4]  = {superFamily = 148, ecoSystem = {42, 65, 82, 95, 127, 132, 148, 161} }, -- Worm, Amorph
+    [5]  = {superFamily =  95, ecoSystem = {42, 65, 82, 95, 127, 132, 148, 161} }, -- Leech, Amorph
+    [6]  = {superFamily =  42, ecoSystem = {42, 65, 82, 95, 127, 132, 148, 161} }, -- Slime, Amorph
+    [7]  = {superFamily =  65, ecoSystem = {42, 65, 82, 95, 127, 132, 148, 161} }, -- Flan, Amorph
+    [8]  = {superFamily =  32, ecoSystem = {1, 6, 29, 32, 37, 53, 79, 91, 97, 102, 134, 159, 164, 168, 183, 194, }}, -- Bomb, Arcana
+    [9]  = {superFamily = 194, ecoSystem = {1, 6, 29, 32, 37, 53, 79, 91, 97, 102, 134, 159, 164, 168, 183, 194, }}, -- Cluster Bomb, Arcana
+    [10] = {superFamily =  28, ecoSystem = {28, 46, 47, 54, 56, 68, 84, 86, 91, 109, 118, 143, 154, 167, 186} }, -- Ghost, Undead
+    [11] = {superFamily =  91, ecoSystem = {28, 46, 47, 54, 56, 68, 84, 86, 91, 109, 118, 143, 154, 167, 186} }, -- Skeleton, Undead
+    [12] = {superFamily =  54, ecoSystem = {28, 46, 47, 54, 56, 68, 84, 86, 91, 109, 118, 143, 154, 167, 186} }, -- Doomed, Undead
+    [13] = {superFamily =  40, ecoSystem = {9, 26, 27, 40, 52, 63, 66, 75, 93, 129, 135, 144, 155, 156, 157, 173, 196} }, -- Chigoe, Vermin
+    [14] = {superFamily = 135, ecoSystem = {9, 26, 27, 40, 52, 63, 66, 75, 93, 129, 135, 144, 155, 156, 157, 173, 196} }, -- Spider, Vermin
+    [15] = {superFamily =  26, ecoSystem = {9, 26, 27, 40, 52, 63, 66, 75, 93, 129, 135, 144, 155, 156, 157, 173, 196} }, -- Verified Bee, Vermin
+    [16] = {superFamily =  63, ecoSystem = {9, 26, 27, 40, 52, 63, 66, 75, 93, 129, 135, 144, 155, 156, 157, 173, 196} }, -- Verified Crawler, Vermin
+    [17] = {superFamily = 196, ecoSystem = {9, 26, 27, 40, 52, 63, 66, 75, 93, 129, 135, 144, 155, 156, 157, 173, 196} }, -- Wamoura Larvae, Vermin
+    [18] = {superFamily =  66, ecoSystem = {9, 26, 27, 40, 52, 63, 66, 75, 93, 129, 135, 144, 155, 156, 157, 173, 196} }, -- Fly, Vermin
+    [19] = {superFamily =  52, ecoSystem = {9, 26, 27, 40, 52, 63, 66, 75, 93, 129, 135, 144, 155, 156, 157, 173, 196} }, -- Verified Diremite, Vermin
+    [20] = {superFamily = 129, ecoSystem = {9, 26, 27, 40, 52, 63, 66, 75, 93, 129, 135, 144, 155, 156, 157, 173, 196} }, -- Scorpion, Vermin
+    [21] = {superFamily = 144, ecoSystem = {9, 26, 27, 40, 52, 63, 66, 75, 93, 129, 135, 144, 155, 156, 157, 173, 196} }, -- Wamoura, Vermin
+    [22] = {superFamily =  89, ecoSystem = {4, 57, 58, 70, 78, 89, 92, 133, 135, 182, 189, 190} }, -- Imp, Demon
+    [23] = {superFamily = 114, ecoSystem = {55, 78, 88, 109, 114, 149, 184, 192} }, -- Puk, Dragon
+    [24] = {superFamily = 109, ecoSystem = {55, 78, 88, 109, 114, 149, 184, 192} }, -- Wyvern, Dragon
+    [25] = {superFamily =  55, ecoSystem = {55, 78, 88, 109, 114, 149, 184, 192} }, -- Dragon, Dragon
+    [26] = {superFamily =  25, ecoSystem = {6, 10, 25, 31, 43, 45, 73, 83, 171, 177, 185, 197} }, -- Bat, Bird
+    [27] = {superFamily = 197, ecoSystem = {6, 10, 25, 31, 43, 45, 73, 83, 171, 177, 185, 197} }, -- Bat Trio, Bird
+    [28] = {superFamily =  45, ecoSystem = {6, 10, 25, 31, 43, 45, 73, 83, 171, 177, 185, 197} }, -- Colibri, Bird
+    [29] = {superFamily =  31, ecoSystem = {6, 10, 25, 31, 43, 45, 73, 83, 171, 177, 185, 197} }, -- Bird, Bird
+    [30] = {superFamily =  10, ecoSystem = {6, 10, 25, 31, 43, 45, 73, 83, 171, 177, 185, 197} }, -- Apkallu, Bird
+    [31] = {superFamily =  43, ecoSystem = {6, 10, 25, 31, 43, 45, 73, 83, 171, 177, 185, 197} }, -- Cockatrice, Bird
+    [32] = {superFamily =  90, ecoSystem = {27, 28, 33, 38, 44, 51, 90, 100, 101, 106, 119, 121, 137, 174, 175, 176} }, -- Sheep, Beast
+    [33] = {superFamily = 137, ecoSystem = {27, 28, 33, 38, 44, 51, 90, 100, 101, 106, 119, 121, 137, 174, 175, 176} }, -- Tiger, Beast
+    [34] = {superFamily = 101, ecoSystem = {27, 28, 33, 38, 44, 51, 90, 100, 101, 106, 119, 121, 137, 174, 175, 176} }, -- Marid, Beast
+    [35] = {superFamily = 121, ecoSystem = {27, 28, 33, 38, 44, 51, 90, 100, 101, 106, 119, 121, 137, 174, 175, 176} }, -- Ram, Beast
+    [36] = {superFamily = 128, ecoSystem = {67, 69, 80, 99, 104, 120, 125, 128, 139, 172, 179, 180, 181} }, -- Verified Sapling, Plantoid
+    [37] = {superFamily =  67, ecoSystem = {67, 69, 80, 99, 104, 120, 125, 128, 139, 172, 179, 180, 181} }, -- Flytrap, Plantoid
+    [38] = {superFamily =  69, ecoSystem = {67, 69, 80, 99, 104, 120, 125, 128, 139, 172, 179, 180, 181} }, -- Funguar, Plantoid
+    [39] = {superFamily = 139, ecoSystem = {67, 69, 80, 99, 104, 120, 125, 128, 139, 172, 179, 180, 181} }, -- Treant, Plantoid
+    [40] = {superFamily = 104, ecoSystem = {67, 69, 80, 99, 104, 120, 125, 128, 139, 172, 179, 180, 181} }, -- Verified Morbol, Plantoid
+    [41] = {superFamily =  60, ecoSystem = {2, 34, 60, 61, 109, 123, 147, 163, 178} }, -- Lizard, Lizard
+    [42] = {superFamily = 123, ecoSystem = {2, 34, 60, 61, 109, 123, 147, 163, 178} }, -- Raptor, Lizard
+    [43] = {superFamily =  34, ecoSystem = {2, 34, 60, 61, 109, 123, 147, 163, 178} }, -- Bugard, Lizard
+    [44] = {superFamily = 147, ecoSystem = {2, 34, 60, 61, 109, 123, 147, 163, 178} }, -- Verified Wivre, Lizard
+    [45] = {superFamily =  62, ecoSystem = {11, 62, 87}, name = 'FireElemental'}, -- Fire Elemental, Elemental
+    [46] = {superFamily =  62, ecoSystem = {11, 62, 87}, name = 'IceElemental'}, -- Ice Elemental, Elemental
+    [47] = {superFamily =  62, ecoSystem = {11, 62, 87}, name = 'AirElemental'}, -- Air Elemental, Elemental
+    [48] = {superFamily =  62, ecoSystem = {11, 62, 87}, name = 'EarthElemental'}, -- Earth Elemental, Elemental
+    [49] = {superFamily =  62, ecoSystem = {11, 62, 87}, name = 'ThunderElement`'}, -- Thunder Elemental, Elemental
+    [50] = {superFamily =  62, ecoSystem = {11, 62, 87}, name = 'WaterElemental'}, -- Water Elemental, Elemental
+    [51] = {superFamily =  62, ecoSystem = {11, 62, 87}, name = 'DarkElemental'}, -- Verified Dark Elemental, Elemental
+    [52] = {superFamily = 195, ecoSystem = {8, 35, 74, 76, 77, 94, 98, 107, 112, 115, 116, 126, 138, 140, 151, 158, 193, 195} }, -- Moblin, Beastman
+    [53] = {superFamily = 112, ecoSystem = {8, 35, 74, 76, 77, 94, 98, 107, 112, 115, 116, 126, 138, 140, 151, 158, 193, 195} }, -- Poroggo, Beastmen
+    [54] = {superFamily = 126, ecoSystem = {8, 35, 74, 76, 77, 94, 98, 107, 112, 115, 116, 126, 138, 140, 151, 158, 193, 195} }, -- Sahagin, Beastmen
+    [55] = {superFamily =  98, ecoSystem = {8, 35, 74, 76, 77, 94, 98, 107, 112, 115, 116, 126, 138, 140, 151, 158, 193, 195} }, -- Mamool Ja, Beastmen
+    [56] = {superFamily =  94, ecoSystem = {8, 35, 74, 76, 77, 94, 98, 107, 112, 115, 116, 126, 138, 140, 151, 158, 193, 195} }, -- Lamiae, Beastmen
+    [57] = {superFamily = 193, ecoSystem = {8, 35, 74, 76, 77, 94, 98, 107, 112, 115, 116, 126, 138, 140, 151, 158, 193, 195} }, -- Merrow, Beastmen
+    [58] = {superFamily = 115, ecoSystem = {8, 35, 74, 76, 77, 94, 98, 107, 112, 115, 116, 126, 138, 140, 151, 158, 193, 195} }, -- Qiqirn, beastmen
+    [59] = {superFamily = 140, ecoSystem = {8, 35, 74, 76, 77, 94, 98, 107, 112, 115, 116, 126, 138, 140, 151, 158, 193, 195} }, -- Verified Troll, Beastmen
+    [60] = {superFamily = 118, ecoSystem = {28, 46, 47, 54, 56, 68, 84, 86, 91, 109, 118, 143, 154, 167, 186} }, -- Qutrub, Undead
+    [61] = {superFamily = 133, ecoSystem = {4, 57, 58, 70, 78, 89, 92, 133, 135, 182, 189, 190} }, -- Soulflayer, Demon
 }
 
 xi.znm.SANRAKUS_FAUNA =
 { -- Recommended Fauna refer to a specific enemy, identified by zone and type
-    [1]  = {zone = xi.zone.MOUNT_ZHAYOLM,               name = "Cerberus"}, -- Mount Zhayolm
-    [2]  = {zone = xi.zone.WAJAOM_WOODLANDS,            name = "Hydra"}, -- Wajaom Woodlands
-    [3]  = {zone = xi.zone.ILRUSI_ATOLL,                name = "Cursed_Chest"}, -- Golden Salvage (Assault)
-    [4]  = {zone = xi.zone.ILRUSI_ATOLL,                name = "Imp"}, -- Demolition Duty (Assault)
-    [5]  = {zone = xi.zone.ILRUSI_ATOLL,                name = "Orobon"}, -- Desperately Seeking Cephalopods (Assault)
-    [6]  = {zone = xi.zone.ILRUSI_ATOLL,                name = "Khimaira_14X"}, -- Bellerophon's Bliss (Assault)
-    [7]  = {zone = xi.zone.ILRUSI_ATOLL,                name = "Martial_Maestro_Megomak"}, -- Bellerophon's Bliss (Assault)
-    [8]  = {zone = xi.zone.PERIQIA,                     name = "Arrapago_Crab"}, -- Seagull Grounded (Assault)
-    [9]  = {zone = xi.zone.PERIQIA,                     name = "Batteilant_Bhoot"}, -- Requiem (Assault)
-    [10] = {zone = xi.zone.PERIQIA,                     name = "Black_Baron"}, -- Shooting Down the Baron (Assault)
-    [11] = {zone = xi.zone.PERIQIA,                     name = "Qiqirn_Miner"}, -- Defuse the Threat (Assault)
-    [12] = {zone = xi.zone.PERIQIA,                     name = "King_Goldemar"}, -- The Price is Right (Assault)
-    [13] = {zone = xi.zone.LEBROS_CAVERN,               name = "Dahak"}, -- Evade and Escape (Assault)
-    [14] = {zone = xi.zone.LEBROS_CAVERN,               name = "Ranch_Wamoura"}, -- Wamoura Farm Raid (Assault)
-    [15] = {zone = xi.zone.LEBROS_CAVERN,               name = "Black_Shuck"}, -- Better Than One (Assault)
-    [16] = {zone = xi.zone.LEBROS_CAVERN,               name = "Nocuous_Inferno"}, -- Better Than One (Assault)
-    [17] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = "Festive_Firedrake"}, -- Blitzkrieg (Assault)
-    [18] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = "Molted_Ziz"}, -- Blitzkrieg (Assault)
-    [19] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = "Marid"}, -- Marids in the Mist (Assault)
-    [20] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = "Poroggo"}, -- Azure Ailments (Assault)
-    [21] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = "Qiqirn_Huckster"}, -- Azure Ailments (Assault)
-    [22] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = "Leech"}, -- Azure Ailments (Assault)
-    [23] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = "Orochi"}, -- The Susanoo Shuffle (Assault)
-    [24] = {zone = xi.zone.LEUJAOAM_SANCTUM,            name = "Coney"}, -- Shanarha Grass Conservation (Assault)
-    [25] = {zone = xi.zone.LEUJAOAM_SANCTUM,            name = "Imp"}, -- Supplies Recovery (Assault)
-    [26] = {zone = xi.zone.LEUJAOAM_SANCTUM,            name = "Count_Dracula"}, -- Bloody Rondo (Assault)
-    [27] = {zone = xi.zone.THE_ASHU_TALIF,              name = "Bubbly"}, -- Targeting the Captain (Assault)
-    [28] = {zone = xi.zone.TALACCA_COVE,                name = "Imp_Bandsman"}, -- Call to Arms (ISNM)
-    [29] = {zone = xi.zone.TALACCA_COVE,                name = "Angler_Orobon"}, -- Compliments to the Chef (ISNM)
-    [30] = {zone = xi.zone.NAVUKGO_EXECUTION_CHAMBER,   name = "Watch_Wamoura"}, -- Tough Nut to Crack (ISNM)
-    [31] = {zone = xi.zone.NAVUKGO_EXECUTION_CHAMBER,   name = "Two-Faced_Flan"}, -- Happy Caster (ISNM)
-    [32] = {zone = xi.zone.JADE_SEPULCHER,              name = "Mocking_Colibri"}, -- Making a Mockery (ISNM)
-    [33] = {zone = xi.zone.JADE_SEPULCHER,              name = "Phantom_Puk"}, -- Shadows of the Mind (ISNM)
-    [34] = {zone = xi.zone.NYZUL_ISLE,                  name = "Adamantoise"}, -- (Floors 20, 40)
-    [35] = {zone = xi.zone.NYZUL_ISLE,                  name = "Behemoth"}, -- (Floors 20, 40)
-    [36] = {zone = xi.zone.NYZUL_ISLE,                  name = "Fafnir"}, -- (Floors 20, 40)
-    [37] = {zone = xi.zone.NYZUL_ISLE,                  name = "Khimaira"}, -- (Floors 60, 80, 100)
-    [38] = {zone = xi.zone.NYZUL_ISLE,                  name = "Cerberus"}, -- (Floors 60, 80, 100)
-    [39] = {zone = xi.zone.NYZUL_ISLE,                  name = "Hydra"}, -- (Floors 60, 80, 100)
-    [40] = {zone = xi.zone.ZHAYOLM_REMNANTS,            name = "Battleclad_Chariot"}, -- Zhayolm Remnants (Salvage)
-    [41] = {zone = xi.zone.ZHAYOLM_REMNANTS,            name = "Jakko"}, -- (Salvage)
-    [42] = {zone = xi.zone.ARRAPAGO_REMNANTS,           name = "Armored_Chariot"}, -- (Salvage)
-    [43] = {zone = xi.zone.ARRAPAGO_REMNANTS,           name = "Princess_Pudding"}, -- (Salvage)
-    [44] = {zone = xi.zone.BHAFLAU_REMNANTS,            name = "Long-Bowed_Chariot"}, -- (Salvage)
-    [45] = {zone = xi.zone.BHAFLAU_REMNANTS,            name = "Demented_Jalaawa"}, -- (Salvage)
-    [46] = {zone = xi.zone.SILVER_SEA_REMNANTS,         name = "Long-Armed_Chariot"}, -- (Salvage)
-    [47] = {zone = xi.zone.SILVER_SEA_REMNANTS,         name = "Don_Poroggo"}, -- (Salvage)
+    [1]  = {zone = xi.zone.MOUNT_ZHAYOLM,               name = 'Cerberus'}, -- Mount Zhayolm
+    [2]  = {zone = xi.zone.WAJAOM_WOODLANDS,            name = 'Hydra'}, -- Wajaom Woodlands
+    [3]  = {zone = xi.zone.ILRUSI_ATOLL,                name = 'Cursed_Chest'}, -- Golden Salvage (Assault)
+    [4]  = {zone = xi.zone.ILRUSI_ATOLL,                name = 'Imp'}, -- Demolition Duty (Assault)
+    [5]  = {zone = xi.zone.ILRUSI_ATOLL,                name = 'Orobon'}, -- Desperately Seeking Cephalopods (Assault)
+    [6]  = {zone = xi.zone.ILRUSI_ATOLL,                name = 'Khimaira_14X'}, -- Bellerophon's Bliss (Assault)
+    [7]  = {zone = xi.zone.ILRUSI_ATOLL,                name = 'Martial_Maestro_Megomak'}, -- Bellerophon's Bliss (Assault)
+    [8]  = {zone = xi.zone.PERIQIA,                     name = 'Arrapago_Crab'}, -- Seagull Grounded (Assault)
+    [9]  = {zone = xi.zone.PERIQIA,                     name = 'Batteilant_Bhoot'}, -- Requiem (Assault)
+    [10] = {zone = xi.zone.PERIQIA,                     name = 'Black_Baron'}, -- Shooting Down the Baron (Assault)
+    [11] = {zone = xi.zone.PERIQIA,                     name = 'Qiqirn_Miner'}, -- Defuse the Threat (Assault)
+    [12] = {zone = xi.zone.PERIQIA,                     name = 'King_Goldemar'}, -- The Price is Right (Assault)
+    [13] = {zone = xi.zone.LEBROS_CAVERN,               name = 'Dahak'}, -- Evade and Escape (Assault)
+    [14] = {zone = xi.zone.LEBROS_CAVERN,               name = 'Ranch_Wamoura'}, -- Wamoura Farm Raid (Assault)
+    [15] = {zone = xi.zone.LEBROS_CAVERN,               name = 'Black_Shuck'}, -- Better Than One (Assault)
+    [16] = {zone = xi.zone.LEBROS_CAVERN,               name = 'Nocuous_Inferno'}, -- Better Than One (Assault)
+    [17] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = 'Festive_Firedrake'}, -- Blitzkrieg (Assault)
+    [18] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = 'Molted_Ziz'}, -- Blitzkrieg (Assault)
+    [19] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = 'Marid'}, -- Marids in the Mist (Assault)
+    [20] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = 'Poroggo'}, -- Azure Ailments (Assault)
+    [21] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = 'Qiqirn_Huckster'}, -- Azure Ailments (Assault)
+    [22] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = 'Leech'}, -- Azure Ailments (Assault)
+    [23] = {zone = xi.zone.MAMOOL_JA_TRAINING_GROUNDS,  name = 'Orochi'}, -- The Susanoo Shuffle (Assault)
+    [24] = {zone = xi.zone.LEUJAOAM_SANCTUM,            name = 'Coney'}, -- Shanarha Grass Conservation (Assault)
+    [25] = {zone = xi.zone.LEUJAOAM_SANCTUM,            name = 'Imp'}, -- Supplies Recovery (Assault)
+    [26] = {zone = xi.zone.LEUJAOAM_SANCTUM,            name = 'Count_Dracula'}, -- Bloody Rondo (Assault)
+    [27] = {zone = xi.zone.THE_ASHU_TALIF,              name = 'Bubbly'}, -- Targeting the Captain (Assault)
+    [28] = {zone = xi.zone.TALACCA_COVE,                name = 'Imp_Bandsman'}, -- Call to Arms (ISNM)
+    [29] = {zone = xi.zone.TALACCA_COVE,                name = 'Angler_Orobon'}, -- Compliments to the Chef (ISNM)
+    [30] = {zone = xi.zone.NAVUKGO_EXECUTION_CHAMBER,   name = 'Watch_Wamoura'}, -- Tough Nut to Crack (ISNM)
+    [31] = {zone = xi.zone.NAVUKGO_EXECUTION_CHAMBER,   name = 'Two-Faced_Flan'}, -- Happy Caster (ISNM)
+    [32] = {zone = xi.zone.JADE_SEPULCHER,              name = 'Mocking_Colibri'}, -- Making a Mockery (ISNM)
+    [33] = {zone = xi.zone.JADE_SEPULCHER,              name = 'Phantom_Puk'}, -- Shadows of the Mind (ISNM)
+    [34] = {zone = xi.zone.NYZUL_ISLE,                  name = 'Adamantoise'}, -- (Floors 20, 40)
+    [35] = {zone = xi.zone.NYZUL_ISLE,                  name = 'Behemoth'}, -- (Floors 20, 40)
+    [36] = {zone = xi.zone.NYZUL_ISLE,                  name = 'Fafnir'}, -- (Floors 20, 40)
+    [37] = {zone = xi.zone.NYZUL_ISLE,                  name = 'Khimaira'}, -- (Floors 60, 80, 100)
+    [38] = {zone = xi.zone.NYZUL_ISLE,                  name = 'Cerberus'}, -- (Floors 60, 80, 100)
+    [39] = {zone = xi.zone.NYZUL_ISLE,                  name = 'Hydra'}, -- (Floors 60, 80, 100)
+    [40] = {zone = xi.zone.ZHAYOLM_REMNANTS,            name = 'Battleclad_Chariot'}, -- Zhayolm Remnants (Salvage)
+    [41] = {zone = xi.zone.ZHAYOLM_REMNANTS,            name = 'Jakko'}, -- (Salvage)
+    [42] = {zone = xi.zone.ARRAPAGO_REMNANTS,           name = 'Armored_Chariot'}, -- (Salvage)
+    [43] = {zone = xi.zone.ARRAPAGO_REMNANTS,           name = 'Princess_Pudding'}, -- (Salvage)
+    [44] = {zone = xi.zone.BHAFLAU_REMNANTS,            name = 'Long-Bowed_Chariot'}, -- (Salvage)
+    [45] = {zone = xi.zone.BHAFLAU_REMNANTS,            name = 'Demented_Jalaawa'}, -- (Salvage)
+    [46] = {zone = xi.zone.SILVER_SEA_REMNANTS,         name = 'Long-Armed_Chariot'}, -- (Salvage)
+    [47] = {zone = xi.zone.SILVER_SEA_REMNANTS,         name = 'Don_Poroggo'}, -- (Salvage)
     [48] = {zone = xi.zone.HAZHALM_TESTING_GROUNDS,     -- First Wing Bosses (Einherjar - one spawns at random)
-            name = {"Hakenmann", "Hildesvini", "Himinrjot", "Hraesvelg", "Morbol_Emperor", "Nihhus"}},
+            name = {'Hakenmann', 'Hildesvini', 'Himinrjot', 'Hraesvelg', 'Morbol_Emperor', 'Nihhus'}},
     [49] = {zone = xi.zone.HAZHALM_TESTING_GROUNDS,     -- Second Wing Bosses (Einherjar - one spawns at random)
-            name = {"Andhrimnir", "Ariri_Samariri", "Balrahn", "Hrungnir", "Mokkuralfi", "Tanngrisnir"}},
+            name = {'Andhrimnir', 'Ariri_Samariri', 'Balrahn', 'Hrungnir', 'Mokkuralfi', 'Tanngrisnir'}},
     [50] = {zone = xi.zone.HAZHALM_TESTING_GROUNDS,     -- Third Wing Bosses (Einherjar - one spawns at random)
-            name =  {"Dendainsonne", "Freke", "Gorgimera", "Motsognir", "Stoorworm", "Vampyr_Jarl"}},
-    [51] = {zone = xi.zone.HAZHALM_TESTING_GROUNDS, "Odin"}, -- Odin's Chamber (Einherjar)
-    [52] = {zone = xi.zone.AL_ZAHBI,                    name = "Gulool_Ja_Ja"}, -- Al Zhabi (Besieged)
-    [53] = {zone = xi.zone.AL_ZAHBI,                    name = "Gurfurlur_the_Menacing"}, -- Al Zhabi (Besieged)
-    [54] = {zone = xi.zone.AL_ZAHBI,                    name = "Medusa"}
+            name =  {'Dendainsonne', 'Freke', 'Gorgimera', 'Motsognir', 'Stoorworm', 'Vampyr_Jarl'}},
+    [51] = {zone = xi.zone.HAZHALM_TESTING_GROUNDS, 'Odin'}, -- Odin's Chamber (Einherjar)
+    [52] = {zone = xi.zone.AL_ZAHBI,                    name = 'Gulool_Ja_Ja'}, -- Al Zhabi (Besieged)
+    [53] = {zone = xi.zone.AL_ZAHBI,                    name = 'Gurfurlur_the_Menacing'}, -- Al Zhabi (Besieged)
+    [54] = {zone = xi.zone.AL_ZAHBI,                    name = 'Medusa'}
 }
 
 ------------------------------------------------------------
@@ -256,10 +257,10 @@ xi.znm.POP_ITEMS =
 ---- Sanraku's ZNM Menu Options
 ---- ZNM bitmask order is the same as pop_items' order
 ------------------------------------------------------------
--- Default: Tier 1 ZNMs + "Don't Ask"
+-- Default: Tier 1 ZNMs + 'Don't Ask'
 -- (if bit = 0: add ZNM to Sanraku's Menu)
--- xi.znm.DefaultMenu = 0x7F8FE3F8
-xi.znm.DefaultMenu = 0x7FFFFFFF -- No Tier 1 NMs available (need to audit their behaviours)
+xi.znm.DefaultMenu = 0x7F8FE3F8
+-- xi.znm.DefaultMenu = 0x7FFFFFFF -- No Tier 1 NMs available (need to audit their behaviours)
 
 -- Adjusts the bitmask based on owned seals
 xi.znm.MENU_BITMASKS =

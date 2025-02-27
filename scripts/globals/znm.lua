@@ -8,63 +8,47 @@
 -- Soul Plate          : !additem 2477
 -- Sanraku & Ryo       : !pos -127.0 0.9 22.6 50
 -----------------------------------
-local ID = zones[xi.zones.AHT_URHGAN_WHITEGATE]
-require('scripts/globals/items')
-require('scripts/globals/keyitems')
-require('scripts/globals/settings')
-require('scripts/globals/status')
-require('scripts/globals/magic')
-require('scripts/globals/msg')
-require('scripts/globals/npc_util')
-require('scripts/globals/pankration')
-require('scripts/globals/utils')
-require('scripts/globals/znm_data')
+local ID = zones[xi.zone.AHT_URHGAN_WHITEGATE]
 -----------------------------------
 xi = xi or {}
 xi.znm = xi.znm or {}
 
------------------------------------
----- General Utility Helpers
------------------------------------
-
-xi.znm.playerHasSpokenToSanrakuBefore = function(player)
-    return player:getCharVar('ZeniStatus') == 1
+local getHighBits16 = function(data)
+    return bit.rshift(data, 16)
 end
 
-xi.znm.setPlayerHasSpokenToSanrakuBefore = function(player)
-    player:setCharVar('ZeniStatus', 1)
+local getLowBits16 = function(data)
+    return bit.band(data, 0xFFFF)
 end
 
-xi.znm.playerTradingDay = function(player)
-    return player:getCharVar('[ZNM][Sanraku]TradingDay')
+local setHighBits16 = function(data, diff)
+    return bit.bor(data, bit.lshift(getLowBits16(diff), 16))
 end
 
-xi.znm.setPlayerTradingDay = function(player, day)
-    player:setCharVar('[ZNM][Sanraku]TradingDay', day)
+local setLowBits16 = function(data, diff)
+    return bit.bor(data, getLowBits16(diff))
 end
 
-xi.znm.numberOfTradedPlates = function(player)
-    return player:getCharVar('[ZNM][Sanraku]TradedPlates')
-end
-
-xi.znm.incrementTradedPlates = function(player)
-    player:addCharVar('[ZNM][Sanraku]TradedPlates', 1)
-end
-
-xi.znm.resetDailyTrackingVars = function(player)
-    player:setCharVar('[ZNM][Sanraku]TradingDay', 0)
-    player:setCharVar('[ZNM][Sanraku]TradedPlates', 0)
-end
-
------------------------------------
+--------------------------------------------------
 -- Sanraku's Interest and Recommended Fauna
 -- Applies bonuses to soul plate zeni-value
------------------------------------
+--------------------------------------------------
 
 -- Called during JstMidnight tick
 xi.znm.UpdateSanrakusMobs = function()
     SetServerVariable('[ZNM][Sanraku]Interest', math.random(#xi.znm.SANRAKUS_INTEREST))
     SetServerVariable('[ZNM][Sanraku]Fauna', math.random(#xi.znm.SANRAKUS_FAUNA))
+    SetServerVariable('[ZNM][Sanraku]Trades', math.random(0, 250))
+end
+
+xi.znm.serverPlateTrades = function()
+    local currentTrades = GetServerVariable('[ZNM][Sanraku]Trades')
+
+    if currentTrades >= 500 then
+        xi.znm.UpdateSanrakusMobs()
+    else
+        SetServerVariable('[ZNM][Sanraku]Trades', currentTrades + 1)
+    end
 end
 
 -- Get Sanraku's 'Subject of Interest'
@@ -91,23 +75,15 @@ xi.znm.getSanrakusFauna = function()
     return fauna
 end
 
--- Does this mob fall under Sanraku's current 'Subject of Interest'?
--- Some families had multiple famIDs (see Sea Monks), and some superfamIDs were too general (see elementals)
--- In order to only need to use/store a single ID per mob, a bool was added to check what type of ID is stored
-xi.znm.isCurrentInterest = function(superfamID, famID)
-    local family_row = xi.znm.SANRAKUS_INTEREST[xi.znm.getSanrakusInterest()]
+--- Is this mob Sanraku's current 'Recommended Fauna'?
 
-    -- Is the ID stored a family ID or a superfamily ID?
-    if family_row.isSuperFamID == 0 then  -- Check mob's family
-        return family_row.familyID == famID
-    else                                 -- Check mob's superfamily
-        return family_row.familyID == superfamID
-    end
-end
-
--- Is this mob Sanraku's current 'Recommended Fauna'?
-xi.znm.isCurrentFauna = function(mobName, zoneID)
+xi.znm.isCurrentFauna = function(plateData)
+    local data      = plateData.interestData
+    local zeni      = plateData.zeni
+    local zoneID    = getHighBits16(data)
+    local mobName   = plateData.name
     local fauna_row = xi.znm.SANRAKUS_FAUNA[xi.znm.getSanrakusFauna()]
+
     if fauna_row.zone ~= zoneID then
         return false
     else
@@ -118,49 +94,113 @@ xi.znm.isCurrentFauna = function(mobName, zoneID)
                 end
             end
         else
-            return fauna_row.name == mobName
+            if fauna_row.name == mobName then
+                return true
+            end
         end
     end
+
     return false
+end
+
+-- Main interest objective
+
+xi.znm.isCurrentSuperFamily = function(plateData)
+    local data            = plateData.interestData
+    local superFamily     = getLowBits16(data)
+    local currectInterest = xi.znm.getSanrakusInterest()
+    local interestRow     = xi.znm.SANRAKUS_INTEREST[currectInterest]
+
+    if superFamily == interestRow.superFamily then
+        -- Handle elementals as all have same superFamily
+        if currectInterest >= 45 and currectInterest <= 51 then
+            if plateData.name ~= interestRow.name then
+                return false
+            end
+        end
+        return true
+    end
+
+    return false
+end
+
+-- Secondary interest objective
+xi.znm.isCurrentEcosystem = function(plateData)
+    local data            = plateData.interestData
+    local superFamily     = getLowBits16(data)
+    local currectInterest = xi.znm.getSanrakusInterest()
+    local interestRow     = xi.znm.SANRAKUS_INTEREST[currectInterest]
+
+    if utils.contains(superFamily, interestRow.ecoSystem) then
+        return true
+    end
+
+    return false
+end
+
+
+xi.znm.calculatePlateZeni = function(player, plateData)
+    -- Cache the soulplate value on the player
+    local zeni = plateData.zeni
+    local bonus = 'none'
+
+    if xi.znm.isCurrentFauna(plateData) then
+        zeni = zeni + xi.znm.SOULPLATE_FAUNA
+        bonus = 'Fauna'
+    elseif xi.znm.isCurrentSuperFamily(plateData) then
+        zeni = zeni + xi.znm.SOULPLATE_INTEREST
+        bonus = 'superFamily'
+    elseif xi.znm.isCurrentEcosystem(plateData) then
+        zeni = zeni + xi.znm.SOULPLATE_ECOSYSTEM
+        bonus = 'ecoSystem'
+    end
+    -- to avoid pictures being handed to low level chars, adding this check
+    -- low level chars get 1/3 less when they take the pic, customizing to also affect trade in.
+    if player:getMainLvl() <= 10 then
+        zeni = zeni/3
+    end
+
+    zeni = utils.clamp(zeni, xi.znm.SOULPLATE_MIN_VALUE, xi.znm.SOULPLATE_MAX_VALUE)
+
+    if player:getDebugMode() then
+        player:PrintToPlayer(string.format('name: %s zeni %i, bonus: %s', plateData.name, zeni, bonus))
+    end
+
+    return zeni
 end
 
 -----------------------------------
 -- Soultrapper
 -----------------------------------
+
 xi.znm.soultrapper = xi.znm.soultrapper or {}
 
 -----------------------------------
 -- onItemCheck
 -----------------------------------
-xi.znm.soultrapper.onItemCheck = function(target, item, param, caster)
-    if target:isMob() == false or xi.pankration.prohibitedFamilies[target:getFamily()] ~= nil then
-        return xi.msg.basic.ITEM_NO_USE_ON_TARGET
+
+xi.znm.soultrapper.onItemCheck = function(target, item, player)
+    -- can not be used on non mobs or Structure type mobs
+    if not target:isMob() or (target:getFamily() >= 236 and target:getFamily() <= 239) then
+        return xi.msg.basic.ITEM_CANNOT_USE_TARGET
     end
 
-    local id = caster:getEquipID(xi.slot.AMMO)
+    if player:hasStatusEffect(xi.effect.INVISIBLE) or player:hasStatusEffect(xi.effect.SNEAK)
+        or player:hasStatusEffect(xi.effect.DEODORIZE) or player:hasStatusEffect(xi.effect.HIDE)
+        or player:hasStatusEffect(xi.effect.CAMOUFLAGE)
+    then
+        return xi.msg.basic.ITEM_NO_USE_SNEAK, player:getEquipID(xi.slot.RANGED)
+    end
+
+    local id = player:getEquipID(xi.slot.AMMO)
     if
-        target == nil or -- Players can use a macro to bypass the client side targeting restriction.
-        not target:isMob() or
-        not caster:isFacing(target)
+        id ~= xi.items.BLANK_SOUL_PLATE and
+        id ~= xi.items.BLANK_HIGH_SPEED_SOUL_PLATE
     then
         return xi.msg.basic.ITEM_NO_ITEMS_EQUIPPED
     end
 
-    if xi.pankration.prohibitedFamilies[target:getFamily()] ~= nil then
-        return xi.msg.basic.ITEM_NO_USE_ON_TARGET
-    end
-
-    -- Equipment checks.
-    local id = caster:getEquipID(xi.slot.AMMO)
-    if
-        id ~= xi.item.BLANK_SOUL_PLATE and
-        id ~= xi.item.BLANK_HIGH_SPEED_SOUL_PLATE
-    then
-        return xi.msg.basic.ITEM_UNABLE_TO_USE
-    end
-
-    -- Inventory checks.
-    if caster:getFreeSlotsCount() == 0 then
+    if player:getFreeSlotsCount() == 0 then
         return xi.msg.basic.FULL_INVENTORY
     end
 
@@ -170,68 +210,98 @@ end
 -----------------------------------
 -- onItemUse
 -----------------------------------
-xi.znm.soultrapper.onItemUse = function(target, user, item)
+
+xi.znm.soultrapper.onItemUse = function(target, item, player)
     -- Soul plate not guaranteed
-    if math.random(100) > xi.znm.SOULTRAPPER_SUCCESS then
-        user:messageBasic(xi.msg.basic.SOULTRAPPER_FAILED)
+    -- to validate long term: some posts hint at level correction on success rate vs. higher level mobs.
+    if math.random(100) > xi.znm.SOULTRAPPER_SUCCESS * xi.znm.SOULPLATE_HS_MULT then
+        -- todo, message should show to all in area
+        player:timer(4000, function(player)
+            player:messageBasic(xi.msg.basic.SOULTRAPPER_FAILED)
+        end)
+        player:removeAmmo()
     else
         -- Determine Zeni starting value
-        local zeni = xi.znm.soultrapper.getZeniValue(target, user, item)
+        local zeni = xi.znm.soultrapper.getZeniValue(target, player)
 
         -- Pick a skill totally at random...
         local skillIndex, skillEntry = utils.randomEntryIdx(xi.pankration.feralSkills)
+        local interestData = xi.znm.soultrapper.packInterestData(target)
 
         -- Add plate
-        local plate = user:addSoulPlate(target:getName(), target:getFamily(), zeni, skillIndex, skillEntry.fp)
+        local plate = player:addSoulPlate(target:getName(), interestData, zeni, skillIndex, skillEntry.fp)
         local data = plate:getSoulPlateData()
+
+        if player:getDebugMode() then
+            player:PrintToPlayer(string.format('mobName: %s zone: %i superID: %i SystemID: %i base zeni: %i', data.name, target:getZoneID(), target:getSuperFamily(), target:getSystem(), zeni))
+        end
         utils.unused(data)
-        user:messageBasic(xi.msg.basic.SOULTRAPPER_SUCCESS, 0, xi.items.SOUL_PLATE)
+
+        -- todo, message should show to all in area
+        player:timer(4000, function(player)
+            player:messageBasic(xi.msg.basic.SOULTRAPPER_SUCCESS, 0, xi.items.SOUL_PLATE)
+        end)
     end
 end
 
 -----------------------------------
 -- onItemUse Helpers
 -----------------------------------
-xi.znm.soultrapper.getZeniValue = function(target, user, item)
-    local hpp      = target:getHPP()
-    local isNM     = target:isNM()
-    local distance = user:checkDistance(target)
-    local isFacing = target:isFacing(user)
+
+xi.znm.soultrapper.getZeniValue = function(target, player)
+    local hpp = target:getHPP()
+    local isNM = target:isNM()
+    local distance = player:checkDistance(target)
+    local isFacing = target:isFacing(player)
+    local level = target:getMainLvl()
 
     -- Starting value
-    local zeni = 5
-
-    -- HP% Component
-    zeni = zeni * xi.znm.SOULPLATE_HPP_MULT * math.exp(100-hpp)
+    local zeni = 10
 
     -- Distance Component
-    zeni = zeni * utils.clamp((1 / distance) * 8, 1, 2)
+    zeni = zeni * utils.clamp((1 / distance) * 8, 1, 1.5)
 
+    -- Size Component
+    zeni = zeni + (target:getModelSize() * 5)
     -- Angle/Facing Component
     if isFacing then
         zeni = zeni * xi.znm.SOULPLATE_FACING_MULT
     end
+    -- HP% Component
+    zeni = zeni * 1 + math.abs(hpp-100)/6
 
-    -- Bonus for HS Soul Plate
-    if user:getEquipID(xi.slot.AMMO) == xi.items.BLANK_HIGH_SPEED_SOUL_PLATE then
-        zeni = zeni * xi.znm.SOULPLATE_HS_MULT
-    end
-
-    -- Check for Sanraku's 'Subject of Interest'
-    if xi.znm.isCurrentInterest(target:getSuperFamily(), target:getFamily()) then
-        zeni = zeni * xi.znm.SOULPLATE_INTEREST_MULT
-    end
-
-    -- Check for Sanraku's 'Recommended Fauna'
-    if xi.znm.isCurrentFauna(target:getName(), target:getZoneID()) then
-        zeni = zeni * xi.znm.SOULPLATE_FAUNA_MULT
+    if target:getFamily() == 512 or (target:getFamily() == 109 and target:getZoneID() == 33) then -- Dahak and Aw'euvhi
+        zeni = zeni + xi.znm.SOULPLATE_UNIQUE_AMOUNT
+    elseif target:getFamily() == 64 or target:getFamily() == 293 then -- chigoe penalty
+        zeni = zeni - xi.znm.SOULPLATE_UNIQUE_AMOUNT
     -- Generic NM/Rarity Component
     elseif isNM then
-        zeni = zeni * xi.znm.SOULPLATE_NM_MULT
+        if level >= 80 then
+            zeni = zeni * xi.znm.SOULPLATE_HNM_MULT
+        else
+            zeni = zeni * xi.znm.SOULPLATE_NM_MULT
+        end
     end
+
+    -- level component. dependent on mob level, not player. need to validate level above 75 to see if the values are the same to prove/disprove
+    if level < 75 then
+        zeni = zeni - (75 - level)
+    else
+        zeni = zeni + (level - 75)
+    end
+    zeni = utils.clamp(zeni, xi.znm.SOULPLATE_MIN_VALUE, xi.znm.SOULPLATE_MAX_VALUE)
 
     -- Add a little randomness
     zeni = zeni + math.random(6)
+
+    -- Having claim on the mob you take pictures of increases Zeni reward significantly.
+    -- If another party has claim on the mob, you will only receive 1-5 Zeni for the pictures you take, even in the best possible situation.
+    if not player:hasClaim(target) then
+        zeni = math.max(1, zeni * 0.01)
+    end
+    if player:getMainLvl() <= 10 then
+        zeni = zeni / 3
+    end
 
     -- Sanitize Zeni
     zeni = math.floor(zeni) -- Remove any floating point information
@@ -240,21 +310,31 @@ xi.znm.soultrapper.getZeniValue = function(target, user, item)
     return zeni
 end
 
+xi.znm.soultrapper.packInterestData = function(target)
+    local data = 0
+
+    data = setHighBits16(data, target:getZoneID())
+    data = setLowBits16(data, target:getSuperFamily())
+
+    return data
+end
+
 -----------------------------------
 -- Ryo
 -----------------------------------
+
 xi.znm.ryo = xi.znm.ryo or {}
 
 -----------------------------------
 -- onTrade
 -----------------------------------
-xi.znm.ryo.onTrade = function(player, npc, trade)
-    if npcUtil.tradeHasExactly(trade, xi.item.SOUL_PLATE) then
-        -- Cache the soulplate value on the player
-        local item      = trade:getItem(0)
-        local plateData = item:getSoulPlateData()
 
-        xi.znm.ryo.setTradedPlateValue(player, plateData.zeni)
+xi.znm.ryo.onTrade = function(player, npc, trade)
+    if npcUtil.tradeHasExactly(trade, xi.items.SOUL_PLATE) then
+        -- Cache the soulplate value on the player
+        local item = trade:getItem(0)
+        local zeni = xi.znm.calculatePlateZeni(player, item:getSoulPlateData())
+        xi.znm.ryo.setTradedPlateValue(player, zeni)
 
         player:startEvent(914)
     end
@@ -263,17 +343,19 @@ end
 -----------------------------------
 -- onTrigger
 -----------------------------------
+
 xi.znm.ryo.onTrigger = function(player, npc)
     if xi.znm.playerHasSpokenToSanrakuBefore(player) then
         player:startEvent(913)
     else
-        player:showText(npc, 13156)  -- TODO: csid instead?
+        player:showText(npc, ID.text.MASTER_FORBID)
     end
 end
 
 -----------------------------------
 -- onEventUpdate
 -----------------------------------
+
 xi.znm.ryo.onEventUpdate = function(player, csid, option)
     if csid == 914 then  -- Get approximate value of traded soulplate
         local zeniValue = xi.znm.ryo.tradedPlateValue(player)
@@ -284,20 +366,37 @@ xi.znm.ryo.onEventUpdate = function(player, csid, option)
         if option == 200 then -- 'Sanraku's subject of interest'
             local param = xi.znm.getSanrakusInterest()
 
-            player:updateEvent(param,0)
+            player:updateEvent(param, 0)
         elseif option == 201 then -- 'Sanraku's recommended fauna'
             local param = xi.znm.getSanrakusFauna()
 
             player:updateEvent(param, 0)
         elseif option == 300 then -- 'My zeni balance'
             player:updateEvent(player:getCurrency('zeni_point'), 0)
+        elseif option == 401 and player:getVar('ZeniStatus') == 1 then
+            player:setVar('ZeniStatus', 2)
+        elseif option == 402 and player:getVar('ZeniStatus') == 2 then -- ask about gaining access to islet's
+            player:setVar('ZeniStatus', 3)
+        elseif option == 404 then
+            local menuOptions = 175
+            local zeni = player:getCurrency('zeni_point')
+            if player:getVar('ZeniStatus') >= 2 then -- add 'sanrakus subject of interest' and 'recommended fauna'
+                menuOptions = menuOptions - 12
+            end
+            if zeni ~= 0 then -- add 'whats zeni' and 'my zeni balance' and 'islet's'
+                menuOptions = menuOptions - 131
+                if zeni >= 1000 then
+                    menuOptions = menuOptions - 32
+                end
+            end
+            player:updateEvent(menuOptions)
         else
             player:updateEvent(0, 0)
         end
     end
 end
 
-xi.znm.ryo.onEventFinish = function(player, csid, option, npc)
+xi.znm.ryo.onEventFinish = function(player, csid, option)
 end
 
 -----------------------------------
@@ -318,6 +417,10 @@ end
 
 xi.znm.sanraku = xi.znm.sanraku or {}
 
+------------------------------------
+-- onTrade
+------------------------------------
+
 xi.znm.sanraku.onTrade = function(player, npc, trade)
     if trade:getItemCount() == 1 then -- One soul plate or trophy at a time
         local item = trade:getItem(0)
@@ -330,27 +433,33 @@ xi.znm.sanraku.onTrade = function(player, npc, trade)
     end
 end
 
+------------------------------------
+-- onTrade Helpers
+------------------------------------
+
 xi.znm.sanraku.handleTradeWithPlate = function(player, npc, item)
     if not player:hasKeyItem(xi.ki.RHAPSODY_IN_AZURE) then
         local trade_limit = xi.znm.SOULPLATE_TRADE_LIMIT
 
         if xi.znm.sanraku.platesTradedToday(player) >= trade_limit then
-            player:showText(npc, 13125, 1, xi.items.SOUL_PLATE, trade_limit)
+            player:showText(npc, ID.text.APPRECIATE_MORE, 1, xi.items.SOUL_PLATE, trade_limit)
             return
         end
     else -- If you have the KI, clear out the tracking vars!
         xi.znm.resetDailyTrackingVars(player)
     end
-    -- Cache the soulplate value on the player
-    local plateData = item:getSoulPlateData()
 
-    xi.znm.sanraku.setTradedPlateValue(player, plateData.zeni)
-    player:startEvent(910, plateData.zeni)
+    -- Cache the soulplate value on the player
+    local zeni = xi.znm.calculatePlateZeni(player, item:getSoulPlateData())
+    xi.znm.sanraku.setTradedPlateValue(player, zeni)
+    xi.znm.serverPlateTrades()
+
+    player:startEvent(910, zeni)
 end
 
 xi.znm.sanraku.platesTradedToday = function(player)
-    local currentDay = VanadielUniqueDay()
-    local storedDay  = xi.znm.playerTradingDay(player)
+    local currentDay = vanaDay()
+    local storedDay = xi.znm.playerTradingDay(player)
 
     if currentDay ~= storedDay then
         xi.znm.resetDailyTrackingVars(player)
@@ -365,7 +474,7 @@ xi.znm.sanraku.handleTradeWithTrophy = function(player, npc, item)
 
     if znm_seal ~= nil then
         if player:hasKeyItem(znm_seal) then
-            player:showText(npc, 13155) -- TODO: csid instead?
+            player:showText(npc, ID.text.SINGLE_TALLY)
         else
             xi.znm.sanraku.setTradedTrophySeal(player, znm_seal)
             player:startEvent(912, 0, 0, 1, znm_seal)
@@ -373,15 +482,27 @@ xi.znm.sanraku.handleTradeWithTrophy = function(player, npc, item)
     end
 end
 
+------------------------------------
+-- onTrigger
+------------------------------------
+
 xi.znm.sanraku.onTrigger = function(player, npc)
     -- ZNM and Zeni Ineractions
     if xi.znm.playerHasSpokenToSanrakuBefore(player) then
-        local param = xi.znm.sanraku.menu(player)
-        player:startEvent(909, param)
+        if player:getCurrency('zeni_point') ~= 0 then
+            local param = xi.znm.sanraku.menu(player)
+            player:startEvent(909, param)
+        else
+            player:showText(npc, ID.text.HOPES_REST)
+        end
     else -- First time introduction
         player:startEvent(908)
     end
 end
+
+------------------------------------
+-- onTrigger Helpers
+------------------------------------
 
 -- Update Sanraku's ZNM menu (csid 909) based on owned seals
 xi.znm.sanraku.menu = function(player)
@@ -409,9 +530,16 @@ xi.znm.sanraku.menu = function(player)
     return param
 end
 
+------------------------------------
+-- onEventUpdate
+------------------------------------
+
 xi.znm.sanraku.onEventUpdate = function(player, csid, option)
     if csid == 909 then
-        if option >= 300 and option <= 302 then -- 'Gaining access to islets'
+        if option == 1 or option == 500 then -- adding islets menu
+            local param = player:getVar('ZeniStatus') >= 3 and 1 or 0
+            player:updateEvent(param)
+        elseif option >= 300 and option <= 302 then -- 'Gaining access to islets'
             xi.znm.sanraku.handleGainingAccessToIslets(player, option)
         elseif option >= 100 and option <= 130 then -- Are you sure you want info on <ZNM_mob>?
             xi.znm.sanraku.handleConfirmingDesiredZNMInfo(player, option)
@@ -421,6 +549,10 @@ xi.znm.sanraku.onEventUpdate = function(player, csid, option)
     end
 end
 
+------------------------------------
+-- onEventUpdate Helpers
+------------------------------------
+
 xi.znm.sanraku.handleGainingAccessToIslets = function(player, option)
     local zeni_cost = 500 -- Base cost charged by Sanraku
 
@@ -429,13 +561,12 @@ xi.znm.sanraku.handleGainingAccessToIslets = function(player, option)
     end
 
     -- Give the correct island's information + salt
-    local key_item = xi.keyItem.SICKLEMOON_SALT + option - 300
-
+    local key_item = xi.ki.SICKLEMOON_SALT + option - 300
     if player:getCurrency('zeni_point') < zeni_cost then -- Not enough zeni
         player:updateEvent(2)
     elseif player:hasKeyItem(key_item) then -- Already have the salt
         local SANRAKU_ID = ID.npc.SANRAKU
-        player:showText(GetNPCByID(SANRAKU_ID), 13124) -- TODO: csid instead?
+        player:showText(GetNPCByID(SANRAKU_ID), ID.text.APPRECIATE_MORE - 1)
     else
         player:addKeyItem(key_item)
         player:delCurrency('zeni_point', zeni_cost)
@@ -446,7 +577,7 @@ end
 xi.znm.sanraku.handleConfirmingDesiredZNMInfo = function(player, option)
     -- Give the correct ZNM's zeni cost
     local diff      = option - 99
-    local zeni_cost = xi.znm.getPopPrice(xi.znm.POP_ITEMS[diff].tier)
+    local zeni_cost = xi.znm.getPopPrice(xi.znm.POP_ITEMS[diff].mob, xi.znm.POP_ITEMS[diff].tier)
 
     player:updateEvent(0, 0, 0, 0, 0, 0, zeni_cost)
 end
@@ -456,20 +587,19 @@ xi.znm.sanraku.handleConfirmedZNMInfo = function(player, option)
     local diff      = math.min(option - 399, 31) -- Determine the desired ZNM
     local pop_item  = xi.znm.POP_ITEMS[diff].item
     local znm_tier  = xi.znm.POP_ITEMS[diff].tier
-    local zeni_cost = xi.znm.getPopPrice(znm_tier)
+    local mob       = xi.znm.POP_ITEMS[diff].mob
+    local zeni_cost = xi.znm.getPopPrice(mob, znm_tier)
 
     if player:getCurrency('zeni_point') < zeni_cost then -- Not enough zeni
         player:updateEvent(2)
     elseif player:getFreeSlotsCount() == 0 then -- No inventory space
         player:updateEvent(4)
     elseif player:hasItem(pop_item) then -- Own pop already
-        local SANRAKU_ID = ID.npc.SANRAKU
-
-        player:showText(GetNPCByID(SANRAKU_ID), 13124) -- TODO: csid instead?
+        player:updateEvent(4)
     else
         -- Deduct zeni from player, increase future pop-item costs
         player:delCurrency('zeni_point', zeni_cost)
-        xi.znm.updatePopPrice(znm_tier)
+        xi.znm.updatePopPrice(mob, znm_tier)
 
         -- Give the pop item and remove the corresponding seal(s), if applicable
         player:addItem(pop_item)
@@ -490,6 +620,10 @@ xi.znm.sanraku.handleConfirmedZNMInfo = function(player, option)
     end
 end
 
+------------------------------------
+-- onEventFinish
+------------------------------------
+
 xi.znm.sanraku.onEventFinish = function(player, csid, option)
     if csid == 910 then
         xi.znm.sanraku.handleCompletedTradeWithPlate(player)
@@ -500,9 +634,13 @@ xi.znm.sanraku.onEventFinish = function(player, csid, option)
     end
 end
 
+------------------------------------
+-- onEventFinish Helpers
+------------------------------------
+
 xi.znm.sanraku.handleCompletedTradeWithPlate = function(player)
     player:tradeComplete()
-    xi.znm.setPlayerTradingDay(player, VanadielUniqueDay())
+    xi.znm.setPlayerTradingDay(player, vanaDay())
     xi.znm.incrementTradedPlates(player)
 
     local zeniValue = xi.znm.sanraku.tradedPlateValue(player)
@@ -541,34 +679,74 @@ end
 ---- ZNM Pop-Item Prices
 -----------------------------------
 
-xi.znm.getPopPrice = function(znm_tier)
-    local pop_cost = GetServerVariable('[ZNM][T' .. znm_tier .. ']PopCost')
+xi.znm.getPopPrice = function(mob, znm_tier)
+    local pop_cost = GetServerVariable('[ZNM][' .. mob .. ']PopCost')
 
     -- Check to make sure the pop prices have a set value
     if pop_cost == nil or pop_cost == 0 then
         pop_cost = xi.znm.ZNM_POP_COSTS[znm_tier].minPrice
-        SetServerVariable('[ZNM][T' .. znm_tier .. ']PopCost', pop_cost)
+        SetServerVariable('[ZNM][' .. mob .. ']PopCost', pop_cost)
     end
+
     return pop_cost
 end
 
-xi.znm.updatePopPrice = function(znm_tier)
+-- pop prices update per purchase at the mob level
+xi.znm.updatePopPrice = function(mob, znm_tier)
     if not xi.znm.ZNM_STATIC_POP_PRICES then
-        local pop_cost = math.min(xi.znm.getPopPrice(znm_tier) + xi.znm.ZNM_POP_COSTS[znm_tier].addedPrice,
+        local pop_cost = math.min(xi.znm.getPopPrice(mob, znm_tier) + xi.znm.ZNM_POP_COSTS[znm_tier].addedPrice,
                 xi.znm.ZNM_POP_COSTS[znm_tier].maxPrice)
-        SetServerVariable('[ZNM][T' .. znm_tier .. ']PopCost', pop_cost )
+        SetServerVariable('[ZNM][' .. mob .. ']PopCost', pop_cost )
     end
 end
-
 
 -- Prices decay over time (called every 2 hours)
 xi.znm.ZNMPopPriceDecay = function()
     if not xi.znm.ZNM_STATIC_POP_PRICES then
         local pop_cost = 0
-        for znm_tier = 1,5 do
-            pop_cost = math.max(xi.znm.getPopPrice(znm_tier) - xi.znm.ZNM_POP_COSTS[znm_tier].decayPrice,
+        local mob      = nil
+        local znm_tier = 1
+
+        for i = 1, 31 do
+            mob      = xi.znm.POP_ITEMS[i].mob
+            znm_tier = xi.znm.POP_ITEMS[i].tier
+            pop_cost = math.max(xi.znm.getPopPrice(mob, znm_tier) - xi.znm.ZNM_POP_COSTS[znm_tier].decayPrice,
                     xi.znm.ZNM_POP_COSTS[znm_tier].minPrice)
-            SetServerVariable('[ZNM][T' .. znm_tier .. ']PopCost', pop_cost)
+
+            SetServerVariable('[ZNM][' .. mob .. ']PopCost', pop_cost)
         end
     end
+end
+
+-----------------------------------
+---- General Utility Helpers
+-----------------------------------
+
+xi.znm.playerHasSpokenToSanrakuBefore = function(player)
+    return player:getVar('ZeniStatus') >= 1
+end
+
+xi.znm.setPlayerHasSpokenToSanrakuBefore = function(player)
+    player:setVar('ZeniStatus', 1)
+end
+
+xi.znm.playerTradingDay = function(player)
+    return player:getVar('[ZNM][Sanraku]TradingDay')
+end
+
+xi.znm.setPlayerTradingDay = function(player, day)
+    player:setVar('[ZNM][Sanraku]TradingDay', day)
+end
+
+xi.znm.numberOfTradedPlates = function(player)
+    return player:getVar('[ZNM][Sanraku]TradedPlates')
+end
+
+xi.znm.incrementTradedPlates = function(player)
+    player:addVar('[ZNM][Sanraku]TradedPlates', 1)
+end
+
+xi.znm.resetDailyTrackingVars = function(player)
+    player:setVar('[ZNM][Sanraku]TradingDay', 0)
+    player:setVar('[ZNM][Sanraku]TradedPlates', 0)
 end
