@@ -259,7 +259,7 @@ void data_session::read_func()
             }
 
             uint32 charid    = session.requestedCharacterID;
-            uint32 accountIP = str2ip(ipAddress.c_str());
+            uint32 accountIP = str2ip(ipAddress);
 
             uint32 ZoneIP   = 0;
             uint16 ZonePort = 0;
@@ -283,7 +283,7 @@ void data_session::read_func()
                     key3[16] += 6;
                 }
 
-                inet_pton(AF_INET, rset->get<std::string>("zoneip").c_str(), &ZoneIP);
+                ZoneIP   = str2ip(rset->get<std::string>("zoneip"));
                 ZonePort = rset->get<uint16>("zoneport");
 
                 characterSelectionResponse.server_ip   = ZoneIP;
@@ -301,7 +301,7 @@ void data_session::read_func()
                 characterSelectionResponse.server_id     = (charid >> 16) & 0xFF; // Looks wrong? shouldn't this be a server index?
 
                 ShowInfo(fmt::format("data_session: zoneid:({}), zoneip:({}), zoneport:({}) for char:({})",
-                                     ZoneID, ip2str(ntohl(ZoneIP)), ZonePort, charid));
+                                     ZoneID, ip2str(ZoneIP), ZonePort, charid));
 
                 // Check the number of sessions
                 uint16 sessionCount = 0;

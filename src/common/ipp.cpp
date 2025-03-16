@@ -21,35 +21,48 @@
 
 #include "ipp.h"
 
+// Converts a network-order IP to a host-order string.
 auto ip2str(uint32 ip) -> std::string
 {
-    uint32 reversed_ip = htonl(ip);
-    char   address[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &reversed_ip, address, INET_ADDRSTRLEN);
-
-    // This is internal, so we can trust it.
+    char address[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &ip, address, INET_ADDRSTRLEN);
     return fmt::format("{}", asStringFromUntrustedSource(address));
 }
 
-auto str2ip(const char* ip_str) -> uint32
+// Converts a host-order string to a network-order IP.
+auto str2ip(const std::string& ip_str) -> uint32
 {
     uint32 ip = 0;
-    inet_pton(AF_INET, ip_str, &ip);
-    return ntohl(ip);
+    inet_pton(AF_INET, ip_str.c_str(), &ip);
+    return ip;
+}
+
+// Extracts the network-order IP from sockaddr_in.
+auto sockaddr2netip(const sockaddr_in& addr) -> uint32
+{
+#ifdef _WIN32
+    return addr.sin_addr.S_un.S_addr;
+#else
+    return addr.sin_addr.s_addr;
+#endif
+}
+
+// Extracts the host-order port from sockaddr_in.
+auto sockaddr2hostport(const sockaddr_in& addr) -> uint16
+{
+    return ntohs(addr.sin_port);
 }
 
 IPP::IPP()
 {
 }
 
-// TODO: Documentation about whether ip needs to be in network byte order.
 IPP::IPP(const uint32 ip, const uint16 port)
 : ip_(ip)
 , port_(port)
 {
 }
 
-// TODO: Documentation about whether ip needs to be in network byte order.
 IPP::IPP(const uint64& ipp)
 : IPP(static_cast<uint32>(ipp), static_cast<uint16>(ipp >> 32))
 {
@@ -57,15 +70,6 @@ IPP::IPP(const uint64& ipp)
 
 IPP::IPP(const zmq::message_t& message)
 : IPP(*reinterpret_cast<const uint64*>(message.data()))
-{
-}
-
-IPP::IPP(const sockaddr_in& address)
-#ifdef WIN32
-: IPP(ntohl(address.sin_addr.S_un.S_addr), ntohs(address.sin_port))
-#else
-: IPP(ntohl(address.sin_addr.s_addr), ntohs(address.sin_port))
-#endif
 {
 }
 
@@ -79,6 +83,11 @@ auto IPP::getIP() const -> uint32
     return ip_;
 }
 
+auto IPP::getIPString() const -> std::string
+{
+    return ip2str(ip_);
+}
+
 auto IPP::getPort() const -> uint16
 {
     return port_;
@@ -86,7 +95,7 @@ auto IPP::getPort() const -> uint16
 
 auto IPP::toString() const -> std::string
 {
-    return fmt::format("{}:{}", ip2str(ip_), port_);
+    return fmt::format("{}:{}", getIPString(), port_);
 }
 
 auto IPP::toZMQMessage() const -> zmq::message_t

@@ -89,20 +89,9 @@
 #include <io.h>
 #endif
 
-// TODO: Why do we have this additional +20?
-std::array<uint8, kMaxBufferSize + 20> g_PBuff;           // Global packet clipboard
-std::array<uint8, kMaxBufferSize + 20> g_PBuffCopy;       // Copy of above, used to decrypt a second time if necessary.
-std::array<uint8, kMaxBufferSize + 20> g_PTempBuff;       // Temporary packet clipboard
-std::array<uint8, kMaxBufferSize + 20> g_PDecompressBuff; // Temporary packet clipboard
-
-// main socket
-int32   map_fd   = 0;
-in_addr map_ip   = {};
-uint16  map_port = 0;
+IPP gMapIPP;
 
 MapSessionContainer gMapSessions;
-
-nonstd::jthread messageThread;
 
 std::unique_ptr<SqlConnection> _sql;
 
@@ -116,6 +105,18 @@ extern std::atomic<bool> gProcessLoaded;
 
 namespace
 {
+    // Map UDP socket file descriptor
+    int32 map_fd = 0;
+
+    // TODO: Why do we have this additional +20?
+    std::array<uint8, kMaxBufferSize + 20> g_PBuff;           // Global packet clipboard
+    std::array<uint8, kMaxBufferSize + 20> g_PBuffCopy;       // Copy of above, used to decrypt a second time if necessary.
+    std::array<uint8, kMaxBufferSize + 20> g_PTempBuff;       // Temporary packet clipboard
+    std::array<uint8, kMaxBufferSize + 20> g_PDecompressBuff; // Temporary packet clipboard
+
+    // ZMQ message thread
+    nonstd::jthread messageThread;
+
     // Runtime statistics
     uint32 TotalPacketsToSendPerTick  = 0U;
     uint32 TotalPacketsSentPerTick    = 0U;
@@ -215,21 +216,19 @@ int32 do_init(int32 argc, char** argv)
     ShowInfo("do_init: begin server initialization");
 
     // These aren't set unless --ip or --port is set, respectively.
-    map_ip.s_addr = 0;
-    map_port      = 0;
+    auto mapIP   = 0;
+    auto mapPort = 0;
 
     // TODO: Replace with argparse::ArgumentParser
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "--ip") == 0)
         {
-            uint32 ip = 0;
-            inet_pton(AF_INET, argv[i + 1], &ip);
-            map_ip.s_addr = ip;
+            mapIP = str2ip(argv[i + 1]);
         }
         else if (strcmp(argv[i], "--port") == 0)
         {
-            map_port = std::stoi(argv[i + 1]);
+            mapPort = std::stoi(argv[i + 1]);
         }
         else if (strcmp(argv[i], "--load_all") == 0)
         {
@@ -237,7 +236,10 @@ int32 do_init(int32 argc, char** argv)
         }
     }
 
-    ShowInfoFmt("map_port: {}", map_port);
+    gMapIPP = IPP(mapIP, mapPort);
+
+    ShowInfoFmt("map_ip: {}", gMapIPP.getIPString());
+    ShowInfoFmt("map_port: {}", gMapIPP.getPort());
     ShowInfoFmt("Zones assigned to this process: {}", zoneutils::GetZonesAssignedToThisProcess().size());
 
     srand((uint32)time(nullptr));
@@ -260,7 +262,7 @@ int32 do_init(int32 argc, char** argv)
     PacketParserInitialize();
 
     _sql->Query("DELETE FROM accounts_sessions WHERE IF(%u = 0 AND %u = 0, true, server_addr = %u AND server_port = %u)",
-                map_ip.s_addr, map_port, map_ip.s_addr, map_port);
+                gMapIPP.getIP(), gMapIPP.getPort(), gMapIPP.getIP(), gMapIPP.getPort());
 
     ShowInfo("do_init: zlib is reading");
     zlib_init();
@@ -322,8 +324,8 @@ int32 do_init(int32 argc, char** argv)
 
     monstrosity::LoadStaticData();
 
-    ShowInfo("do_init: server is binding with port %u", map_port == 0 ? settings::get<uint16>("network.MAP_PORT") : map_port);
-    map_fd = makeBind_udp(INADDR_ANY, map_port == 0 ? settings::get<uint16>("network.MAP_PORT") : map_port);
+    ShowInfo("do_init: server is binding with port %u", gMapIPP.getPort() == 0 ? settings::get<uint16>("network.MAP_PORT") : gMapIPP.getPort());
+    map_fd = makeBind_udp(INADDR_ANY, gMapIPP.getPort() == 0 ? settings::get<uint16>("network.MAP_PORT") : gMapIPP.getPort());
 
     CVanaTime::getInstance()->setCustomEpoch(settings::get<int32>("map.VANADIEL_TIME_EPOCH"));
 
@@ -504,7 +506,9 @@ int32 do_sockets(fd_set* rfd, duration next)
         ret = recvudp(map_fd, g_PBuff.data(), kMaxBufferSize, 0, (struct sockaddr*)&from, &fromlen);
         if (ret != -1)
         {
-            const auto ipp = IPP(from);
+            const auto ip   = sockaddr2netip(from);
+            const auto port = sockaddr2hostport(from);
+            const auto ipp  = IPP(ip, port);
 
             // find player char
             MapSession* map_session_data = gMapSessions.getSessionByIPP(ipp);
@@ -590,11 +594,7 @@ int32 map_decipher_packet(uint8* buff, size_t size, sockaddr_in* from, MapSessio
     tmp = (uint16)((size - FFXI_HEADER_SIZE) / 4);
     tmp -= tmp % 2;
 
-#ifdef WIN32
-    uint32 ip = ntohl(from->sin_addr.S_un.S_addr);
-#else
-    uint32 ip = ntohl(from->sin_addr.s_addr);
-#endif
+    const auto ip = sockaddr2netip(*from);
 
     for (i = 0; i < tmp; i += 2)
     {

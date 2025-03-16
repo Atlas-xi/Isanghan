@@ -20,6 +20,7 @@
 */
 
 #include "common/cbasetypes.h"
+#include "common/ipp.h"
 #include "common/kernel.h"
 #include "common/logging.h"
 #include "common/mmo.h"
@@ -270,13 +271,13 @@ void socket_init_udp()
     last_tick = time(nullptr);
 }
 
-int32 recvudp(int32 fd, void* buff, size_t nbytes, int32 flags, struct sockaddr* from, socklen_t* addrlen)
+int32 recvudp(int32 fd, void* buff, size_t nbytes, int32 flags, sockaddr* from, socklen_t* addrlen)
 {
     TracyZoneScoped;
     return sRecvfrom(fd, (char*)buff, (int)nbytes, flags, from, addrlen);
 }
 
-int32 sendudp(int32 fd, void* buff, size_t nbytes, int32 flags, const struct sockaddr* from, socklen_t addrlen)
+int32 sendudp(int32 fd, void* buff, size_t nbytes, int32 flags, const sockaddr* from, socklen_t addrlen)
 {
     TracyZoneScoped;
     return sSendto(fd, (const char*)buff, (int)nbytes, flags, from, addrlen);

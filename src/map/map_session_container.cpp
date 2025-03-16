@@ -36,11 +36,9 @@ auto MapSessionContainer::createSession(IPP ipp) -> MapSession*
 {
     TracyZoneScoped;
 
-    const auto ipstr = ip2str(ipp.getIP());
+    ShowDebugFmt("Creating session for {}", ipp.getIPString());
 
-    ShowDebugFmt("Creating session for {}", ipstr);
-
-    const auto rset = db::preparedStmt("SELECT charid FROM accounts_sessions WHERE inet_ntoa(client_addr) = ? LIMIT 1", ipstr);
+    const auto rset = db::preparedStmt("SELECT charid FROM accounts_sessions WHERE client_addr = ? LIMIT 1", ipp.getIP());
     if (!rset)
     {
         ShowError("SQL query failed in mapsession_createsession!");
@@ -50,7 +48,7 @@ auto MapSessionContainer::createSession(IPP ipp) -> MapSession*
     if (rset->rowsCount() == 0)
     {
         // This is noisy and not really necessary
-        DebugSocketsFmt("recv_parse: Invalid login attempt from {}", ipstr);
+        DebugSocketsFmt("recv_parse: Invalid login attempt from {}", ipp.getIPString());
         return nullptr;
     }
 
@@ -180,7 +178,7 @@ void MapSessionContainer::cleanupSessions()
 
                     // s_addr of 0 is single process map server without IP address set explicitly in commandline
                     // map_port is 0 without the port being explicitly set in commandline
-                    if ((map_ip.s_addr != 0 && server_addr != map_ip.s_addr) || (map_port != 0 && server_port != map_port))
+                    if ((gMapIPP.getIP() != 0 && server_addr != gMapIPP.getIP()) || (gMapIPP.getPort() != 0 && server_port != gMapIPP.getPort()))
                     {
                         otherMap = true;
                     }

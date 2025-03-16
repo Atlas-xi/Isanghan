@@ -42,14 +42,14 @@
 #include "map_session_container.h"
 #include "zone.h"
 
-extern MapSessionContainer gMapSessions;
+//
+// Exposed globals
+//
 
-extern in_addr map_ip;
-extern uint16  map_port;
-
+extern MapSessionContainer            gMapSessions;
+extern IPP                            gMapIPP;
 extern std::unique_ptr<SqlConnection> _sql;
-
-extern bool gLoadAllLua;
+extern bool                           gLoadAllLua;
 
 //=======================================================================
 

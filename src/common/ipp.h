@@ -29,7 +29,9 @@
 #include <zmq_addon.hpp>
 
 auto ip2str(uint32 ip) -> std::string;
-auto str2ip(const char* ip_str) -> uint32;
+auto str2ip(const std::string& ip_str) -> uint32;
+auto sockaddr2netip(const sockaddr_in& addr) -> uint32;
+auto sockaddr2hostport(const sockaddr_in& addr) -> uint16;
 
 class IPP final
 {
@@ -38,10 +40,10 @@ public:
     explicit IPP(const uint32 ip, const uint16 port);
     explicit IPP(const uint64& ipp);
     explicit IPP(const zmq::message_t& message);
-    explicit IPP(const sockaddr_in& address);
 
     auto getRawIPP() const -> uint64;
     auto getIP() const -> uint32;
+    auto getIPString() const -> std::string;
     auto getPort() const -> uint16;
 
     auto toString() const -> std::string;
@@ -54,7 +56,9 @@ public:
     auto operator<(const IPP& other) const -> bool;
 
 private:
-    // TODO: Can we enforce whether this is in network byte order?
+    // IP is always stored and used in network byte order.
     uint32 ip_{};
+
+    // Port is always stored and used in host byte order (human-readable).
     uint16 port_{};
 };
