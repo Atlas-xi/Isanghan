@@ -108,11 +108,10 @@ namespace
     // Map UDP socket file descriptor
     int32 map_fd = 0;
 
-    // TODO: Why do we have this additional +20?
-    std::array<uint8, kMaxBufferSize + 20> g_PBuff;           // Global packet clipboard
-    std::array<uint8, kMaxBufferSize + 20> g_PBuffCopy;       // Copy of above, used to decrypt a second time if necessary.
-    std::array<uint8, kMaxBufferSize + 20> g_PTempBuff;       // Temporary packet clipboard
-    std::array<uint8, kMaxBufferSize + 20> g_PDecompressBuff; // Temporary packet clipboard
+    // Map udp buffers
+    NetworkBuffer PBuff;        // Global packet clipboard
+    NetworkBuffer PBuffCopy;    // Copy of above, used to decrypt a second time if necessary.
+    NetworkBuffer PScratchBuff; // Temporary packet clipboard
 
     // ZMQ message thread
     nonstd::jthread messageThread;
@@ -503,7 +502,7 @@ int32 do_sockets(fd_set* rfd, duration next)
         sockaddr_in from{};
         socklen_t   fromlen = sizeof(from);
 
-        ret = recvudp(map_fd, g_PBuff.data(), kMaxBufferSize, 0, (struct sockaddr*)&from, &fromlen);
+        ret = recvudp(map_fd, PBuff.data(), kMaxBufferSize, 0, (struct sockaddr*)&from, &fromlen);
         if (ret != -1)
         {
             const auto ip   = sockaddr2netip(from);
@@ -524,7 +523,7 @@ int32 do_sockets(fd_set* rfd, duration next)
 
             size_t size = ret;
 
-            int32 decryptCount = recv_parse(g_PBuff.data(), &size, &from, map_session_data);
+            int32 decryptCount = recv_parse(PBuff.data(), &size, &from, map_session_data);
             if (decryptCount != -1)
             {
                 // DecryptCount of 0 means the main key decrypted the packet
@@ -532,9 +531,9 @@ int32 do_sockets(fd_set* rfd, duration next)
                 {
                     // If the previous package was lost, then we do not collect a new one,
                     // and send the previous packet again
-                    if (!parse(g_PBuff.data(), &size, &from, map_session_data))
+                    if (!parse(PBuff.data(), &size, &from, map_session_data))
                     {
-                        send_parse(g_PBuff.data(), &size, &from, map_session_data, false);
+                        send_parse(PBuff.data(), &size, &from, map_session_data, false);
                     }
                 }
                 else if (decryptCount == 1 && map_session_data->blowfish.status == BLOWFISH_PENDING_ZONE)
@@ -549,16 +548,16 @@ int32 do_sockets(fd_set* rfd, duration next)
                         PChar->clearPacketList();
                         PChar->pushPacket<CServerIPPacket>(PChar, map_session_data->zone_type, map_session_data->zone_ipp);
                     }
-                    send_parse(g_PBuff.data(), &size, &from, map_session_data, true);
+                    send_parse(PBuff.data(), &size, &from, map_session_data, true);
 
                     // Increment sync count with every packet
                     // TODO: match incoming with a new parse that only cares about sync count
                     map_session_data->server_packet_id += 1;
                 }
 
-                ret = sendudp(map_fd, g_PBuff.data(), size, 0, (const struct sockaddr*)&from, fromlen);
+                ret = sendudp(map_fd, PBuff.data(), size, 0, (const struct sockaddr*)&from, fromlen);
 
-                std::swap(g_PBuff, map_session_data->server_packet_data);
+                std::swap(PBuff, map_session_data->server_packet_data);
                 std::swap(size, map_session_data->server_packet_size);
             }
 
@@ -734,7 +733,7 @@ int32 recv_parse(uint8* buff, size_t* buffsize, sockaddr_in* from, MapSession* m
         if (map_session_data->blowfish.status == BLOWFISH_PENDING_ZONE)
         {
             // Copy buff into the backup buffer. Blowfish can't be rewound currently.
-            std::memcpy(g_PBuffCopy.data(), buff, *buffsize);
+            std::memcpy(PBuffCopy.data(), buff, *buffsize);
         }
         int decryptCount = 0;
         // char packets
@@ -743,10 +742,10 @@ int32 recv_parse(uint8* buff, size_t* buffsize, sockaddr_in* from, MapSession* m
             // If the client is pending zone, they might not have received 0x00B, and thus not incremented their key
             // Check old blowfish data
             if (map_session_data->blowfish.status == BLOWFISH_PENDING_ZONE &&
-                map_decipher_packet(g_PBuffCopy.data(), *buffsize, from, map_session_data, &map_session_data->prev_blowfish) != -1)
+                map_decipher_packet(PBuffCopy.data(), *buffsize, from, map_session_data, &map_session_data->prev_blowfish) != -1)
             {
                 // Copy decrypted bytes back into buffer
-                std::memcpy(buff, g_PBuffCopy.data(), *buffsize);
+                std::memcpy(buff, PBuffCopy.data(), *buffsize);
                 decryptCount++;
             }
             else
@@ -760,14 +759,14 @@ int32 recv_parse(uint8* buff, size_t* buffsize, sockaddr_in* from, MapSession* m
         uint32 PacketDataSize = ref<uint32>(buff, *buffsize - sizeof(int32) - 16);
 
         // it's decompressing data and getting new size
-        PacketDataSize = zlib_decompress((int8*)(buff + FFXI_HEADER_SIZE), PacketDataSize, (int8*)g_PDecompressBuff.data(), kMaxBufferSize);
+        PacketDataSize = zlib_decompress((int8*)(buff + FFXI_HEADER_SIZE), PacketDataSize, (int8*)PScratchBuff.data(), kMaxBufferSize);
 
         // Not sure why zlib_decompress is defined to return a uint32 when it returns -1 in situations.
         if (static_cast<int32>(PacketDataSize) != -1)
         {
             // it's making result buff
             // don't need std::memcpy header
-            std::memcpy(buff + FFXI_HEADER_SIZE, g_PDecompressBuff.data(), PacketDataSize);
+            std::memcpy(buff + FFXI_HEADER_SIZE, PScratchBuff.data(), PacketDataSize);
             *buffsize = FFXI_HEADER_SIZE + PacketDataSize;
 
             return decryptCount;
@@ -906,7 +905,7 @@ int32 parse(uint8* buff, size_t* buffsize, sockaddr_in* from, MapSession* map_se
         ref<uint16>(map_session_data->server_packet_data.data(), 2) = SmallPD_Code;
         ref<uint16>(map_session_data->server_packet_data.data(), 8) = (uint32)time(nullptr);
 
-        g_PBuff   = map_session_data->server_packet_data;
+        PBuff     = map_session_data->server_packet_data;
         *buffsize = map_session_data->server_packet_size;
 
         std::memcpy(map_session_data->server_packet_data.data(), buff, *buffsize);
@@ -1017,7 +1016,7 @@ int32 send_parse(uint8* buff, size_t* buffsize, sockaddr_in* from, MapSession* m
 
             // Compress the data without regard to the header
             // The returned size is 8 times the real data
-            PacketSize = zlib_compress((int8*)(buff + FFXI_HEADER_SIZE), (uint32)(*buffsize - FFXI_HEADER_SIZE), (int8*)g_PTempBuff.data(), kMaxBufferSize);
+            PacketSize = zlib_compress((int8*)(buff + FFXI_HEADER_SIZE), (uint32)(*buffsize - FFXI_HEADER_SIZE), (int8*)PScratchBuff.data(), kMaxBufferSize);
 
             // handle compression error
             if (PacketSize == static_cast<uint32>(-1))
@@ -1026,7 +1025,7 @@ int32 send_parse(uint8* buff, size_t* buffsize, sockaddr_in* from, MapSession* m
                 continue;
             }
 
-            ref<uint32>(g_PTempBuff.data(), zlib_compressed_size(PacketSize)) = PacketSize;
+            ref<uint32>(PScratchBuff.data(), zlib_compressed_size(PacketSize)) = PacketSize;
 
             PacketSize = (uint32)zlib_compressed_size(PacketSize) + 4;
 
@@ -1052,17 +1051,17 @@ int32 send_parse(uint8* buff, size_t* buffsize, sockaddr_in* from, MapSession* m
 
     // Record data size excluding header
     uint8 hash[16];
-    md5(g_PTempBuff.data(), hash, PacketSize);
-    std::memcpy(g_PTempBuff.data() + PacketSize, hash, 16);
+    md5(PScratchBuff.data(), hash, PacketSize);
+    std::memcpy(PScratchBuff.data() + PacketSize, hash, 16);
     PacketSize += 16;
 
-    if (PacketSize > kMaxBufferSize + 20)
+    if (PacketSize > kMaxBufferSize)
     {
-        ShowCritical("Memory manager: g_PTempBuff is overflowed (%u)", PacketSize);
+        ShowCritical("Memory manager: PScratchBuff is overflowed (%u)", PacketSize);
     }
 
     // Making total packet
-    std::memcpy(buff + FFXI_HEADER_SIZE, g_PTempBuff.data(), PacketSize);
+    std::memcpy(buff + FFXI_HEADER_SIZE, PScratchBuff.data(), PacketSize);
 
     uint32 CypherSize = (PacketSize / 4) & -2;
 

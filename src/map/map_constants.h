@@ -34,3 +34,5 @@ static constexpr auto kServerTriggerAreaInterval = kServerTickInterval / 2.0f;
 static constexpr auto kMaxBufferSize           = 2500U;
 static constexpr auto kMaxPacketPerCompression = 32U;
 static constexpr auto kMaxPacketBacklogSize    = kMaxPacketPerCompression * 6U; // If we hit this number, things are going very very badly.
+
+using NetworkBuffer = std::array<uint8, kMaxBufferSize>;

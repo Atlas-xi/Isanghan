@@ -6587,6 +6587,12 @@ namespace charutils
         TracyZoneScoped;
 
         SaveCharPosition(PChar);
+
+        message::send(ipc::CharZone{
+            .charId            = PChar->id,
+            .destinationZoneId = 0xFFFF, // Clear cache
+        });
+
         PChar->pushPacket<CServerIPPacket>(PChar, 1, IPP());
     }
 
