@@ -676,21 +676,17 @@ void IPCClient::handleMessage_KillSession(const IPP& ipp, const ipc::KillSession
 {
     TracyZoneScoped;
 
-    map_session_data_t* sessionToDelete = nullptr;
-
-    for (const auto& [_, session] : map_session_list)
+    if (auto sessionToDelete = gMapSessions.getSessionByCharId(message.victimId))
     {
-        if (session->charID == message.victimId)
+        if (sessionToDelete->blowfish.status == BLOWFISH_PENDING_ZONE)
         {
-            sessionToDelete = session;
-            break;
+            ShowDebugFmt("Closing session of charid {} on request of other process", message.victimId);
+            gMapSessions.destroySession(sessionToDelete);
         }
-    }
-
-    if (sessionToDelete && sessionToDelete->blowfish.status == BLOWFISH_PENDING_ZONE)
-    {
-        DebugSockets(fmt::format("Closing session of charid {} on request of other process", message.victimId));
-        map_close_session(server_clock::now(), sessionToDelete);
+        else
+        {
+            ShowDebugFmt("KillSession for charid {} not needed", message.victimId);
+        }
     }
 }
 

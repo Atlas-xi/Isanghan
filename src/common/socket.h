@@ -152,11 +152,6 @@ extern time_t last_tick;
 
 void socket_init();
 
-// hostname/ip conversion functions
-std::string ip2str(uint32 ip);
-
-uint32 str2ip(const char* ip_str);
-
 void set_nonblocking(int fd, unsigned long yes);
 
 int32 makeBind_udp(uint32 ip, uint16 port);

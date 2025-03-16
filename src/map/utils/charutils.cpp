@@ -6582,7 +6582,7 @@ namespace charutils
             charutils::forceSynthCritFail("SendToZone", PChar);
         }
 
-        PChar->pushPacket<CServerIPPacket>(PChar, static_cast<uint8>(type), ipp);
+        PChar->pushPacket<CServerIPPacket>(PChar, static_cast<uint8>(type), IPP(ipp));
 
         removeCharFromZone(PChar);
     }
@@ -7231,16 +7231,7 @@ namespace charutils
 
     void removeCharFromZone(CCharEntity* PChar)
     {
-        map_session_data_t* PSession = nullptr;
-
-        for (auto session : map_session_list)
-        {
-            if (session.second->charID == PChar->id)
-            {
-                PSession = session.second;
-                break;
-            }
-        }
+        MapSession* PSession = gMapSessions.getSessionByCharId(PChar->id);
 
         // Store old blowfish, recalculate expected new blowfish
         if (PSession)

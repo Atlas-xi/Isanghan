@@ -162,25 +162,6 @@ int32  fd_max;
 time_t last_tick;
 time_t tick_time;
 
-// hostname/ip conversion functions
-std::string ip2str(uint32 ip)
-{
-    uint32 reversed_ip = htonl(ip);
-    char   address[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &reversed_ip, address, INET_ADDRSTRLEN);
-
-    // This is internal, so we can trust it.
-    return fmt::format("{}", asStringFromUntrustedSource(address));
-}
-
-uint32 str2ip(const char* ip_str)
-{
-    uint32 ip = 0;
-    inet_pton(AF_INET, ip_str, &ip);
-
-    return ntohl(ip);
-}
-
 void set_nonblocking(int fd, unsigned long yes)
 {
     TracyZoneScoped;

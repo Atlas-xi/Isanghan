@@ -962,8 +962,8 @@ void CZone::createZoneTimers()
 {
     TracyZoneScoped;
 
-    const auto tickInterval        = std::chrono::milliseconds(static_cast<uint32>(server_tick_interval));
-    const auto triggerAreaInterval = std::chrono::milliseconds(static_cast<uint32>(server_trigger_area_interval));
+    const auto tickInterval        = std::chrono::milliseconds(static_cast<uint32>(kServerTickInterval));
+    const auto triggerAreaInterval = std::chrono::milliseconds(static_cast<uint32>(kServerTriggerAreaInterval));
 
     // clang-format off
     ZoneTimer = CTaskMgr::getInstance()->AddTask(m_zoneName, server_clock::now(), this, CTaskMgr::TASK_INTERVAL, tickInterval,

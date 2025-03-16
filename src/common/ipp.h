@@ -28,64 +28,33 @@
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
 
+auto ip2str(uint32 ip) -> std::string;
+auto str2ip(const char* ip_str) -> uint32;
+
 class IPP final
 {
 public:
-    IPP()
-    {
-    }
+    IPP();
+    explicit IPP(const uint32 ip, const uint16 port);
+    explicit IPP(const uint64& ipp);
+    explicit IPP(const zmq::message_t& message);
+    explicit IPP(const sockaddr_in& address);
 
-    explicit IPP(const uint32 ip, const uint16 port)
-    : ip_(ip)
-    , port_(port)
-    {
-    }
+    auto getRawIPP() const -> uint64;
+    auto getIP() const -> uint32;
+    auto getPort() const -> uint16;
 
-    explicit IPP(const uint64& ipp)
-    : IPP(static_cast<uint32>(ipp), static_cast<uint16>(ipp >> 32))
-    {
-    }
-
-    explicit IPP(const zmq::message_t& message)
-    : IPP(*reinterpret_cast<const uint64*>(message.data()))
-    {
-    }
-
-    auto toString() const -> std::string
-    {
-        in_addr inaddr{};
-        inaddr.s_addr = ip_;
-
-        char address[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &inaddr, address, INET_ADDRSTRLEN);
-
-        // TODO: Add a designator for if this address is connect, map, search, or world, etc.
-
-        // This is internal, so we can trust it.
-        return fmt::format("{}:{}", asStringFromUntrustedSource(address), port_);
-    }
-
-    auto getIPP() const -> uint64
-    {
-        return static_cast<uint64>(ip_) | (static_cast<uint64>(port_) << 32);
-    }
-
-    auto toZMQMessage() const -> zmq::message_t
-    {
-        const auto ipp = getIPP();
-        return zmq::message_t(&ipp, sizeof(ipp));
-    }
+    auto toString() const -> std::string;
+    auto toZMQMessage() const -> zmq::message_t;
 
     //
     // Operators for use with STL containers
     //
 
-    auto operator<(const IPP& other) const -> bool
-    {
-        return ip_ < other.ip_ || (ip_ == other.ip_ && port_ < other.port_);
-    }
+    auto operator<(const IPP& other) const -> bool;
 
 private:
+    // TODO: Can we enforce whether this is in network byte order?
     uint32 ip_{};
     uint16 port_{};
 };
