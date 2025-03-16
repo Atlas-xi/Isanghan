@@ -799,7 +799,7 @@ void IPCClient::handleMessage_EntityInformationResponse(const IPP& ipp, const ip
 
             PChar->clearPacketList();
 
-            charutils::SendToZone(PChar, ZoningType::Zoning, zoneutils::GetZoneIPP(PChar->loc.destination));
+            charutils::SendToZone(PChar, PChar->loc.destination);
         }
     }
 }
@@ -826,7 +826,7 @@ void IPCClient::handleMessage_SendPlayerToLocation(const IPP& ipp, const ipc::Se
 
         PChar->clearPacketList();
 
-        charutils::SendToZone(PChar, ZoningType::Zoning, zoneutils::GetZoneIPP(PChar->loc.destination));
+        charutils::SendToZone(PChar, PChar->loc.destination);
     }
 }
 
