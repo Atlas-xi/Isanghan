@@ -4129,7 +4129,7 @@ INSERT INTO `mob_groups` VALUES (16,1422,78,'Freke',0,128,0,80000,0,85,85,0);
 INSERT INTO `mob_groups` VALUES (17,4130,78,'Vampyr_Jarl',0,128,0,50000,0,85,85,0);
 INSERT INTO `mob_groups` VALUES (18,2756,78,'Motsognir',0,128,0,100000,0,85,85,0);
 INSERT INTO `mob_groups` VALUES (19,913,78,'Dark_Elemental',0,128,3410,10000,0,82,82,0);
-INSERT INTO `mob_groups` VALUES (20,3397,78,'Rotting_Huskarl',0,128,3410,7000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (20,3397,78,'Rotting_Huskarl_war',0,128,3410,7000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (21,829,78,'Craven_Einherjar',0,128,3410,10000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (22,2037,78,'Hyndla',0,128,3410,17500,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (23,2838,78,'Nickur',0,128,3410,50000,0,82,82,0);
@@ -4157,7 +4157,7 @@ INSERT INTO `mob_groups` VALUES (44,2943,78,'Odins_Jester',0,128,3410,7700,0,82,
 INSERT INTO `mob_groups` VALUES (45,800,78,'Corrupt_Einherjar',0,128,3410,8800,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (46,2555,78,'Manticore-X',0,128,3410,13500,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (47,3054,78,'Ormr',0,128,3410,32000,0,82,82,0);
-INSERT INTO `mob_groups` VALUES (48,714,78,'Chigoe',0,128,3410,7200,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (48,7074,78,'Chigoe',0,128,3410,7200,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (49,1071,78,'Djigga',0,128,3410,9000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (50,2430,78,'Logi',0,128,3410,7500,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (51,1356,78,'Flames_of_Muspelheim',0,128,3410,18000,0,82,82,0);
@@ -4199,6 +4199,11 @@ INSERT INTO `mob_groups` VALUES (86,4279,78,'Waltraute',0,128,0,12500,0,85,85,0)
 INSERT INTO `mob_groups` VALUES (87,0,78,'Odin_Prime',0,128,0,0,0,0,0,0);
 INSERT INTO `mob_groups` VALUES (88,0,78,'Odin_Image',0,128,0,0,0,0,0,0);
 INSERT INTO `mob_groups` VALUES (89,2941,78,'Odin',0,128,3411,110000,0,85,85,0);
+INSERT INTO `mob_groups` VALUES (90,7075,78,'Craven_Einherjar_bhoot',0,128,3410,10000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (91,7076,78,'Rotting_Huskarl_blm',0,128,3410,7000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (92,7077,78,'Rotting_Huskarl_drk',0,128,3410,7000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (93,7078,78,'Rotting_Huskarl_thf',0,128,3410,7000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (94,1071,78,'Djigga_Hildesvini',0,128,0,9000,0,82,82,0);
 
 -- ------------------------------------------------------------
 -- Caedarva_Mire (Zone 79)
