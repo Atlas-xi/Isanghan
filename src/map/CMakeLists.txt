@@ -77,6 +77,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/linkshell.h
     ${CMAKE_CURRENT_SOURCE_DIR}/map.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/map.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/map_networking.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/map_networking.h
     ${CMAKE_CURRENT_SOURCE_DIR}/map_session_container.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/map_session_container.h
     ${CMAKE_CURRENT_SOURCE_DIR}/map_session.cpp

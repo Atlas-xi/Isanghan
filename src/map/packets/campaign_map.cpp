@@ -19,8 +19,6 @@
 ===========================================================================
 */
 
-#include "common/socket.h"
-
 #include "campaign_map.h"
 #include "campaign_system.h"
 
