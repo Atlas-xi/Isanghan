@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2024 LandSandBoat Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,9 +18,36 @@
 
 ===========================================================================
 */
-#include "search_server.h"
 
-int main(int argc, char** argv)
+#ifdef TRACY_ENABLE
+void* operator new(std::size_t count)
 {
-    return std::make_unique<SearchServer>(argc, argv)->run();
+    void* ptr = malloc(count);
+    TracyAlloc(ptr, count);
+    return ptr;
 }
+
+void operator delete(void* ptr) noexcept
+{
+    TracyFree(ptr);
+    free(ptr);
+}
+
+void operator delete(void* ptr, std::size_t count) noexcept
+{
+    TracyFree(ptr);
+    free(ptr);
+}
+
+void operator delete[](void* ptr) noexcept
+{
+    TracyFree(ptr);
+    free(ptr);
+}
+
+void operator delete[](void* ptr, std::size_t count) noexcept
+{
+    TracyFree(ptr);
+    free(ptr);
+}
+#endif // TRACY_ENABLE

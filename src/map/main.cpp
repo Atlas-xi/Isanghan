@@ -1,7 +1,7 @@
 ﻿/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,25 +19,9 @@
 ===========================================================================
 */
 
-#pragma once
+#include "map_server.h"
 
-#include "cbasetypes.h"
-#include "console_service.h"
-#include "settings.h"
-
-//
-// Global variables
-//
-
-extern std::atomic<bool>               gRunFlag;
-extern std::unique_ptr<ConsoleService> gConsoleService;
-
-//
-// Functions
-//
-
-extern void log_init(int, char**);
-extern auto do_init(int32, char**) -> int32;
-extern auto do_sockets(duration) -> int32;
-extern void do_abort(void);
-extern void do_final(int);
+int main(int argc, char** argv)
+{
+    return std::make_unique<MapServer>(argc, argv)->run();
+}

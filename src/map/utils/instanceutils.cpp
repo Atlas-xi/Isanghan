@@ -23,6 +23,8 @@
 #include "lua/luautils.h"
 
 #include "instanceutils.h"
+#include "map_networking.h"
+#include "map_server.h"
 #include "zoneutils.h"
 
 #include <queue>
@@ -54,7 +56,8 @@ namespace instanceutils
             "ON instance_zone = zone_settings.zoneid "
             "WHERE IF(%d <> 0, '%s' = zoneip AND %d = zoneport, TRUE)";
 
-        int32 ret = _sql->Query(query, gMapIPP.getIP(), gMapIPP.getIPString(), gMapIPP.getPort());
+        const auto mapIPP = gMapServer->networking().ipp();
+        int32      ret    = _sql->Query(query, mapIPP.getIP(), mapIPP.getIPString(), mapIPP.getPort());
 
         if (ret != SQL_ERROR && _sql->NumRows() != 0)
         {

@@ -29,6 +29,8 @@
 #include "alliance.h"
 #include "conquest_system.h"
 #include "linkshell.h"
+#include "map_networking.h"
+#include "map_server.h"
 #include "party.h"
 #include "status_effect_container.h"
 #include "unitychat.h"
@@ -60,8 +62,10 @@ namespace
 
     auto getZMQRoutingId() -> uint64
     {
-        auto ip   = gMapIPP.getIP();
-        auto port = gMapIPP.getPort();
+        const auto mapIPP = gMapServer->networking().ipp();
+
+        auto ip   = mapIPP.getIP();
+        auto port = mapIPP.getPort();
 
         // if no ip/port were supplied, set to 1 (0 is not valid for an identity)
         if (ip == 0 && port == 0)
@@ -670,12 +674,14 @@ void IPCClient::handleMessage_KillSession(const IPP& ipp, const ipc::KillSession
 {
     TracyZoneScoped;
 
-    if (auto sessionToDelete = gMapSessions.getSessionByCharId(message.victimId))
+    auto& sessions = gMapServer->networking().sessions();
+
+    if (auto sessionToDelete = sessions.getSessionByCharId(message.victimId))
     {
         if (sessionToDelete->blowfish.status == BLOWFISH_PENDING_ZONE)
         {
             ShowDebugFmt("Closing session of charid {} on request of other process", message.victimId);
-            gMapSessions.destroySession(sessionToDelete);
+            sessions.destroySession(sessionToDelete);
         }
         else
         {

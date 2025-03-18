@@ -38,6 +38,8 @@
 #include "tracy.h"
 #include "utils.h"
 
+class Application;
+
 class ConsoleService
 {
 private:
@@ -51,7 +53,7 @@ private:
     };
 
 public:
-    ConsoleService();
+    ConsoleService(Application& application);
     ~ConsoleService();
 
     // NOTE: If you capture things in this function, make sure they're protected (locked or atomic)!
@@ -62,6 +64,8 @@ public:
     void stop();
 
 private:
+    Application& application_;
+
     std::mutex              m_consoleInputBottleneck;
     std::atomic<bool>       m_consoleThreadRun = true;
     nonstd::jthread         m_consoleInputThread;

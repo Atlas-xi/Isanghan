@@ -21,8 +21,10 @@
 
 #include "console_service.h"
 
+#include "application.h"
 #include "database.h"
 #include "lua.h"
+#include "settings.h"
 
 #include <sstream>
 
@@ -96,7 +98,8 @@ bool getLine(std::string& line)
 #endif
 }
 
-ConsoleService::ConsoleService()
+ConsoleService::ConsoleService(Application& application)
+: application_(application)
 {
     // clang-format off
     RegisterCommand("help", "Print a list of available console commands.",
@@ -113,6 +116,13 @@ ConsoleService::ConsoleService()
     [](std::vector<std::string>& inputs)
     {
         fmt::print("> tasks registered to the application task manager: {}\n", CTaskMgr::getInstance()->getTaskList().size());
+    });
+
+    RegisterCommand("reload_settings", "Reload settings files.",
+    [](std::vector<std::string>& inputs)
+    {
+        fmt::print("Reloading settings files\n");
+        settings::init();
     });
 
     RegisterCommand("log_level", "Set the maximum log level to be displayed (available: 0: trace, 1: debug, 2: info, 3: warn)",
@@ -140,85 +150,46 @@ ConsoleService::ConsoleService()
             inputs = std::vector<std::string>(inputs.begin() + 1, inputs.end());
 
             auto input = fmt::format("local var = {}; if type(var) ~= \"nil\" then print(var) end", fmt::join(inputs, " "));
-            lua.safe_script(input);
+
+            asio::post(application_.ioContext(),
+            [&]()
+            {
+                lua.safe_script(input);
+            });
         }
     });
 
     RegisterCommand("crash", "Crash the process",
-    [](std::vector<std::string>& inputs)
+    [this](std::vector<std::string>& inputs)
     {
-        crash();
+        asio::post(application_.ioContext(),
+        []()
+        {
+            crash();
+        });
     });
 
-    RegisterCommand("throw", "Throw an exception from the console worker thread",
-    [](std::vector<std::string>& inputs)
+    RegisterCommand("throw", "Throw an exception",
+    [this](std::vector<std::string>& inputs)
     {
-        throw std::runtime_error("Exception thrown from console command (from worker thread)");
+        asio::post(application_.ioContext(),
+        []()
+        {
+            throw std::runtime_error("Exception thrown from console command");
+        });
     });
 
-    RegisterCommand("db", "Run both a query and a prepared statement to test the database connection",
-    [](std::vector<std::string>& inputs)
+
+    RegisterCommand("exit", "Request application exit",
+    [&](std::vector<std::string>& inputs)
     {
-        auto query = "SELECT 1";
-        auto rset = db::queryStr(query);
-        if (rset && rset->rowsCount())
-        {
-            fmt::print("> Query successful: {}\n", query);
-        }
-
-        auto preparedQuery = "SELECT 1";
-        auto preparedRset = db::preparedStmt(preparedQuery);
-        if (preparedRset && preparedRset->rowsCount())
-        {
-            fmt::print("> Prepared statement successful: {}\n", preparedQuery);
-        }
-    });
-
-    RegisterCommand("db_perf_test", "",
-    [](std::vector<std::string>& inputs)
-    {
-        {
-            const auto start = hires_clock::now();
-            for (int i = 0; i < 100; i++) // number of queries
-            {
-                for (int j = 0; j < 10; j++) // charids
-                {
-                    auto rset = db::query("SELECT * FROM chars WHERE charid = %u", j);
-                    if (rset && rset->rowsCount() && rset->next())
-                    {
-                        std::ignore = rset->get<uint32>(0);
-                    }
-                }
-            }
-            const auto end = hires_clock::now();
-            const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-            fmt::print("> db_perf_test queries took {}ms\n", duration);
-        }
-
-        {
-            const auto start = hires_clock::now();
-            for (int i = 0; i < 100; i++) // number of queries
-            {
-                for (int j = 0; j < 10; j++) // charids
-                {
-                    auto rset = db::preparedStmt("SELECT * FROM chars WHERE charid = ?", j);
-                    if (rset && rset->rowsCount() && rset->next())
-                    {
-                        std::ignore = rset->get<uint32>(0);
-                    }
-                }
-            }
-            const auto end = hires_clock::now();
-            const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-            fmt::print("> db_perf_test prepared statements took {}ms\n", duration);
-        }
+        application.requestExit();
+        fmt::print("> Goodbye!");
     });
 
     bool attached = isatty(0);
     if (attached)
     {
-        ShowInfo("Console input thread is ready...");
-        ShowInfo("Type 'help' for a list of available commands.");
         m_consoleInputThread = nonstd::jthread([&]()
         {
             std::string line;
@@ -265,7 +236,6 @@ ConsoleService::ConsoleService()
                     line = std::string();
                 }
             }
-            fmt::print("Console input thread exiting...\n");
         });
     }
     // clang-format on

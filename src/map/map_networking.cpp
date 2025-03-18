@@ -1,7 +1,7 @@
 ﻿/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,20 +19,18 @@
 ===========================================================================
 */
 
-#include "map.h"
+#include "map_networking.h"
 
-#include "common/async.h"
-#include "common/blowfish.h"
-#include "common/console_service.h"
-#include "common/database.h"
-#include "common/debug.h"
-#include "common/ipp.h"
-#include "common/logging.h"
-#include "common/timer.h"
-#include "common/utils.h"
-#include "common/vana_time.h"
-#include "common/version.h"
+#include "common/tracy.h"
 #include "common/zlib.h"
+
+#include "entities/charentity.h"
+
+#include "packets/basic.h"
+#include "packets/chat_message.h"
+#include "packets/server_ip.h"
+
+#include "utils/charutils.h"
 
 #include "ability.h"
 #include "daily_system.h"
@@ -40,6 +38,7 @@
 #include "job_points.h"
 #include "latent_effect_container.h"
 #include "linkshell.h"
+#include "map_statistics.h"
 #include "mob_spell_list.h"
 #include "monstrosity.h"
 #include "packet_guard.h"
@@ -52,400 +51,64 @@
 #include "zone.h"
 #include "zone_entities.h"
 
-#include "ai/controllers/automaton_controller.h"
-
-#include "items/item_equipment.h"
-
-#include "packets/basic.h"
-#include "packets/chat_message.h"
-#include "packets/server_ip.h"
-
-#include "utils/battleutils.h"
-#include "utils/charutils.h"
-#include "utils/fishingutils.h"
-#include "utils/gardenutils.h"
-#include "utils/guildutils.h"
-#include "utils/instanceutils.h"
-#include "utils/itemutils.h"
-#include "utils/mobutils.h"
-#include "utils/moduleutils.h"
-#include "utils/petutils.h"
-#include "utils/serverutils.h"
-#include "utils/synergyutils.h"
-#include "utils/synthutils.h"
-#include "utils/trustutils.h"
-#include "utils/zoneutils.h"
-
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <thread>
-
-#include <nonstd/jthread.hpp>
-
-#ifdef WIN32
-#include <io.h>
-#endif
-
-IPP gMapIPP;
-
-MapSessionContainer gMapSessions;
-
-std::unique_ptr<SqlConnection> _sql;
-
-extern std::map<uint16, CZone*> g_PZoneList; // Global array of pointers for zones
-
-bool gLoadAllLua = false;
-
-std::unordered_map<uint32, std::unordered_map<uint16, std::vector<std::pair<uint16, uint8>>>> PacketMods;
-
-extern std::atomic<bool> gProcessLoaded;
-
-// TODO: This should eventually live inside a MapNetworking class
-std::unique_ptr<MapSocket> gMapSocket;
-
-// Forward declare
-void handle_incoming_packet(const std::error_code& ec, std::span<uint8> buffer, IPP ipp);
-
 namespace
 {
-    // Map udp buffers
     NetworkBuffer PBuff;          // Global packet clipboard
     NetworkBuffer PBuffCopy;      // Copy of above, used to decrypt a second time if necessary.
     NetworkBuffer PScratchBuffer; // Temporary packet clipboard
-
-    // Runtime statistics
-    uint32 TotalPacketsToSendPerTick  = 0U;
-    uint32 TotalPacketsSentPerTick    = 0U;
-    uint32 TotalPacketsDelayedPerTick = 0U;
 } // namespace
 
-void initConsoleService()
+MapNetworking::MapNetworking(MapServer& mapServer)
+: mapServer_(mapServer)
 {
-    // clang-format off
-    gConsoleService = std::make_unique<ConsoleService>();
-
-    gConsoleService->RegisterCommand("crash", "Force-crash the process.",
-    [](std::vector<std::string>& inputs)
+    auto ip = 0;
+    if (auto maybeIP = mapServer_.argParser().present("--ip"))
     {
-        crash();
-    });
+        ip = str2ip(*maybeIP);
+    }
 
-    gConsoleService->RegisterCommand("gm", "Change a character's GM level.",
-    [](std::vector<std::string>& inputs)
+    auto port = 0;
+    if (auto maybePort = mapServer_.argParser().present("--port"))
     {
-        if (inputs.size() != 3)
-        {
-            fmt::print("Usage: gm <char_name> <level>. example: gm Testo 1\n");
-            return;
-        }
+        port = std::stoi(*maybePort);
+    }
 
-        auto  name  = inputs[1];
-        auto* PChar = zoneutils::GetCharByName(name);
-        if (!PChar)
-        {
-            fmt::print("Couldnt find character: {}\n", name);
-            return;
-        }
-
-        auto level = std::clamp<uint8>(static_cast<uint8>(stoi(inputs[2])), 0, 5);
-
-        PChar->m_GMlevel = level;
-
-        // NOTE: This is the same logic as charutils::SaveCharGMLevel(PChar);
-        // But we're not executing on the main thread, so we're doing it with
-        // our own SQL connection.
-        {
-            auto otherSql  = std::make_unique<SqlConnection>();
-            auto query = "UPDATE %s SET %s %u WHERE charid = %u";
-            otherSql->Query(query, "chars", "gmlevel =", PChar->m_GMlevel, PChar->id);
-        }
-
-        fmt::print("Promoting {} to GM level {}\n", PChar->name, level);
-        PChar->pushPacket<CChatMessagePacket>(PChar, MESSAGE_SYSTEM_3, fmt::format("You have been set to GM level {}.", level));
-    });
-
-    gConsoleService->RegisterCommand("reload_settings", "Reload settings files.",
-    [&](std::vector<std::string>& inputs)
+    if (port == 0)
     {
-        fmt::print("Reloading settings files\n");
-        settings::init();
-    });
+        port = settings::get<uint16>("network.MAP_PORT");
+    }
 
-    gConsoleService->RegisterCommand("reload_recipes", "Reload crafting recipes.",
-    [&](std::vector<std::string>& inputs)
-    {
-        fmt::print("Reloading crafting recipes\n");
-        synthutils::LoadSynthRecipes();
-    });
+    mapIPP_ = IPP(ip, port);
 
-    gConsoleService->RegisterCommand("exit", "Terminate the program.",
-    [&](std::vector<std::string>& inputs)
-    {
-        fmt::print("> Goodbye!\n");
-        gConsoleService->stop();
-        gRunFlag = false;
-    });
-    // clang-format on
+    mapSocket_ = std::make_unique<MapSocket>(mapIPP_.getPort(), std::bind(&MapNetworking::handle_incoming_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
-int32 do_init(int32 argc, char** argv)
+auto MapNetworking::doSockets(duration next) -> int32
 {
-    TracyZoneScoped;
+    message::handle_incoming();
 
-#ifdef TRACY_ENABLE
-    ShowInfo("*** TRACY IS ENABLED ***");
+    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(next - std::chrono::duration_cast<std::chrono::seconds>(next));
+    mapSocket_->recvFor(duration);
 
-    if (!debug::isUserRoot())
-    {
-        ShowWarning("You are NOT running as the root superuser or admin.");
-        ShowWarning("This is required for Tracy to work properly.");
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-    }
-#endif // TRACY_ENABLE
+    mapServer_.statistics().reportToTracy();
 
-    ShowInfo("do_init: begin server initialization");
-
-    // These aren't set unless --ip or --port is set, respectively.
-    auto mapIP   = 0;
-    auto mapPort = 0;
-
-    // TODO: Replace with argparse::ArgumentParser
-    for (int i = 1; i < argc; i++)
-    {
-        if (strcmp(argv[i], "--ip") == 0)
-        {
-            mapIP = str2ip(argv[i + 1]);
-        }
-        else if (strcmp(argv[i], "--port") == 0)
-        {
-            mapPort = std::stoi(argv[i + 1]);
-        }
-        else if (strcmp(argv[i], "--load_all") == 0)
-        {
-            gLoadAllLua = true;
-        }
-    }
-
-    gMapIPP = IPP(mapIP, mapPort);
-
-    ShowInfoFmt("map_ip: {}", gMapIPP.getIPString());
-    ShowInfoFmt("map_port: {}", gMapIPP.getPort());
-    ShowInfoFmt("Zones assigned to this process: {}", zoneutils::GetZonesAssignedToThisProcess().size());
-
-    srand((uint32)time(nullptr));
-    xirand::seed();
-    ShowInfo(fmt::format("Random samples (integer): {}", utils::getRandomSampleString(0, 255)));
-    ShowInfo(fmt::format("Random samples (float): {}", utils::getRandomSampleString(0.0f, 1.0f)));
-
-    // TODO: Get rid of legacy _sql and SqlConnection
-    ShowInfo("do_init: connecting to database");
-    _sql = std::make_unique<SqlConnection>();
-
-    ShowInfo(fmt::format("database name: {}", db::getDatabaseSchema()).c_str());
-    ShowInfo(fmt::format("database server version: {}", db::getDatabaseVersion()).c_str());
-    ShowInfo(fmt::format("database client version: {}", db::getDriverVersion()).c_str());
-    db::checkCharset();
-    db::checkTriggers();
-
-    luautils::init(); // Also calls moduleutils::LoadLuaModules();
-
-    PacketParserInitialize();
-
-    _sql->Query("DELETE FROM accounts_sessions WHERE IF(%u = 0 AND %u = 0, true, server_addr = %u AND server_port = %u)",
-                gMapIPP.getIP(), gMapIPP.getPort(), gMapIPP.getIP(), gMapIPP.getPort());
-
-    ShowInfo("do_init: zlib is reading");
-    zlib_init();
-
-    ShowInfo("do_init: starting ZMQ thread");
-    message::init();
-
-    ShowInfo("do_init: loading items");
-    itemutils::Initialize();
-
-    ShowInfo("do_init: loading plants");
-    gardenutils::Initialize();
-
-    ShowInfo("do_init: loading spells");
-    spell::LoadSpellList();
-    mobSpellList::LoadMobSpellList();
-    automaton::LoadAutomatonSpellList();
-    automaton::LoadAutomatonAbilities();
-
-    guildutils::Initialize();
-    charutils::LoadExpTable();
-    traits::LoadTraitsList();
-    effects::LoadEffectsParameters();
-    battleutils::LoadSkillTable();
-    meritNameSpace::LoadMeritsList();
-    ability::LoadAbilitiesList();
-    battleutils::LoadWeaponSkillsList();
-    battleutils::LoadMobSkillsList();
-    battleutils::LoadPetSkillsList();
-    battleutils::LoadSkillChainDamageModifiers();
-    petutils::LoadPetList();
-    trustutils::LoadTrustList();
-    mobutils::LoadSqlModifiers();
-    jobpointutils::LoadGifts();
-    daily::LoadDailyItems();
-    roeutils::UpdateUnityRankings();
-    synthutils::LoadSynthRecipes();
-    synergyutils::LoadSynergyRecipes();
-    CItemEquipment::LoadAugmentData(); // TODO: Move to itemutils
-
-    if (!std::filesystem::exists("./navmeshes/") || std::filesystem::is_empty("./navmeshes/"))
-    {
-        ShowInfo("./navmeshes/ directory isn't present or is empty");
-    }
-
-    if (!std::filesystem::exists("./losmeshes/") || std::filesystem::is_empty("./losmeshes/"))
-    {
-        ShowInfo("./losmeshes/ directory isn't present or is empty");
-    }
-
-    ShowInfo("do_init: loading zones");
-    zoneutils::LoadZoneList();
-
-    fishingutils::InitializeFishingSystem();
-    instanceutils::LoadInstanceList();
-
-    monstrosity::LoadStaticData();
-
-    const auto udpPort = gMapIPP.getPort() == 0 ? settings::get<uint16>("network.MAP_PORT") : gMapIPP.getPort();
-    gMapSocket         = std::make_unique<MapSocket>(udpPort);
-
-    CVanaTime::getInstance()->setCustomEpoch(settings::get<int32>("map.VANADIEL_TIME_EPOCH"));
-
-    zoneutils::InitializeWeather(); // Need VanaTime initialized
-
-    CTransportHandler::getInstance()->InitializeTransport();
-
-    CTaskMgr::getInstance()->AddTask("time_server", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 2400ms, time_server);
-    CTaskMgr::getInstance()->AddTask("map_cleanup", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 5s, map_cleanup);
-    CTaskMgr::getInstance()->AddTask("garbage_collect", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 15min, map_garbage_collect);
-    CTaskMgr::getInstance()->AddTask("persist_server_vars", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 1min, serverutils::PersistVolatileServerVars);
-
-    zoneutils::TOTDChange(CVanaTime::getInstance()->GetCurrentTOTD()); // This tells the zones to spawn stuff based on time of day conditions (such as undead at night)
-
-    ShowInfo("do_init: Removing expired database variables");
-    uint32 currentTimestamp = CVanaTime::getInstance()->getSysTime();
-    db::preparedStmt("DELETE FROM char_vars WHERE expiry > 0 AND expiry <= ?", currentTimestamp);
-    db::preparedStmt("DELETE FROM server_variables WHERE expiry > 0 AND expiry <= ?", currentTimestamp);
-
-    PacketGuard::Init();
-
-    initConsoleService();
-
-    moduleutils::OnInit();
-
-    luautils::OnServerStart();
-
-    moduleutils::ReportLuaModuleUsage();
-
-    db::enableTimers();
-
-    ShowInfo("The map-server is ready to work!");
-    ShowInfo("=======================================================================");
-
-#ifdef TRACY_ENABLE
-    ShowInfo("*** TRACY IS ENABLED ***");
-#endif // TRACY_ENABLE
-
-    gProcessLoaded = true;
+    _sql->TryPing();
 
     return 0;
 }
 
-void do_final(int code)
-{
-    TracyZoneScoped;
-
-    ability::CleanupAbilitiesList();
-    itemutils::FreeItemList();
-    battleutils::FreeWeaponSkillsList();
-    battleutils::FreeMobSkillList();
-    battleutils::FreePetSkillList();
-    fishingutils::CleanupFishing();
-    guildutils::Cleanup();
-    mobutils::Cleanup();
-    traits::ClearTraitsList();
-
-    petutils::FreePetList();
-    trustutils::FreeTrustList();
-    zoneutils::FreeZoneList();
-
-    CTaskMgr::delInstance();
-    CVanaTime::delInstance();
-    Async::delInstance();
-
-    timer_final();
-
-    luautils::cleanup();
-    logging::ShutDown();
-
-    if (code != EXIT_SUCCESS)
-    {
-        std::exit(code);
-    }
-}
-
-void do_abort()
-{
-    do_final(EXIT_FAILURE);
-}
-
-void ReportTracyStats()
-{
-    TracyReportLuaMemory(lua.lua_state());
-
-    std::size_t activeZoneCount       = 0;
-    std::size_t playerCount           = 0;
-    std::size_t mobCount              = 0;
-    std::size_t dynamicTargIdCount    = 0;
-    std::size_t dynamicTargIdCapacity = 0;
-
-    for (auto& [id, PZone] : g_PZoneList)
-    {
-        if (PZone->IsZoneActive())
-        {
-            activeZoneCount += 1;
-            playerCount += PZone->GetZoneEntities()->GetCharList().size();
-            mobCount += PZone->GetZoneEntities()->GetMobList().size();
-            dynamicTargIdCount += PZone->GetZoneEntities()->GetUsedDynamicTargIDsCount();
-            dynamicTargIdCapacity += 511;
-        }
-    }
-
-    TracyReportGraphNumber("Active Zones (Process)", static_cast<std::int64_t>(activeZoneCount));
-    TracyReportGraphNumber("Connected Players (Process)", static_cast<std::int64_t>(playerCount));
-    TracyReportGraphNumber("Active Mobs (Process)", static_cast<std::int64_t>(mobCount));
-    TracyReportGraphNumber("Task Manager Tasks", static_cast<std::int64_t>(CTaskMgr::getInstance()->getTaskList().size()));
-
-    TracyReportGraphPercent("Dynamic Entity TargID Capacity Usage Percent", static_cast<double>(dynamicTargIdCount) / static_cast<double>(dynamicTargIdCapacity));
-
-    TracyReportGraphNumber("Total Packets To Send Per Tick", static_cast<std::int64_t>(TotalPacketsToSendPerTick));
-    TracyReportGraphNumber("Total Packets Sent Per Tick", static_cast<std::int64_t>(TotalPacketsSentPerTick));
-    TracyReportGraphNumber("Total Packets Delayed Per Tick", static_cast<std::int64_t>(TotalPacketsDelayedPerTick));
-
-    TotalPacketsToSendPerTick  = 0;
-    TotalPacketsSentPerTick    = 0;
-    TotalPacketsDelayedPerTick = 0;
-}
-
-void handle_incoming_packet(const std::error_code& ec, std::span<uint8> buffer, IPP ipp)
+void MapNetworking::handle_incoming_packet(const std::error_code& ec, std::span<uint8> buffer, IPP ipp)
 {
     if (!ec && !buffer.empty())
     {
         // find player session
-        MapSession* map_session_data = gMapSessions.getSessionByIPP(ipp);
+        MapSession* map_session_data = mapSessions_.getSessionByIPP(ipp);
         if (map_session_data == nullptr)
         {
-            map_session_data = gMapSessions.createSession(ipp);
+            map_session_data = mapSessions_.createSession(ipp);
             if (map_session_data == nullptr)
             {
-                gMapSessions.destroySession(ipp);
+                mapSessions_.destroySession(ipp);
                 return;
             }
         }
@@ -487,7 +150,7 @@ void handle_incoming_packet(const std::error_code& ec, std::span<uint8> buffer, 
                 map_session_data->server_packet_id += 1;
             }
 
-            gMapSocket->send(ipp, { PBuff.data(), size });
+            mapSocket_->send(ipp, { PBuff.data(), size });
 
             std::swap(PBuff, map_session_data->server_packet_data);
             std::swap(size, map_session_data->server_packet_size);
@@ -496,7 +159,7 @@ void handle_incoming_packet(const std::error_code& ec, std::span<uint8> buffer, 
         // If client is logging out, just close it.
         if (map_session_data->shuttingDown == 1)
         {
-            gMapSessions.destroySession(map_session_data);
+            mapSessions_.destroySession(map_session_data);
         }
     }
     else if (ec)
@@ -505,21 +168,7 @@ void handle_incoming_packet(const std::error_code& ec, std::span<uint8> buffer, 
     }
 }
 
-int32 do_sockets(duration next)
-{
-    message::handle_incoming();
-
-    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(next - std::chrono::duration_cast<std::chrono::seconds>(next));
-    gMapSocket->recvFor(duration, &handle_incoming_packet);
-
-    ReportTracyStats();
-
-    _sql->TryPing();
-
-    return 0;
-}
-
-int32 map_decipher_packet(uint8* buff, size_t buffsize, MapSession* PSession, blowfish_t* pbfkey)
+int32 MapNetworking::map_decipher_packet(uint8* buff, size_t buffsize, MapSession* PSession, blowfish_t* pbfkey)
 {
     TracyZoneScoped;
 
@@ -551,7 +200,7 @@ int32 map_decipher_packet(uint8* buff, size_t buffsize, MapSession* PSession, bl
     return -1;
 }
 
-int32 recv_parse(uint8* buff, size_t* buffsize, MapSession* map_session_data)
+int32 MapNetworking::recv_parse(uint8* buff, size_t* buffsize, MapSession* map_session_data)
 {
     TracyZoneScoped;
 
@@ -711,7 +360,7 @@ int32 recv_parse(uint8* buff, size_t* buffsize, MapSession* map_session_data)
     // return -1;
 }
 
-int32 parse(uint8* buff, size_t* buffsize, MapSession* map_session_data)
+int32 MapNetworking::parse(uint8* buff, size_t* buffsize, MapSession* map_session_data)
 {
     TracyZoneScoped;
 
@@ -847,7 +496,7 @@ int32 parse(uint8* buff, size_t* buffsize, MapSession* map_session_data)
     return 0;
 }
 
-int32 send_parse(uint8* buff, size_t* buffsize, MapSession* map_session_data, bool usePreviousKey)
+int32 MapNetworking::send_parse(uint8* buff, size_t* buffsize, MapSession* map_session_data, bool usePreviousKey)
 {
     TracyZoneScoped;
 
@@ -874,7 +523,7 @@ int32 send_parse(uint8* buff, size_t* buffsize, MapSession* map_session_data, bo
     uint8  packets                  = 0;
     bool   incrementKeyAfterEncrypt = false;
 
-    TotalPacketsToSendPerTick += static_cast<uint32>(PChar->getPacketCount());
+    // TotalPacketsToSendPerTick += static_cast<uint32>(PChar->getPacketCount());
 
 #ifdef LOG_OUTGOING_PACKETS
     PacketGuard::PrintPacketList(PChar);
@@ -897,20 +546,20 @@ int32 send_parse(uint8* buff, size_t* buffsize, MapSession* map_session_data, bo
                 auto type = PSmallPacket->getType();
 
                 // Apply packet mods if available
-                if (!PacketMods[PChar->id].empty())
-                {
-                    if (PacketMods[PChar->id].find(type) != PacketMods[PChar->id].end())
-                    {
-                        for (auto& entry : PacketMods[PChar->id][type])
-                        {
-                            auto offset = entry.first;
-                            auto value  = entry.second;
-                            ShowInfo(fmt::format("Packet Mod ({}): {:04X}: {:04X}: {:02X}",
-                                                 PChar->name, type, offset, value));
-                            PSmallPacket->ref<uint8>(offset) = value;
-                        }
-                    }
-                }
+                // if (!PacketMods[PChar->id].empty())
+                // {
+                //     if (PacketMods[PChar->id].find(type) != PacketMods[PChar->id].end())
+                //     {
+                //         for (auto& entry : PacketMods[PChar->id][type])
+                //         {
+                //             auto offset = entry.first;
+                //             auto value  = entry.second;
+                //             ShowInfo(fmt::format("Packet Mod ({}): {:04X}: {:04X}: {:02X}",
+                //                                  PChar->name, type, offset, value));
+                //             PSmallPacket->ref<uint8>(offset) = value;
+                //         }
+                //     }
+                // }
 
                 // Store zoneout packet in case we need to re-send this
                 if (type == 0x00B && map_session_data->blowfish.status == BLOWFISH_PENDING_ZONE && map_session_data->zone_ipp.getRawIPP() == 0)
@@ -968,7 +617,7 @@ int32 send_parse(uint8* buff, size_t* buffsize, MapSession* map_session_data, bo
     } while (PacketSize == static_cast<uint32>(-1));
 
     PChar->erasePackets(packets);
-    TotalPacketsSentPerTick += packets;
+    // TotalPacketsSentPerTick += packets;
     TracyZoneString(fmt::format("Sending {} packets", packets));
 
     // Record data size excluding header
@@ -1023,86 +672,38 @@ int32 send_parse(uint8* buff, size_t* buffsize, MapSession* map_session_data, bo
 
     *buffsize = PacketSize + FFXI_HEADER_SIZE;
 
-    auto remainingPackets = PChar->getPacketCount();
-    TotalPacketsDelayedPerTick += static_cast<uint32>(remainingPackets);
-
-    if (settings::get<bool>("logging.DEBUG_PACKET_BACKLOG"))
-    {
-        TracyZoneString(fmt::format("{} packets remaining", remainingPackets));
-        if (remainingPackets > kMaxPacketBacklogSize)
-        {
-            if (PChar->loc.zone == nullptr)
-            {
-                ShowWarning(fmt::format("Packet backlog exists for char {} with a nullptr zone. Clearing packet list.", PChar->name));
-                PChar->clearPacketList();
-                return 0;
-            }
-            ShowWarning(fmt::format("Packet backlog for char {} in {} is {}! Limit is: {}",
-                                    PChar->name, PChar->loc.zone->getName(), remainingPackets, kMaxPacketBacklogSize));
-        }
-    }
-
-    return 0;
-}
-
-int32 map_cleanup(time_point tick, CTaskMgr::CTask* PTask)
-{
-    TracyZoneScoped;
-
-    gMapSessions.cleanupSessions();
-
-    // clang-format off
-    zoneutils::ForEachZone([](CZone* PZone)
-    {
-        PZone->GetZoneEntities()->EraseStaleDynamicTargIDs();
-    });
-    // clang-format on
+    // auto remainingPackets = PChar->getPacketCount();
+    // TotalPacketsDelayedPerTick += static_cast<uint32>(remainingPackets);
+    // if (settings::get<bool>("logging.DEBUG_PACKET_BACKLOG"))
+    // {
+    //     TracyZoneString(fmt::format("{} packets remaining", remainingPackets));
+    //     if (remainingPackets > kMaxPacketBacklogSize)
+    //     {
+    //         if (PChar->loc.zone == nullptr)
+    //         {
+    //             ShowWarning(fmt::format("Packet backlog exists for char {} with a nullptr zone. Clearing packet list.", PChar->name));
+    //             PChar->clearPacketList();
+    //             return 0;
+    //         }
+    //         ShowWarning(fmt::format("Packet backlog for char {} in {} is {}! Limit is: {}",
+    //                                 PChar->name, PChar->loc.zone->getName(), remainingPackets, kMaxPacketBacklogSize));
+    //     }
+    // }
 
     return 0;
 }
 
-int32 map_garbage_collect(time_point tick, CTaskMgr::CTask* PTask)
+auto MapNetworking::ipp() -> IPP
 {
-    TracyZoneScoped;
-
-    ShowInfo("CTaskMgr Active Tasks: %i", CTaskMgr::getInstance()->getTaskList().size());
-
-    luautils::garbageCollectFull();
-    return 0;
+    return mapIPP_;
 }
 
-void log_init(int argc, char** argv)
+auto MapNetworking::sessions() -> MapSessionContainer&
 {
-    std::string logFile;
-#ifdef DEBUGLOGMAP
-#ifdef WIN32
-    logFile = "log\\map-server.log";
-#else
-    logFile = "log/map-server.log";
-#endif
-#endif
-    bool defaultname = true;
-    bool appendDate{};
-    for (int i = 1; i < argc; i++)
-    {
-        if (strcmp(argv[i], "--ip") == 0 && defaultname)
-        {
-            logFile = argv[i + 1];
-        }
-        else if (strcmp(argv[i], "--port") == 0 && defaultname)
-        {
-            logFile.append(argv[i + 1]);
-        }
-        else if (strcmp(argv[i], "--log") == 0)
-        {
-            defaultname = false;
-            logFile     = argv[i + 1];
-        }
+    return mapSessions_;
+}
 
-        if (strcmp(argv[i], "--append-date") == 0)
-        {
-            appendDate = true;
-        }
-    }
-    logging::InitializeLog("map", logFile, appendDate);
+auto MapNetworking::socket() -> MapSocket&
+{
+    return *mapSocket_;
 }

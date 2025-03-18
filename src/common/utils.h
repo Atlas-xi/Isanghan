@@ -179,7 +179,7 @@ namespace utils
     auto getRandomSampleString(T min, T max) -> std::string
     {
         std::vector<T> randomNumbers;
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 3; i++)
         {
             randomNumbers.push_back(xirand::GetRandomNumber(min, max));
         }

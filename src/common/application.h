@@ -21,31 +21,90 @@
 
 #pragma once
 
+#include "console_service.h"
+
+#include <argparse/argparse.hpp>
+#include <asio/io_context.hpp>
+#include <asio/post.hpp>
+
 #include <memory>
 #include <string>
 
-#include <argparse/argparse.hpp>
+//
+// Forward declarations
+//
 
-#include "console_service.h"
+class Application;
+class ConsoleService;
+
+namespace argparse
+{
+    class ArgumentParser;
+}
+
+//
+// Globally exposed variables
+//
+
+// TODO: This is a hack to allow handleSignal and other not-yet refactored code to access Application.
+//     : Major systems should be constructed with Application as a parameter.
+extern Application* gApplication;
 
 class Application
 {
 public:
     Application(std::string const& serverName, int argc, char** argv);
-    virtual ~Application() = default;
+    virtual ~Application();
 
     Application(const Application&)            = delete;
     Application(Application&&)                 = delete;
     Application& operator=(const Application&) = delete;
     Application& operator=(Application&&)      = delete;
 
-    virtual bool IsRunning();
-    virtual void Tick();
+    //
+    // Init
+    //
+
+    void trySetConsoleTitle();
+    void registerSignalHandlers();
+    void usercheck();
+    void tryIncreaseRLimits();
+    void tryDisableQuickEditMode();
+    void tryRestoreQuickEditMode();
+    void parseCommandLineArguments(int argc, char** argv);
+    void prepareLogging();
+
+    virtual void loadConsoleCommands() = 0;
+
+    void markLoaded();
+
+    //
+    // Runtime
+    //
+
+    bool isRunning();
+    void requestExit();
+
+    // Is expected to block until requestExit() is called and/or isRunning() returns false
+    virtual void run();
+
+    //
+    // Member accessors
+    //
+
+    auto ioContext() -> asio::io_context&;
+    auto argParser() -> argparse::ArgumentParser&;
+    auto console() -> ConsoleService&;
 
 protected:
-    std::string       m_ServerName;
-    std::atomic<bool> m_RequestExit;
+    asio::io_context io_context_;
 
-    std::unique_ptr<argparse::ArgumentParser> gArgParser;
-    std::unique_ptr<ConsoleService>           gConsoleService;
+    std::string       serverName_;
+    std::atomic<bool> isRunning_;
+
+    std::unique_ptr<argparse::ArgumentParser> argParser_;
+    std::unique_ptr<ConsoleService>           consoleService_;
+
+    // Windows-only
+    unsigned long prevQuickEditMode_;
 };

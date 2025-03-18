@@ -26,18 +26,7 @@
 #include <ms/applink.c>
 #endif
 
-// TODO: Standardize our running arguments for shutdown and thread signals
-std::atomic<bool> gRunFlag = true;
-
 int main(int argc, char** argv)
 {
-    auto pConnectServer = std::make_unique<ConnectServer>(argc, argv);
-
-    // TODO: We don't need this
-    while (pConnectServer->IsRunning())
-    {
-        pConnectServer->Tick();
-    }
-
-    return 0;
+    return std::make_unique<ConnectServer>(argc, argv)->run();
 }

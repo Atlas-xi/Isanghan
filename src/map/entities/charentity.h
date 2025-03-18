@@ -25,6 +25,7 @@
 #include "event_info.h"
 #include "item_container.h"
 #include "monstrosity.h"
+#include "treasure_pool.h"
 
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
@@ -36,10 +37,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "automatonentity.h"
 #include "battleentity.h"
 #include "petentity.h"
 
-#include "automatonentity.h"
 #include "utils/fishingutils.h"
 
 #define MAX_QUESTAREA    11

@@ -55,7 +55,7 @@
 #include "items.h"
 #include "items/item_weapon.h"
 #include "job_points.h"
-#include "map.h"
+#include "map_server.h"
 #include "mob_modifier.h"
 #include "mobskill.h"
 #include "modifier.h"

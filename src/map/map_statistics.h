@@ -1,7 +1,7 @@
 ﻿/*
 ===========================================================================
 
-  Copyright (c) 2024 LandSandBoat Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,9 +18,18 @@
 
 ===========================================================================
 */
-#include "search_server.h"
 
-int main(int argc, char** argv)
+#pragma once
+
+#include "common/cbasetypes.h"
+
+class MapStatistics
 {
-    return std::make_unique<SearchServer>(argc, argv)->run();
-}
+public:
+    void reportToTracy();
+
+private:
+    uint32 totalPacketsToSendPerTick_  = 0U;
+    uint32 totalPacketsSentPerTick_    = 0U;
+    uint32 totalPacketsDelayedPerTick_ = 0U;
+};

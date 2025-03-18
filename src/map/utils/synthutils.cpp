@@ -42,7 +42,7 @@
 #include "packets/synth_result.h"
 
 #include "item_container.h"
-#include "map.h"
+#include "map_server.h"
 #include "roe.h"
 #include "trade_container.h"
 

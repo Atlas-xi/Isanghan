@@ -34,7 +34,6 @@
 #endif // PTRACE_DETACH
 
 #include "debug.h"
-#include "kernel.h"
 
 #define BACKWARD_HAS_BFD 1
 #include "ext/backward/backward.hpp"

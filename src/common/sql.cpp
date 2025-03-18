@@ -19,6 +19,7 @@
 ===========================================================================
 */
 
+#include "application.h"
 #include "logging.h"
 #include "settings.h"
 #include "timer.h"
@@ -33,12 +34,6 @@
 #include <cstring>
 #include <string>
 #include <thread>
-
-// TODO: Since kernel.cpp isn't used by the processes which now use Application, we can't
-//     : store this global flag there. So we're storing it here until all processes are
-//     : refactored to use Application. Once that's done this should be moved out of static
-//     : storage in this unit to a member of Application.
-std::atomic<bool> gProcessLoaded = false;
 
 SqlConnection::SqlConnection()
 : SqlConnection(settings::get<std::string>("network.SQL_LOGIN").c_str(),
@@ -366,7 +361,7 @@ int32 SqlConnection::QueryStr(const char* query)
     auto endTime = hires_clock::now();
     auto dTime   = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-    if (gProcessLoaded && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
+    if (gApplication->isRunning() && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
     {
         if (dTime > std::chrono::milliseconds(settings::get<uint32>("logging.SQL_SLOW_QUERY_ERROR_TIME")))
         {

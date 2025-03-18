@@ -30,7 +30,7 @@
 #include "entities/charentity.h"
 #include "item_container.h"
 #include "items/item_flowerpot.h"
-#include "map.h"
+#include "map_server.h"
 #include "packets/inventory_item.h"
 
 #define MAX_RESULTID 2500

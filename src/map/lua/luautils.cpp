@@ -21,9 +21,11 @@
 
 #include "luautils.h"
 
+#include "common/application.h"
 #include "common/filewatcher.h"
 #include "common/ipc.h"
 #include "common/logging.h"
+#include "common/settings.h"
 #include "common/utils.h"
 #include "common/vana_time.h"
 #include "common/version.h"
@@ -76,7 +78,7 @@
 #include "instance.h"
 #include "ipc_client.h"
 #include "items/item_puppet.h"
-#include "map.h"
+#include "map_server.h"
 #include "mobskill.h"
 #include "monstrosity.h"
 #include "packets/action.h"
@@ -414,7 +416,8 @@ namespace luautils
             }
         }
 
-        if (gLoadAllLua) // Load all lua files (for sanity testing, no need for during regular use)
+        const auto loadAllLua = gApplication->argParser().present("--load_all");
+        if (loadAllLua) // Load all lua files (for sanity testing, no need for during regular use)
         {
             ShowInfo("*** CI ONLY: Smoke testing by running all Lua files. ***");
             for (auto const& entry : sorted_directory_iterator<std::filesystem::recursive_directory_iterator>("./scripts"))

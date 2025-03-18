@@ -61,7 +61,11 @@ WorldServer::WorldServer(int argc, char** argv)
 
 WorldServer::~WorldServer() = default;
 
-void WorldServer::Tick()
+void WorldServer::loadConsoleCommands()
 {
-    Application::Tick();
+}
+
+void WorldServer::run()
+{
+    Application::run();
 }

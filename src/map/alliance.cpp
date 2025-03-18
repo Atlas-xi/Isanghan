@@ -28,7 +28,8 @@
 #include "conquest_system.h"
 #include "entities/battleentity.h"
 #include "ipc_client.h"
-#include "map.h"
+#include "map_networking.h"
+#include "map_server.h"
 #include "party.h"
 #include "treasure_pool.h"
 #include "utils/charutils.h"
@@ -85,8 +86,10 @@ void CAlliance::dissolveAlliance(bool playerInitiated)
     }
     else
     {
-        const auto ip   = gMapIPP.getIP();
-        const auto port = gMapIPP.getPort();
+        const auto mapIPP = gMapServer->networking().ipp();
+
+        const auto ip   = mapIPP.getIP();
+        const auto port = mapIPP.getPort();
 
         _sql->Query("UPDATE accounts_parties JOIN accounts_sessions USING (charid) "
                     "SET allianceid = 0, partyflag = partyflag & ~%d "

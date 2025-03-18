@@ -32,7 +32,8 @@
 #include "entities/npcentity.h"
 #include "items/item_weapon.h"
 #include "lua/luautils.h"
-#include "map.h"
+#include "map_networking.h"
+#include "map_server.h"
 #include "mob_modifier.h"
 #include "mob_spell_list.h"
 #include "mobutils.h"
@@ -223,9 +224,11 @@ namespace zoneutils
 
     auto GetZonesAssignedToThisProcess() -> std::vector<uint16>
     {
-        const auto ip    = gMapIPP.getIP();
-        const auto ipStr = gMapIPP.getIPString();
-        const auto port  = gMapIPP.getPort();
+        const auto mapIPP = gMapServer->networking().ipp();
+
+        const auto ip    = mapIPP.getIP();
+        const auto ipStr = mapIPP.getIPString();
+        const auto port  = mapIPP.getPort();
 
         const auto zonesQuery = fmt::format("SELECT zoneid "
                                             "FROM zone_settings "
@@ -740,7 +743,7 @@ namespace zoneutils
         if (zones.empty())
         {
             ShowCritical("Unable to load any zones! Check IP and port params");
-            do_final(EXIT_FAILURE);
+            gMapServer->do_final();
         }
 
         ShowInfo(fmt::format("Loading {} zones", zones.size()));
