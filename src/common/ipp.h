@@ -27,17 +27,11 @@
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
-#include <sys/types.h>
-
 #ifdef _WIN32
 #include <io.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#else // NOT _WIN32
+#else
 #include <arpa/inet.h>
 #include <cerrno>
 #include <errno.h>
@@ -50,9 +44,12 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-#endif // _WIN32
+#endif
 
 #include <array>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <ctime>
 #include <memory>
 #include <string>
