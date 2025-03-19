@@ -29,6 +29,7 @@
 #include "map_session.h"
 #include "map_session_container.h"
 #include "map_socket.h"
+#include "map_statistics.h"
 
 #include <span>
 
@@ -37,13 +38,14 @@ class MapServer;
 class MapNetworking
 {
 public:
-    MapNetworking(MapServer& mapServer);
+    MapNetworking(MapServer& mapServer, MapStatistics& mapStatistics);
 
     //
     // Networking
     //
 
-    auto doSockets(duration) -> int32;
+    void tapStatistics();
+    auto doSockets(duration) -> duration;
 
     // TODO: Pass around std::span<uint8> instead of uint8* and size_t*
     // TODO: Stop changing the buffsize size_t as we go along
@@ -64,6 +66,7 @@ public:
 
 private:
     MapServer&                 mapServer_;
+    MapStatistics&             mapStatistics_;
     IPP                        mapIPP_;
     MapSessionContainer        mapSessions_;
     std::unique_ptr<MapSocket> mapSocket_;

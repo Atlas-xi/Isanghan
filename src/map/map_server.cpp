@@ -28,6 +28,7 @@
 #include "common/debug.h"
 #include "common/ipp.h"
 #include "common/logging.h"
+#include "common/macros.h"
 #include "common/settings.h"
 #include "common/timer.h"
 #include "common/utils.h"
@@ -79,13 +80,12 @@
 #include "utils/trustutils.h"
 #include "utils/zoneutils.h"
 
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <thread>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #endif
 
@@ -93,29 +93,28 @@
 // Legacy global variables
 //
 
-MapServer*                      gMapServer;
+// TODO: These are all hacks and shouldn't be globally exposed like this!
+
 std::unique_ptr<SqlConnection>  _sql;
 extern std::map<uint16, CZone*> g_PZoneList; // Global array of pointers for zones
 
-std::unordered_map<uint32, std::unordered_map<uint16, std::vector<std::pair<uint16, uint8>>>> PacketMods;
-
 MapServer::MapServer(int argc, char** argv)
 : Application("map", argc, argv)
-, networking_(std::make_unique<MapNetworking>(*this))
 , mapStatistics_(std::make_unique<MapStatistics>())
+, networking_(std::make_unique<MapNetworking>(*this, *mapStatistics_))
 {
-    // TODO: Get rid of this
-    gMapServer = this;
-
     do_init();
 }
 
-MapServer::~MapServer() = default;
+MapServer::~MapServer()
+{
+    do_final();
+}
 
 void MapServer::loadConsoleCommands()
 {
     // clang-format off
-    consoleService_->RegisterCommand("gm", "Change a character's GM level.",
+    consoleService_->registerCommand("gm", "Change a character's GM level",
     [](std::vector<std::string>& inputs)
     {
         if (inputs.size() != 3)
@@ -149,21 +148,34 @@ void MapServer::loadConsoleCommands()
         PChar->pushPacket<CChatMessagePacket>(PChar, MESSAGE_SYSTEM_3, fmt::format("You have been set to GM level {}.", level));
     });
 
-    consoleService_->RegisterCommand("reload_recipes", "Reload crafting recipes.",
+    consoleService_->registerCommand("reload_recipes", "Reload crafting recipes",
     [&](std::vector<std::string>& inputs)
     {
         fmt::print("> Reloading crafting recipes\n");
         synthutils::LoadSynthRecipes();
+    });
+
+    consoleService_->registerCommand("stats", "Print runtime stats",
+    [&](std::vector<std::string>& inputs)
+    {
+        mapStatistics_->print();
     });
     // clang-format on
 }
 
 void MapServer::prepareWatchdog()
 {
-    // clang-format off
-    auto period   = settings::get<uint32>("main.INACTIVITY_WATCHDOG_PERIOD");
-    auto periodMs = (period > 0) ? std::chrono::milliseconds(period) : 2000ms;
+    auto period = settings::get<uint32>("main.INACTIVITY_WATCHDOG_PERIOD");
 
+    if (Application::isRunningInCI())
+    {
+        // Double the timer period, to account for the slower CI environment
+        period *= 2;
+    }
+
+    const auto periodMs = (period > 0) ? std::chrono::milliseconds(period) : 2000ms;
+
+    // clang-format off
     watchdog_ = std::make_unique<Watchdog>(periodMs, [period]()
     {
         if (debug::isRunningUnderDebugger())
@@ -202,22 +214,45 @@ void MapServer::run()
 {
     Application::markLoaded();
 
-    // Main runtime cycle
+    const auto getMilliseconds = [](const duration& d) -> int64
     {
-        duration next = std::chrono::milliseconds(200); // TODO: MapConstants
+        return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
+    };
 
-        while (Application::isRunning())
+    duration networkDuration;
+    duration next;
+
+    //
+    // Main runtime cycle
+    //
+    while (Application::isRunning())
+    {
+        const auto tickStart = server_clock::now();
         {
-            next = CTaskMgr::getInstance()->DoTimer(server_clock::now());
-            networking_->doSockets(next);
+            next            = CTaskMgr::getInstance()->DoTimer(server_clock::now());
+            networkDuration = networking_->doSockets(next);
             watchdog_->update();
         }
-    }
+        const auto tickDuration  = server_clock::now() - tickStart;
+        const auto logicDuration = tickDuration - networkDuration;
 
-    do_final();
+        mapStatistics_->set(MapStatistics::Key::LogicTickTime, getMilliseconds(logicDuration));
+        mapStatistics_->set(MapStatistics::Key::NetworkTickTime, getMilliseconds(networkDuration));
+        mapStatistics_->set(MapStatistics::Key::TotalTickTime, getMilliseconds(tickDuration));
+        mapStatistics_->flush();
+
+        // If we're ahead of schedule, sleep for the remaining time.
+        //
+        // TODO: Once all logic is moved onto io_context::run(), we won't
+        //     : need this!
+        if (tickDuration < next)
+        {
+            std::this_thread::sleep_for(next - tickDuration);
+        }
+    }
 }
 
-int32 MapServer::do_init()
+void MapServer::do_init()
 {
     TracyZoneScoped;
 
@@ -235,7 +270,7 @@ int32 MapServer::do_init()
     ShowInfoFmt("map_ip: {}", mapIPP.getIPString());
     ShowInfoFmt("map_port: {}", mapIPP.getPort());
 
-    ShowInfoFmt("Zones assigned to this process: {}", zoneutils::GetZonesAssignedToThisProcess().size());
+    ShowInfoFmt("Zones assigned to this process: {}", zoneutils::GetZonesAssignedToThisProcess(mapIPP).size());
 
     ShowInfo(fmt::format("Random samples (integer): {}", utils::getRandomSampleString(0, 255)));
     ShowInfo(fmt::format("Random samples (float): {}", utils::getRandomSampleString(0.0f, 1.0f)));
@@ -247,10 +282,15 @@ int32 MapServer::do_init()
     ShowInfo(fmt::format("database name: {}", db::getDatabaseSchema()).c_str());
     ShowInfo(fmt::format("database server version: {}", db::getDatabaseVersion()).c_str());
     ShowInfo(fmt::format("database client version: {}", db::getDriverVersion()).c_str());
-    db::checkCharset();
+
+    if (!isRunningInCI())
+    {
+        db::checkCharset();
+    }
+
     db::checkTriggers();
 
-    luautils::init(); // Also calls moduleutils::LoadLuaModules();
+    luautils::init(mapIPP, isRunningInCI()); // Also calls moduleutils::LoadLuaModules();
 
     PacketParserInitialize();
 
@@ -261,7 +301,7 @@ int32 MapServer::do_init()
     zlib_init();
 
     ShowInfo("do_init: starting ZMQ thread");
-    message::init();
+    message::init(networking());
 
     ShowInfo("do_init: loading items");
     itemutils::Initialize();
@@ -307,25 +347,22 @@ int32 MapServer::do_init()
     }
 
     ShowInfo("do_init: loading zones");
-    zoneutils::LoadZoneList();
+    zoneutils::LoadZoneList(mapIPP);
 
     fishingutils::InitializeFishingSystem();
-    instanceutils::LoadInstanceList();
+    instanceutils::LoadInstanceList(mapIPP);
 
     monstrosity::LoadStaticData();
-
-    // const auto udpPort = gMapIPP.getPort() == 0 ? settings::get<uint16>("network.MAP_PORT") : gMapIPP.getPort();
-    // gMapSocket         = std::make_unique<MapSocket>(udpPort);
 
     CVanaTime::getInstance()->setCustomEpoch(settings::get<int32>("map.VANADIEL_TIME_EPOCH"));
 
     zoneutils::InitializeWeather(); // Need VanaTime initialized
 
-    CTransportHandler::getInstance()->InitializeTransport();
+    CTransportHandler::getInstance()->InitializeTransport(mapIPP);
 
     CTaskMgr::getInstance()->AddTask("time_server", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 2400ms, time_server);
-    // CTaskMgr::getInstance()->AddTask("map_cleanup", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 5s, &map_cleanup);
-    // CTaskMgr::getInstance()->AddTask("garbage_collect", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 15min, &map_garbage_collect);
+    CTaskMgr::getInstance()->AddTask("map_cleanup", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 5s, std::bind(&MapServer::map_cleanup, this, std::placeholders::_1, std::placeholders::_2));
+    CTaskMgr::getInstance()->AddTask("garbage_collect", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 15min, std::bind(&MapServer::map_garbage_collect, this, std::placeholders::_1, std::placeholders::_2));
     CTaskMgr::getInstance()->AddTask("persist_server_vars", server_clock::now(), nullptr, CTaskMgr::TASK_INTERVAL, 1min, serverutils::PersistVolatileServerVars);
 
     zoneutils::TOTDChange(CVanaTime::getInstance()->GetCurrentTOTD()); // This tells the zones to spawn stuff based on time of day conditions (such as undead at night)
@@ -343,6 +380,7 @@ int32 MapServer::do_init()
 
     moduleutils::ReportLuaModuleUsage();
 
+    _sql->EnableTimers();
     db::enableTimers();
 
     prepareWatchdog();
@@ -350,15 +388,11 @@ int32 MapServer::do_init()
 #ifdef TRACY_ENABLE
     ShowInfo("*** TRACY IS ENABLED ***");
 #endif // TRACY_ENABLE
-
-    return 0;
 }
 
 void MapServer::do_final()
 {
     TracyZoneScoped;
-
-    consoleService_->stop();
 
     ability::CleanupAbilitiesList();
     itemutils::FreeItemList();
@@ -382,18 +416,13 @@ void MapServer::do_final()
 
     luautils::cleanup();
     logging::ShutDown();
-
-    // if (code != EXIT_SUCCESS)
-    // {
-    //     std::exit(code);
-    // }
 }
 
 int32 MapServer::map_cleanup(time_point tick, CTaskMgr::CTask* PTask)
 {
     TracyZoneScoped;
 
-    networking().sessions().cleanupSessions();
+    networking().sessions().cleanupSessions(networking().ipp());
 
     // clang-format off
     zoneutils::ForEachZone([](CZone* PZone)

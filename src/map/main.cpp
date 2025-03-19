@@ -23,5 +23,6 @@
 
 int main(int argc, char** argv)
 {
-    return std::make_unique<MapServer>(argc, argv)->run();
+    std::make_unique<MapServer>(argc, argv)->run();
+    return 0;
 }

@@ -54,6 +54,8 @@ void ConnectServer::run()
 
     ShowInfo("creating ports");
 
+    // TODO: Why can't the ASIO setup be done in the constructor?
+
     // Handler creates session of type T for specific port on connection.
     handler<auth_session> auth(io_context_, settings::get<uint32>("network.LOGIN_AUTH_PORT"), zmqDealerWrapper_);
     handler<view_session> view(io_context_, settings::get<uint32>("network.LOGIN_VIEW_PORT"), zmqDealerWrapper_);
@@ -99,7 +101,7 @@ void ConnectServer::run()
 void ConnectServer::loadConsoleCommands()
 {
     // clang-format off
-    consoleService_->RegisterCommand("stats", "Print server runtime statistics",
+    consoleService_->registerCommand("stats", "Print server runtime statistics",
     [](std::vector<std::string>& inputs)
     {
         size_t uniqueIPs      = loginHelpers::getAuthenticatedSessions().size();

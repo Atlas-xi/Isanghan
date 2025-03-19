@@ -34,7 +34,7 @@ namespace instanceutils
     std::unordered_map<uint16, InstanceData_t> InstanceData;
     std::queue<std::pair<uint32, uint16>>      LoadQueue; // player id, instance id
 
-    void LoadInstanceList()
+    void LoadInstanceList(IPP mapIPP)
     {
         const char query[] =
             "SELECT "
@@ -56,8 +56,7 @@ namespace instanceutils
             "ON instance_zone = zone_settings.zoneid "
             "WHERE IF(%d <> 0, '%s' = zoneip AND %d = zoneport, TRUE)";
 
-        const auto mapIPP = gMapServer->networking().ipp();
-        int32      ret    = _sql->Query(query, mapIPP.getIP(), mapIPP.getIPString(), mapIPP.getPort());
+        int32 ret = _sql->Query(query, mapIPP.getIP(), mapIPP.getIPString(), mapIPP.getPort());
 
         if (ret != SQL_ERROR && _sql->NumRows() != 0)
         {

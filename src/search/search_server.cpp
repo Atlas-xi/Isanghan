@@ -101,15 +101,14 @@ void SearchServer::run()
 void SearchServer::loadConsoleCommands()
 {
     // clang-format off
-    consoleService_->RegisterCommand(
-    "ah_cleanup", fmt::format("AH task to return items older than {} days.", settings::get<uint16>("search.EXPIRE_DAYS")),
+    const auto expiryDays = settings::get<uint16>("search.EXPIRE_DAYS");
+    consoleService_->registerCommand("ah_cleanup", fmt::format("AH task to return items older than {} days", expiryDays),
     [&](std::vector<std::string>& inputs)
     {
         ahCleanup();
     });
 
-    consoleService_->RegisterCommand(
-    "expire_all", "Force-expire all items on the AH, returning to sender.",
+    consoleService_->registerCommand("expire_all", "Force-expire all items on the AH, returning to sender",
     [](std::vector<std::string>& inputs)
     {
         CDataLoader data;

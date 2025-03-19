@@ -24,6 +24,7 @@
 
 #include "event_info.h"
 #include "item_container.h"
+#include "map_session.h"
 #include "monstrosity.h"
 #include "treasure_pool.h"
 
@@ -294,6 +295,8 @@ class CCharEntity : public CBattleEntity
 {
 public:
     uint32 accid; // Account ID associated with the character.
+
+    MapSession* PSession;
 
     jobs_t     jobs; // Available Character jobs
     keyitems_t keys; // Table key objects

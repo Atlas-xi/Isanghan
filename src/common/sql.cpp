@@ -83,6 +83,8 @@ SqlConnection::SqlConnection(const char* user, const char* passwd, const char* h
     m_PingInterval = 0;
     m_LastPing     = 0;
 
+    m_TimersEnabled = false;
+
     SetupKeepalive();
 }
 
@@ -200,33 +202,8 @@ void SqlConnection::SetupKeepalive()
     m_PingInterval = timeout + reserve;
 }
 
-void SqlConnection::CheckCharset()
+void SqlConnection::EnableTimers()
 {
-    // Check that the SQL charset is what we require
-    auto ret = QueryStr("SELECT @@character_set_database, @@collation_database");
-    if (ret != SQL_ERROR && NumRows())
-    {
-        bool foundError = false;
-        while (NextRow() == SQL_SUCCESS)
-        {
-            auto charsetSetting   = GetStringData(0);
-            auto collationSetting = GetStringData(1);
-            if (!starts_with(charsetSetting, "utf8") || !starts_with(collationSetting, "utf8"))
-            {
-                foundError = true;
-                // clang-format off
-                ShowWarning(fmt::format("Unexpected character_set or collation setting in database: {}: {}. Expected utf8*.",
-                    charsetSetting, collationSetting).c_str());
-                // clang-format on
-            }
-        }
-
-        if (foundError)
-        {
-            ShowWarning("Non utf8 charset can result in data reads and writes being corrupted!");
-            ShowWarning("Non utf8 collation can be indicative that the database was not set up per required specifications.");
-        }
-    }
 }
 
 int32 SqlConnection::TryPing()
@@ -361,7 +338,7 @@ int32 SqlConnection::QueryStr(const char* query)
     auto endTime = hires_clock::now();
     auto dTime   = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-    if (gApplication->isRunning() && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
+    if (m_TimersEnabled && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
     {
         if (dTime > std::chrono::milliseconds(settings::get<uint32>("logging.SQL_SLOW_QUERY_ERROR_TIME")))
         {

@@ -18,6 +18,7 @@
 
 ===========================================================================
 */
+
 #include "connect_server.h"
 
 // openssl applink.c prevents issues with debug vs release vs threaded/single threaded .dlls at runtime
@@ -28,5 +29,6 @@
 
 int main(int argc, char** argv)
 {
-    return std::make_unique<ConnectServer>(argc, argv)->run();
+    std::make_unique<ConnectServer>(argc, argv)->run();
+    return 0;
 }

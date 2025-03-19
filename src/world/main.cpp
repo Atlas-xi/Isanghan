@@ -23,5 +23,6 @@
 
 int main(int argc, char** argv)
 {
-    return std::make_unique<WorldServer>(argc, argv)->run();
+    std::make_unique<WorldServer>(argc, argv)->run();
+    return 0;
 }

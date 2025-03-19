@@ -19,9 +19,8 @@
 ===========================================================================
 */
 
-#include <cmath>
-
 #include "lua_baseentity.h"
+
 #include "lua_battlefield.h"
 #include "lua_instance.h"
 #include "lua_item.h"

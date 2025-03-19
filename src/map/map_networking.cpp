@@ -21,6 +21,7 @@
 
 #include "map_networking.h"
 
+#include "common/arguments.h"
 #include "common/tracy.h"
 #include "common/zlib.h"
 
@@ -31,6 +32,7 @@
 #include "packets/server_ip.h"
 
 #include "utils/charutils.h"
+#include "utils/zoneutils.h"
 
 #include "ability.h"
 #include "daily_system.h"
@@ -51,54 +53,120 @@
 #include "zone.h"
 #include "zone_entities.h"
 
+extern std::map<uint16, CZone*> g_PZoneList; // Global array of pointers for zones
+
+// TODO: Extract into a class and a packetMods() member of MapNetworking
+std::unordered_map<uint32, std::unordered_map<uint16, std::vector<std::pair<uint16, uint8>>>> PacketMods;
+
 namespace
 {
     NetworkBuffer PBuff;          // Global packet clipboard
     NetworkBuffer PBuffCopy;      // Copy of above, used to decrypt a second time if necessary.
     NetworkBuffer PScratchBuffer; // Temporary packet clipboard
+
+    // Runtime statistics
+    // TODO: Move these to MapStatistics
+    uint32 TotalPacketsToSendPerTick  = 0U;
+    uint32 TotalPacketsSentPerTick    = 0U;
+    uint32 TotalPacketsDelayedPerTick = 0U;
 } // namespace
 
-MapNetworking::MapNetworking(MapServer& mapServer)
+MapNetworking::MapNetworking(MapServer& mapServer, MapStatistics& mapStatistics)
 : mapServer_(mapServer)
+, mapStatistics_(mapStatistics)
 {
+    TracyZoneScoped;
+
     auto ip = 0;
-    if (auto maybeIP = mapServer_.argParser().present("--ip"))
+    if (auto maybeIP = mapServer_.args().present("--ip"))
     {
         ip = str2ip(*maybeIP);
     }
 
     auto port = 0;
-    if (auto maybePort = mapServer_.argParser().present("--port"))
+    if (auto maybePort = mapServer_.args().present("--port"))
     {
         port = std::stoi(*maybePort);
     }
 
-    if (port == 0)
-    {
-        port = settings::get<uint16>("network.MAP_PORT");
-    }
-
+    // The original logic relies on these being contructed as (0, 0) if not provided
+    // TODO: Remove all of the SQL query logic that relies on these being 0.
     mapIPP_ = IPP(ip, port);
 
-    mapSocket_ = std::make_unique<MapSocket>(mapIPP_.getPort(), std::bind(&MapNetworking::handle_incoming_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    try
+    {
+        const auto udpPort = mapIPP_.getPort() == 0 ? settings::get<uint16>("network.MAP_PORT") : mapIPP_.getPort();
+        mapSocket_         = std::make_unique<MapSocket>(udpPort, std::bind(&MapNetworking::handle_incoming_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    }
+    catch (const std::exception& e)
+    {
+        ShowCriticalFmt("Failed to create MapSocket: {}", e.what());
+        std::exit(1);
+    }
 }
 
-auto MapNetworking::doSockets(duration next) -> int32
+void MapNetworking::tapStatistics()
 {
+    // Collect statistics
+    // TODO: Collect these inline
+    std::size_t activeZoneCount       = 0;
+    std::size_t playerCount           = 0;
+    std::size_t mobCount              = 0;
+    std::size_t dynamicTargIdCount    = 0;
+    std::size_t dynamicTargIdCapacity = 0;
+
+    for (auto& [id, PZone] : g_PZoneList)
+    {
+        if (PZone->IsZoneActive())
+        {
+            activeZoneCount += 1;
+            playerCount += PZone->GetZoneEntities()->GetCharList().size();
+            mobCount += PZone->GetZoneEntities()->GetMobList().size();
+            dynamicTargIdCount += PZone->GetZoneEntities()->GetUsedDynamicTargIDsCount();
+            dynamicTargIdCapacity += 511;
+        }
+    }
+
+    // Set statistics
+    mapStatistics_.set(MapStatistics::Key::TotalPacketsToSendPerTick, TotalPacketsToSendPerTick);
+    mapStatistics_.set(MapStatistics::Key::TotalPacketsSentPerTick, TotalPacketsSentPerTick);
+    mapStatistics_.set(MapStatistics::Key::TotalPacketsDelayedPerTick, TotalPacketsDelayedPerTick);
+    mapStatistics_.set(MapStatistics::Key::ActiveZones, activeZoneCount);
+    mapStatistics_.set(MapStatistics::Key::ConnectedPlayers, playerCount);
+    mapStatistics_.set(MapStatistics::Key::ActiveMobs, mobCount);
+    mapStatistics_.set(MapStatistics::Key::TaskManagerTasks, CTaskMgr::getInstance()->getTaskList().size());
+
+    const auto percent = (static_cast<double>(dynamicTargIdCount) / static_cast<double>(dynamicTargIdCapacity)) * 100.0;
+    mapStatistics_.set(MapStatistics::Key::DynamicTargIdUsagePercent, static_cast<int64>(percent));
+
+    // Clear statistics
+    TotalPacketsToSendPerTick  = 0U;
+    TotalPacketsSentPerTick    = 0U;
+    TotalPacketsDelayedPerTick = 0U;
+}
+
+auto MapNetworking::doSockets(duration next) -> duration
+{
+    TracyZoneScoped;
+
+    const auto start = server_clock::now();
+
     message::handle_incoming();
 
     const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(next - std::chrono::duration_cast<std::chrono::seconds>(next));
     mapSocket_->recvFor(duration);
 
-    mapServer_.statistics().reportToTracy();
-
     _sql->TryPing();
 
-    return 0;
+    tapStatistics();
+
+    return server_clock::now() - start;
 }
 
 void MapNetworking::handle_incoming_packet(const std::error_code& ec, std::span<uint8> buffer, IPP ipp)
 {
+    TracyZoneScoped;
+
     if (!ec && !buffer.empty())
     {
         // find player session
@@ -290,11 +358,15 @@ int32 MapNetworking::recv_parse(uint8* buff, size_t* buffsize, MapSession* map_s
                 map_session_data->initBlowfish();
             }
 
-            map_session_data->PChar  = charutils::LoadChar(charID);
+            auto PChar = charutils::LoadChar(charID);
+
+            map_session_data->PChar  = PChar;
             map_session_data->charID = charID;
 
+            PChar->PSession = map_session_data;
+
             // If we're a new char on a new instance and prevzone != zone
-            if (map_session_data->blowfish.status == BLOWFISH_WAITING && map_session_data->PChar->loc.destination != map_session_data->PChar->loc.prevzone)
+            if (map_session_data->blowfish.status == BLOWFISH_WAITING && PChar->loc.destination != PChar->loc.prevzone)
             {
                 message::send(ipc::KillSession{
                     .victimId = charID,
@@ -523,7 +595,7 @@ int32 MapNetworking::send_parse(uint8* buff, size_t* buffsize, MapSession* map_s
     uint8  packets                  = 0;
     bool   incrementKeyAfterEncrypt = false;
 
-    // TotalPacketsToSendPerTick += static_cast<uint32>(PChar->getPacketCount());
+    TotalPacketsToSendPerTick += static_cast<uint32>(PChar->getPacketCount());
 
 #ifdef LOG_OUTGOING_PACKETS
     PacketGuard::PrintPacketList(PChar);
@@ -546,25 +618,25 @@ int32 MapNetworking::send_parse(uint8* buff, size_t* buffsize, MapSession* map_s
                 auto type = PSmallPacket->getType();
 
                 // Apply packet mods if available
-                // if (!PacketMods[PChar->id].empty())
-                // {
-                //     if (PacketMods[PChar->id].find(type) != PacketMods[PChar->id].end())
-                //     {
-                //         for (auto& entry : PacketMods[PChar->id][type])
-                //         {
-                //             auto offset = entry.first;
-                //             auto value  = entry.second;
-                //             ShowInfo(fmt::format("Packet Mod ({}): {:04X}: {:04X}: {:02X}",
-                //                                  PChar->name, type, offset, value));
-                //             PSmallPacket->ref<uint8>(offset) = value;
-                //         }
-                //     }
-                // }
+                if (!PacketMods[PChar->id].empty())
+                {
+                    if (PacketMods[PChar->id].find(type) != PacketMods[PChar->id].end())
+                    {
+                        for (auto& entry : PacketMods[PChar->id][type])
+                        {
+                            auto offset = entry.first;
+                            auto value  = entry.second;
+                            ShowInfo(fmt::format("Packet Mod ({}): {:04X}: {:04X}: {:02X}",
+                                                 PChar->name, type, offset, value));
+                            PSmallPacket->ref<uint8>(offset) = value;
+                        }
+                    }
+                }
 
                 // Store zoneout packet in case we need to re-send this
                 if (type == 0x00B && map_session_data->blowfish.status == BLOWFISH_PENDING_ZONE && map_session_data->zone_ipp.getRawIPP() == 0)
                 {
-                    auto IPPacket = static_cast<CServerIPPacket*>(PSmallPacket.get());
+                    const auto IPPacket = static_cast<CServerIPPacket*>(PSmallPacket.get());
 
                     map_session_data->zone_ipp  = IPPacket->zoneIPP();
                     map_session_data->zone_type = IPPacket->zoneType();
@@ -617,7 +689,7 @@ int32 MapNetworking::send_parse(uint8* buff, size_t* buffsize, MapSession* map_s
     } while (PacketSize == static_cast<uint32>(-1));
 
     PChar->erasePackets(packets);
-    // TotalPacketsSentPerTick += packets;
+    TotalPacketsSentPerTick += packets;
     TracyZoneString(fmt::format("Sending {} packets", packets));
 
     // Record data size excluding header
@@ -672,23 +744,23 @@ int32 MapNetworking::send_parse(uint8* buff, size_t* buffsize, MapSession* map_s
 
     *buffsize = PacketSize + FFXI_HEADER_SIZE;
 
-    // auto remainingPackets = PChar->getPacketCount();
-    // TotalPacketsDelayedPerTick += static_cast<uint32>(remainingPackets);
-    // if (settings::get<bool>("logging.DEBUG_PACKET_BACKLOG"))
-    // {
-    //     TracyZoneString(fmt::format("{} packets remaining", remainingPackets));
-    //     if (remainingPackets > kMaxPacketBacklogSize)
-    //     {
-    //         if (PChar->loc.zone == nullptr)
-    //         {
-    //             ShowWarning(fmt::format("Packet backlog exists for char {} with a nullptr zone. Clearing packet list.", PChar->name));
-    //             PChar->clearPacketList();
-    //             return 0;
-    //         }
-    //         ShowWarning(fmt::format("Packet backlog for char {} in {} is {}! Limit is: {}",
-    //                                 PChar->name, PChar->loc.zone->getName(), remainingPackets, kMaxPacketBacklogSize));
-    //     }
-    // }
+    auto remainingPackets = PChar->getPacketCount();
+    TotalPacketsDelayedPerTick += static_cast<uint32>(remainingPackets);
+    if (settings::get<bool>("logging.DEBUG_PACKET_BACKLOG"))
+    {
+        TracyZoneString(fmt::format("{} packets remaining", remainingPackets));
+        if (remainingPackets > kMaxPacketBacklogSize)
+        {
+            if (PChar->loc.zone == nullptr)
+            {
+                ShowWarning(fmt::format("Packet backlog exists for char {} with a nullptr zone. Clearing packet list.", PChar->name));
+                PChar->clearPacketList();
+                return 0;
+            }
+            ShowWarning(fmt::format("Packet backlog for char {} in {} is {}! Limit is: {}",
+                                    PChar->name, PChar->loc.zone->getName(), remainingPackets, kMaxPacketBacklogSize));
+        }
+    }
 
     return 0;
 }

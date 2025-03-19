@@ -21,11 +21,7 @@
 
 #pragma once
 
-#include "console_service.h"
-
-#include <argparse/argparse.hpp>
-#include <asio/io_context.hpp>
-#include <asio/post.hpp>
+#include <asio.hpp>
 
 #include <memory>
 #include <string>
@@ -34,21 +30,12 @@
 // Forward declarations
 //
 
-class Application;
+class Arguments;
 class ConsoleService;
-
-namespace argparse
-{
-    class ArgumentParser;
-}
 
 //
 // Globally exposed variables
 //
-
-// TODO: This is a hack to allow handleSignal and other not-yet refactored code to access Application.
-//     : Major systems should be constructed with Application as a parameter.
-extern Application* gApplication;
 
 class Application
 {
@@ -71,7 +58,6 @@ public:
     void tryIncreaseRLimits();
     void tryDisableQuickEditMode();
     void tryRestoreQuickEditMode();
-    void parseCommandLineArguments(int argc, char** argv);
     void prepareLogging();
 
     virtual void loadConsoleCommands() = 0;
@@ -88,23 +74,21 @@ public:
     // Is expected to block until requestExit() is called and/or isRunning() returns false
     virtual void run();
 
+    bool isRunningInCI();
+
     //
     // Member accessors
     //
 
     auto ioContext() -> asio::io_context&;
-    auto argParser() -> argparse::ArgumentParser&;
+    auto args() -> Arguments&;
     auto console() -> ConsoleService&;
 
 protected:
     asio::io_context io_context_;
 
-    std::string       serverName_;
-    std::atomic<bool> isRunning_;
+    std::string serverName_;
 
-    std::unique_ptr<argparse::ArgumentParser> argParser_;
-    std::unique_ptr<ConsoleService>           consoleService_;
-
-    // Windows-only
-    unsigned long prevQuickEditMode_;
+    std::unique_ptr<Arguments>      args_;
+    std::unique_ptr<ConsoleService> consoleService_;
 };

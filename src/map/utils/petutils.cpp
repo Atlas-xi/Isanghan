@@ -22,8 +22,6 @@
 #include "common/timer.h"
 #include "common/utils.h"
 
-#include <cmath>
-#include <cstring>
 #include <vector>
 
 #include "ability.h"

@@ -111,15 +111,13 @@ void Elevator_t::closeDoor(CNpcEntity* npc) const
  *                                                                       *
  ************************************************************************/
 
-void CTransportHandler::InitializeTransport()
+void CTransportHandler::InitializeTransport(IPP mapIPP)
 {
     if (townZoneList.size() != 0)
     {
         ShowError("townZoneList is not empty.");
         return;
     }
-
-    const auto mapIPP = gMapServer->networking().ipp();
 
     const char* fmtQuery = "SELECT id, transport, door, dock_x, dock_y, dock_z, dock_rot, \
                             boundary, zone, anim_arrive, anim_depart, time_offset, time_interval, \

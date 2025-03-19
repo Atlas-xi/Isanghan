@@ -18,9 +18,11 @@
 
 ===========================================================================
 */
+
 #include "search_server.h"
 
 int main(int argc, char** argv)
 {
-    return std::make_unique<SearchServer>(argc, argv)->run();
+    std::make_unique<SearchServer>(argc, argv)->run();
+    return 0;
 }

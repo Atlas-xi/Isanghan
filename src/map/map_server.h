@@ -21,22 +21,11 @@
 
 #pragma once
 
+#include "pch.h"
+
 #include "common/application.h"
-#include "common/blowfish.h"
-#include "common/cbasetypes.h"
-#include "common/ipp.h"
-#include "common/md52.h"
-#include "common/mmo.h"
-#include "common/sql.h"
-#include "common/taskmgr.h"
 #include "common/watchdog.h"
-#include "common/xirand.h"
 
-#include <list>
-#include <map>
-#include <memory>
-
-#include "map_constants.h"
 #include "zone.h"
 
 //
@@ -53,8 +42,8 @@ class CZone;
 // Exposed globals
 //
 
-extern MapServer*                     gMapServer;
 extern std::unique_ptr<SqlConnection> _sql;
+extern std::map<uint16, CZone*>       g_PZoneList; // Global array of pointers for zones
 
 class MapServer final : public Application
 {
@@ -76,8 +65,7 @@ public:
 
     void prepareWatchdog();
 
-    // TODO: Kernel logic
-    auto do_init() -> int32;
+    void do_init();
     void do_final();
 
     //
@@ -97,7 +85,7 @@ public:
     // gameState()
 
 private:
-    std::unique_ptr<MapNetworking> networking_;
     std::unique_ptr<MapStatistics> mapStatistics_;
+    std::unique_ptr<MapNetworking> networking_;
     std::unique_ptr<Watchdog>      watchdog_;
 };

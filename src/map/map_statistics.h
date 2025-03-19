@@ -26,10 +26,36 @@
 class MapStatistics
 {
 public:
-    void reportToTracy();
+    enum class Key
+    {
+        TotalPacketsToSendPerTick,
+        TotalPacketsSentPerTick,
+        TotalPacketsDelayedPerTick,
+        LogicTickTime,
+        NetworkTickTime,
+        TotalTickTime,
+        ActiveZones,
+        ConnectedPlayers,
+        ActiveMobs,
+        TaskManagerTasks,
+        DynamicTargIdUsagePercent,
+    };
+
+    MapStatistics();
+
+    static auto toString(Key key);
+
+    void set(Key key, int64 value);
+    auto get(Key key) const -> int64;
+
+    void increment(Key key, int64 amount = 1);
+    void decrement(Key key, int64 amount = 1);
+
+    void print();
+    void flush();
 
 private:
-    uint32 totalPacketsToSendPerTick_  = 0U;
-    uint32 totalPacketsSentPerTick_    = 0U;
-    uint32 totalPacketsDelayedPerTick_ = 0U;
+    void reset();
+
+    std::unordered_map<Key, int64> statistics_;
 };

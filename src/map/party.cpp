@@ -460,6 +460,12 @@ void CParty::DelMember(CBattleEntity* PEntity)
 
 void CParty::PopMember(CBattleEntity* PEntity)
 {
+    if (PEntity == nullptr || PEntity->PParty != this)
+    {
+        ShowWarning("CParty::PopMember() - PEntity was null, or PParty mismatch.");
+        return;
+    }
+
     auto memberToDelete = std::find(members.begin(), members.end(), PEntity);
 
     if (memberToDelete != members.end())
@@ -544,6 +550,12 @@ bool CParty::RemovePartyLeader(CBattleEntity* PEntity)
 std::vector<CParty::partyInfo_t> CParty::GetPartyInfo() const
 {
     std::vector<CParty::partyInfo_t> memberinfo;
+
+    if (m_PartyType != PARTY_PCS)
+    {
+        ShowWarning("Attempting to get Party data for Mob Party.");
+        return memberinfo;
+    }
 
     const auto rset = db::preparedStmt("SELECT chars.charid, partyid, allianceid, charname, partyflag, pos_zone, pos_prevzone FROM accounts_parties "
                                        "LEFT JOIN chars ON accounts_parties.charid = chars.charid WHERE "
@@ -935,6 +947,12 @@ void CParty::ReloadParty()
 // update party info for PChar
 void CParty::ReloadPartyMembers(CCharEntity* PChar)
 {
+    if (PChar == nullptr)
+    {
+        ShowWarning("CParty::ReloadPartyMembers() - PChar was null.");
+        return;
+    }
+
     PChar->ReloadPartyDec();
     PChar->pushPacket<CPartyDefinePacket>(this);
 

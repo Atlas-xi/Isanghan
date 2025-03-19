@@ -26,9 +26,6 @@
 #include "common/utils.h"
 #include "common/vana_time.h"
 
-#include <cmath>
-#include <cstring>
-
 #include "entities/battleentity.h"
 
 #include "packets/char_skills.h"

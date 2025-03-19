@@ -23,42 +23,104 @@
 
 #include "common/tracy.h"
 
-void MapStatistics::reportToTracy()
+#include "lua/luautils.h"
+
+#include <magic_enum/magic_enum.hpp>
+
+MapStatistics::MapStatistics()
 {
-    /*
-    TracyReportLuaMemory(lua.lua_state());
+    reset();
+}
 
-    std::size_t activeZoneCount       = 0;
-    std::size_t playerCount           = 0;
-    std::size_t mobCount              = 0;
-    std::size_t dynamicTargIdCount    = 0;
-    std::size_t dynamicTargIdCapacity = 0;
-
-    for (auto& [id, PZone] : g_PZoneList)
+auto MapStatistics::toString(Key key)
+{
+    switch (key)
     {
-        if (PZone->IsZoneActive())
-        {
-            activeZoneCount += 1;
-            playerCount += PZone->GetZoneEntities()->GetCharList().size();
-            mobCount += PZone->GetZoneEntities()->GetMobList().size();
-            dynamicTargIdCount += PZone->GetZoneEntities()->GetUsedDynamicTargIDsCount();
-            dynamicTargIdCapacity += 511;
-        }
+        case Key::TotalPacketsToSendPerTick:
+            return "Total Packets To Send Per Tick";
+        case Key::TotalPacketsSentPerTick:
+            return "Total Packets Sent Per Tick";
+        case Key::TotalPacketsDelayedPerTick:
+            return "Total Packets Delayed Per Tick";
+        case Key::LogicTickTime:
+            return "Logic Tick Time (ms)";
+        case Key::NetworkTickTime:
+            return "Network Tick Time (ms)";
+        case Key::TotalTickTime:
+            return "Total Tick Time (ms)";
+        case Key::ActiveZones:
+            return "Active Zones (Process)";
+        case Key::ConnectedPlayers:
+            return "Connected Players (Process)";
+        case Key::ActiveMobs:
+            return "Active Mobs (Process)";
+        case Key::TaskManagerTasks:
+            return "Task Manager Tasks";
+        case Key::DynamicTargIdUsagePercent:
+            return "Dynamic TargID Usage (%)";
+        default:
+            return "Unknown";
+    }
+}
+
+void MapStatistics::set(Key key, int64 value)
+{
+    statistics_[key] = value;
+}
+
+auto MapStatistics::get(Key key) const -> int64
+{
+    if (statistics_.find(key) == statistics_.end())
+    {
+        return 0;
     }
 
-    TracyReportGraphNumber("Active Zones (Process)", static_cast<std::int64_t>(activeZoneCount));
-    TracyReportGraphNumber("Connected Players (Process)", static_cast<std::int64_t>(playerCount));
-    TracyReportGraphNumber("Active Mobs (Process)", static_cast<std::int64_t>(mobCount));
-    TracyReportGraphNumber("Task Manager Tasks", static_cast<std::int64_t>(CTaskMgr::getInstance()->getTaskList().size()));
+    return statistics_.at(key);
+}
 
-    TracyReportGraphPercent("Dynamic Entity TargID Capacity Usage Percent", static_cast<double>(dynamicTargIdCount) / static_cast<double>(dynamicTargIdCapacity));
+void MapStatistics::increment(Key key, int64 amount)
+{
+    statistics_[key] += amount;
+}
 
-    TracyReportGraphNumber("Total Packets To Send Per Tick", static_cast<std::int64_t>(TotalPacketsToSendPerTick));
-    TracyReportGraphNumber("Total Packets Sent Per Tick", static_cast<std::int64_t>(TotalPacketsSentPerTick));
-    TracyReportGraphNumber("Total Packets Delayed Per Tick", static_cast<std::int64_t>(TotalPacketsDelayedPerTick));
+void MapStatistics::decrement(Key key, int64 amount)
+{
+    statistics_[key] -= amount;
+}
 
-    TotalPacketsToSendPerTick  = 0;
-    TotalPacketsSentPerTick    = 0;
-    TotalPacketsDelayedPerTick = 0;
-    */
+void MapStatistics::print()
+{
+    TracyZoneScoped;
+
+    fmt::print("=== Map Statistics ===\n\n");
+
+    for (const auto& [key, value] : statistics_)
+    {
+        fmt::print("{}: {}\n", toString(key), value);
+    }
+
+    reset();
+}
+
+void MapStatistics::flush()
+{
+    TracyZoneScoped;
+    TracyReportLuaMemory(lua.lua_state());
+
+    for (const auto& [key, value] : statistics_)
+    {
+        TracyReportGraphNumber(toString(key), value);
+    }
+
+    reset();
+}
+
+void MapStatistics::reset()
+{
+    TracyZoneScoped;
+
+    for (const auto& key : magic_enum::enum_values<Key>())
+    {
+        statistics_[key] = 0;
+    }
 }

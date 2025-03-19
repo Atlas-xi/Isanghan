@@ -123,10 +123,8 @@ namespace moduleutils
 
     std::vector<Override> overrides;
 
-    void LoadLuaModules()
+    void LoadLuaModules(IPP mapIPP)
     {
-        const auto mapIPP = gMapServer->networking().ipp();
-
         // Load the helper file
         lua.safe_script_file("./modules/module_utils.lua");
 

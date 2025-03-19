@@ -1,6 +1,8 @@
 set(COMMON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/application.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/application.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/arguments.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/arguments.h
     ${CMAKE_CURRENT_SOURCE_DIR}/async.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/async.h
     ${CMAKE_CURRENT_SOURCE_DIR}/blowfish.cpp
@@ -40,6 +42,7 @@ set(COMMON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/xirand.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/uuid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/uuid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/vana_time.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vana_time.h

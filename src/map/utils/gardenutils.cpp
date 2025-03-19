@@ -25,8 +25,6 @@
 
 #include "common/vana_time.h"
 
-#include <cmath>
-
 #include "entities/charentity.h"
 #include "item_container.h"
 #include "items/item_flowerpot.h"

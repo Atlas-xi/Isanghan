@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2023 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,23 +19,26 @@
 ===========================================================================
 */
 
-#ifndef _CSERVERIPPACKET_H
-#define _CSERVERIPPACKET_H
+#include "uuid.h"
 
-#include "common/cbasetypes.h"
-#include "common/ipp.h"
-
-#include "basic.h"
-
-class CCharEntity;
-
-class CServerIPPacket : public CBasicPacket
+auto uuid::GenerateUUID() -> std::string
 {
-public:
-    CServerIPPacket(CCharEntity* PChar, uint8 zone_type, IPP zone_ipp);
+    // https://stackoverflow.com/questions/24365331/how-can-i-generate-uuid-in-c-without-using-boost-library
+    const char* v      = "0123456789abcdef";
+    const bool  dash[] = { 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 };
 
-    auto zoneType() const -> uint8;
-    auto zoneIPP() const -> IPP;
-};
+    std::string res;
 
-#endif
+    for (int i = 0; i < 16; i++)
+    {
+        if (dash[i])
+        {
+            res += "-";
+        }
+
+        res += v[xirand::GetRandomNumber(16)];
+        res += v[xirand::GetRandomNumber(16)];
+    }
+
+    return res;
+}

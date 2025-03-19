@@ -139,7 +139,7 @@ auto MapSessionContainer::getSessionByCharName(const std::string& name) -> MapSe
     return nullptr;
 }
 
-void MapSessionContainer::cleanupSessions()
+void MapSessionContainer::cleanupSessions(IPP mapIPP)
 {
     TracyZoneScoped;
 
@@ -176,8 +176,6 @@ void MapSessionContainer::cleanupSessions()
                 {
                     uint32 server_addr = rset->get<uint32>("server_addr");
                     uint32 server_port = rset->get<uint32>("server_port");
-
-                    const auto mapIPP = gMapServer->networking().ipp();
 
                     // s_addr of 0 is single process map server without IP address set explicitly in commandline
                     // map_port is 0 without the port being explicitly set in commandline
@@ -261,6 +259,8 @@ void MapSessionContainer::destroySession(IPP ipp)
 
 void MapSessionContainer::destroySession(MapSession* map_session_data)
 {
+    TracyZoneScoped;
+
     if (map_session_data == nullptr)
     {
         return;

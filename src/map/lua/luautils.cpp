@@ -30,13 +30,6 @@
 #include "common/vana_time.h"
 #include "common/version.h"
 
-#include <array>
-#include <filesystem>
-#include <numeric>
-#include <optional>
-#include <string>
-#include <unordered_map>
-
 #include "lua_action.h"
 #include "lua_battlefield.h"
 #include "lua_instance.h"
@@ -51,7 +44,6 @@
 #include "lua_trigger_area.h"
 #include "lua_zone.h"
 
-#include "ability.h"
 #include "ai/ai_container.h"
 #include "ai/states/ability_state.h"
 #include "ai/states/attack_state.h"
@@ -64,29 +56,45 @@
 #include "ai/states/range_state.h"
 #include "ai/states/respawn_state.h"
 #include "ai/states/weaponskill_state.h"
-#include "alliance.h"
-#include "battlefield.h"
-#include "campaign_system.h"
-#include "common/vana_time.h"
-#include "conquest_system.h"
-#include "daily_system.h"
+
 #include "entities/automatonentity.h"
 #include "entities/baseentity.h"
 #include "entities/charentity.h"
 #include "entities/mobentity.h"
-#include "fishingcontest.h"
-#include "instance.h"
-#include "ipc_client.h"
+
 #include "items/item_puppet.h"
-#include "map_server.h"
-#include "mobskill.h"
-#include "monstrosity.h"
+
 #include "packets/action.h"
 #include "packets/char_emotion.h"
 #include "packets/chat_message.h"
 #include "packets/entity_update.h"
 #include "packets/entity_visual.h"
 #include "packets/menu_raisetractor.h"
+
+#include "utils/battleutils.h"
+#include "utils/charutils.h"
+#include "utils/instanceutils.h"
+#include "utils/itemutils.h"
+#include "utils/mobutils.h"
+#include "utils/moduleutils.h"
+#include "utils/serverutils.h"
+#include "utils/synergyutils.h"
+#include "utils/synthutils.h"
+#include "utils/zoneutils.h"
+
+#include "ability.h"
+#include "alliance.h"
+#include "battlefield.h"
+#include "campaign_system.h"
+#include "conquest_system.h"
+#include "daily_system.h"
+#include "fishingcontest.h"
+#include "instance.h"
+#include "ipc_client.h"
+#include "map_networking.h"
+#include "map_server.h"
+#include "mobskill.h"
+#include "monstrosity.h"
 #include "party.h"
 #include "petskill.h"
 #include "roe.h"
@@ -101,16 +109,12 @@
 #include "zone_entities.h"
 #include "zone_instance.h"
 
-#include "utils/battleutils.h"
-#include "utils/charutils.h"
-#include "utils/instanceutils.h"
-#include "utils/itemutils.h"
-#include "utils/mobutils.h"
-#include "utils/moduleutils.h"
-#include "utils/serverutils.h"
-#include "utils/synergyutils.h"
-#include "utils/synthutils.h"
-#include "utils/zoneutils.h"
+#include <array>
+#include <filesystem>
+#include <numeric>
+#include <optional>
+#include <string>
+#include <unordered_map>
 
 void ReportErrorToPlayer(CBaseEntity* PEntity, std::string const& message = "") noexcept
 {
@@ -230,7 +234,7 @@ namespace luautils
     /**
      * @brief Initialization of Lua user classes and global functions.
      */
-    void init()
+    void init(IPP mapIPP, bool isRunningInCI)
     {
         TracyZoneScoped;
 
@@ -416,13 +420,12 @@ namespace luautils
             }
         }
 
-        const auto loadAllLua = gApplication->argParser().present("--load_all");
-        if (loadAllLua) // Load all lua files (for sanity testing, no need for during regular use)
+        // Load all lua files (for sanity testing, no need for during regular use)
+        if (isRunningInCI)
         {
             ShowInfo("*** CI ONLY: Smoke testing by running all Lua files. ***");
             for (auto const& entry : sorted_directory_iterator<std::filesystem::recursive_directory_iterator>("./scripts"))
             {
-
                 // Break apart path so that we can verify and ignore specific subdirectories
                 std::vector<std::string> parts;
                 for (auto part : entry)
@@ -453,7 +456,7 @@ namespace luautils
         }
 
         // Handle settings
-        moduleutils::LoadLuaModules();
+        moduleutils::LoadLuaModules(mapIPP);
 
         filewatcher = std::make_unique<Filewatcher>(std::vector<std::string>{ "scripts", "modules", "settings" });
 
@@ -5547,7 +5550,7 @@ namespace luautils
     {
         // IMPORTANT: This should only be called on the Zone Init in Selbina
         // Do not run this from multiple server instances
-        if (zoneutils::IsZoneAssignedToThisProcess(ZONEID::ZONE_SELBINA))
+        if (g_PZoneList[ZONEID::ZONE_SELBINA] != nullptr)
         {
             fishingcontest::InitializeFishingContestSystem();
         }
