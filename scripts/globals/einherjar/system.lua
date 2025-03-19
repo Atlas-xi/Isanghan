@@ -290,6 +290,8 @@ xi.einherjar.new = function(chamberId, leaderId)
             [xi.mobMod.CHARMABLE]      = 0,
             [xi.mobMod.DONT_ROAM_HOME] = 1,
             [xi.mobMod.CLAIM_TYPE]     = xi.claimType.NON_EXCLUSIVE,
+            [xi.mobMod.EXP_BONUS]      = -100,
+            [xi.mobMod.GIL_BONUS]      = -100,
         },
         mods        = {},
         waveIndex   = 0,
