@@ -21,6 +21,16 @@ local function forEachPlayer(players, callback)
     end
 end
 
+local function allPlayersDead(players)
+    for _, player in pairs(players) do
+        if player and not player:isDead() then
+            return false
+        end
+    end
+
+    return true
+end
+
 local function log(chamberId, msg)
     local function getChamberNameById(id)
         for name, value in pairs(xi.einherjar.chamber) do
@@ -262,7 +272,44 @@ local function onMobEngage(chamberData, mob)
     end
 end
 
-xi.einherjar.new = function(chamberId, leaderId)
+-- Check if everyone is dead, queue emergency teleportation
+local function onPlayerDeath(chamberData, player)
+    if not allPlayersDead(chamberData.players) then
+        return
+    end
+
+    log(chamberData.id, string.format('All players dead, queueing emergency teleportation in %d minutes.', xi.einherjar.settings.EINHERJAR_KO_EXPEL_TIME))
+
+    local expelTime = os.time() + (xi.einherjar.settings.EINHERJAR_KO_EXPEL_TIME * 60)
+    forEachPlayer(chamberData.players, function(chamberPlayer)
+        chamberPlayer:messageSpecial(ID.text.EXPEDITION_INCAPACITATED_WARN, xi.einherjar.settings.EINHERJAR_KO_EXPEL_TIME)
+    end)
+
+    local function checkExpel()
+        if not allPlayersDead(chamberData.players) then
+            log(chamberData.id, 'Players no longer dead, cancelling emergency teleportation.')
+            return
+        end
+
+        if os.time() >= expelTime then
+            log(chamberData.id, 'Emergency teleportation, expelling all players.')
+            forEachPlayer(chamberData.players, function(chamberPlayer)
+                chamberPlayer:messageSpecial(ID.text.EXPEDITION_INCAPACITATED)
+            end)
+
+            expelAllFromChamber(chamberData)
+            cleanChamber(chamberData)
+            releaseChamber(chamberData.id)
+        else
+            chamberData.eventsQueue[os.time() + 5] = checkExpel
+        end
+    end
+
+    chamberData.eventsQueue[os.time() + 5] = checkExpel
+end
+
+xi.einherjar.new = function(chamberId, leader)
+    local leaderId  = leader:getID()
     local startTime = os.time()
 
     local chamberData =
@@ -367,6 +414,7 @@ xi.einherjar.onChamberEnter = function(chamberData, player, reconnecting)
     log(chamberData.id, 'Player entered: ' .. player:getName() .. ' (' .. playerId .. ')')
 
     player:setCharVar('[ein]chamber', chamberData.id, chamberData.endTime)
+    player:addListener('DEATH', 'EINHERJAR_DEATH', utils.bind(onPlayerDeath, chamberData))
     -- TODO: Add to chamber treasure pool
 
     for i = 0, 3 do
