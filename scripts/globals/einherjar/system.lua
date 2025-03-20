@@ -68,9 +68,9 @@ xi.einherjar.getChamber = function(id)
 end
 
 -- Create a new chamber instance
-xi.einherjar.createNewChamber = function(chamberId, leaderId)
+xi.einherjar.createNewChamber = function(chamberId, leader)
     log(chamberId, 'Creating chamber ' .. chamberId)
-    local newInstance = xi.einherjar.new(chamberId, leaderId)
+    local newInstance = xi.einherjar.new(chamberId, leader)
     chambersInstances[chamberId] = newInstance
     if newInstance then
         xi.einherjar.cycleWave(newInstance)
@@ -121,7 +121,6 @@ local function expelAllFromChamber(chamberData)
     forEachPlayer(chamberData.players, function(player)
         log(chamberData.id, 'Expelling player: ' .. player:getName() .. ' (' .. player:getID() .. ')')
         xi.einherjar.onChamberExit(chamberData, player)
-        player:messageSpecial(ID.text.TIMEOUT_EXPIRED)
     end)
 end
 
@@ -317,6 +316,8 @@ xi.einherjar.new = function(chamberId, leader)
     {
         id          = chamberId,
         leaderId    = leaderId,
+        -- TODO: Create a chamber-scoped shared treasure pool
+        pool        = leader:getTreasurePool(),
         startTime   = startTime,
         endTime     = startTime + (xi.einherjar.settings.EINHERJAR_TIME_LIMIT * 60),
         locked      = false,
@@ -368,8 +369,6 @@ xi.einherjar.new = function(chamberId, leader)
     if chamberData.tempCrate then
         xi.einherjar.hideCrate(chamberData.tempCrate)
     end
-
-    -- TODO: Create a chamber-scoped shared treasure pool
 
     chamberData.eventsQueue =
     {
@@ -624,11 +623,10 @@ xi.einherjar.onReconnection = function(chamberData, player)
     chamberData.players[playerId] = player
     log(chamberData.id, 'Player reconnected: ' .. player:getName() .. ' (' .. playerId .. ')')
 
-    -- Delay the event to ensure the player is fully loaded
+    -- Delay the event to ensure the player is fully loaded, else the music packets are not processed
     player:timer(5000, function()
         xi.einherjar.onChamberEnter(chamberData, player, true)
     end)
 
     return true
 end
-

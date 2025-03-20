@@ -116,6 +116,7 @@ xi.einherjar.chambers =
 -- Bitmask of chambers the player has access to
 -- Player must own all key items from previous tier to access the next tier
 -- Wing 1 is always accessible
+-- Mark of the Einherjar owners have all wings open
 xi.einherjar.getChambersMenu = function(player)
     local mask = 0xFF0
     local wings =
@@ -169,8 +170,9 @@ xi.einherjar.getChambersMenu = function(player)
     return mask
 end
 
+-- Bitmask of feathers the player is missing, as used by the Mark of the Einherjar NPC
 xi.einherjar.getMissingFeathersMenu = function(player, tier)
-    local mask = 0x3FE  -- Start with nothing missing
+    local mask = 0x3FE  -- Start with nothing missing 1111111110
     local tierChambers = chambersByTier[tier]
 
     for _, chamber in ipairs(tierChambers) do
@@ -187,6 +189,7 @@ xi.einherjar.giveMark = function(player)
     player:messageSpecial(ID.text.KEYITEM_OBTAINED, xi.ki.MARK_OF_THE_EINHERJAR)
 end
 
+-- Give the player the chamber feather and the Mark of the Einherjar if all feathers are owned
 xi.einherjar.giveChamberFeather = function(player, chamberId)
     if xi.einherjar.chambers[chamberId].ki then
         if not player:hasKeyItem(xi.einherjar.chambers[chamberId].ki) then
@@ -208,6 +211,7 @@ xi.einherjar.giveChamberFeather = function(player, chamberId)
     end
 end
 
+-- Returns a table of feathers the player has, ordered by tier
 xi.einherjar.getFeathers = function(player)
     local feathersByTier = {}
 

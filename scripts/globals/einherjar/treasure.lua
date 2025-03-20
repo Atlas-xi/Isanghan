@@ -283,6 +283,8 @@ local tempItems =
     { item = xi.item.REVITALIZER,                 min = 1,  max =  2 },
 }
 
+-- Generates a table of 6 random temporary items with random quantities
+-- The quantity is encoded in the upper 16 bits of the returned value
 xi.einherjar.getTempItems = function()
     local temp = { }
 

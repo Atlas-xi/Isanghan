@@ -4,15 +4,8 @@
 -----------------------------------
 local ID = zones[xi.zone.HAZHALM_TESTING_GROUNDS]
 -----------------------------------
----@type TMobEntity
+---@type TNpcEntity
 local entity = {}
-
-entity.onMobInitialize = function(mob)
-    mob:setMobMod(xi.mobMod.NO_REST, 1)
-    mob:setMobMod(xi.mobMod.NO_MOVE, 1)
-    mob:setMobMod(xi.mobMod.NO_DESPAWN, 1)
-    mob:setStatus(xi.status.NORMAL)
-end
 
 entity.onTrigger = function(player, npc)
     if npc:getLocalVar('[ein]tempCrate') == 0 then
@@ -54,7 +47,7 @@ entity.onEventFinish = function(player, csid, option, npc)
         local quantity = bit.rshift(crateItem, 16)
         local itemId = bit.band(crateItem, 0xFFFF)
 
-        if player:hasItem(itemId, 3) then
+        if player:hasItem(itemId, xi.inv.TEMPITEMS) then
             return player:messageSpecial(ID.text.ALREADY_POSSESS_TEMP)
         else
             if player:addTempItem(itemId) then
@@ -63,15 +56,6 @@ entity.onEventFinish = function(player, csid, option, npc)
             end
         end
     end
-end
-
-entity.onMobSpawn = function(mob)
-end
-
-entity.onMobDeath = function(mob, player, optParams)
-end
-
-entity.onMobDespawn = function(mob)
 end
 
 return entity

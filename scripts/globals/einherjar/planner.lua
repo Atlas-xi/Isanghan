@@ -6,7 +6,9 @@ xi.einherjar = xi.einherjar or {}
 
 local ID = zones[xi.zone.HAZHALM_TESTING_GROUNDS]
 
-local function merge_arrays(a, b)
+-- Merge two mob groups into one
+-- Certain mob groups contain different models/jobs of the same mob family
+local function mergeArrays(a, b)
     local result = {}
     for i = 1, #a do
         result[#result + 1] = a[i]
@@ -60,7 +62,7 @@ local mobPool =
         ID.mob.HAZHALM_BATS,
         ID.mob.HAZHALM_LEECH,
         ID.mob.ODINS_FOOL,
-        merge_arrays(ID.mob.ROTTING_HUSKARL_DRK, ID.mob.ROTTING_HUSKARL_THF),
+        mergeArrays(ID.mob.ROTTING_HUSKARL_DRK, ID.mob.ROTTING_HUSKARL_THF),
         ID.mob.SJOKRAKJEN,
         ID.mob.UTGARTH_BAT,
         ID.mob.UTGARTH_BATS,
