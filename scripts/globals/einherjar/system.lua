@@ -123,12 +123,7 @@ local function onWin(chamberData)
                 xi.einherjar.settings.EINHERJAR_CLEAR_EXTRA_TIME,
                 chamberData.id - 1
         )
-        if xi.einherjar.chambers[chamberData.id].ki then
-            if not player:hasKeyItem(xi.einherjar.chambers[chamberData.id].ki) then
-                player:addKeyItem(xi.einherjar.chambers[chamberData.id].ki)
-                player:messageSpecial(ID.text.KEYITEM_OBTAINED, xi.einherjar.chambers[chamberData.id].ki)
-            end
-        end
+        xi.einherjar.giveChamberFeather(player, chamberData.id)
     end)
 
     -- Cancel all pending events

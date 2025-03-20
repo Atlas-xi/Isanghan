@@ -4,6 +4,8 @@
 xi = xi or {}
 xi.einherjar = xi.einherjar or {}
 
+local ID = zones[xi.zone.HAZHALM_TESTING_GROUNDS]
+
 local chambersByTier =
 {
     [xi.einherjar.wing.WING_1] =
@@ -121,8 +123,24 @@ xi.einherjar.getChambersMenu = function(player)
         xi.einherjar.wing.WING_1,
         xi.einherjar.wing.WING_2,
         xi.einherjar.wing.WING_3,
-        -- xi.einherjar.wing.ODIN, -- Not implemented
+        -- xi.einherjar.wing.VALGRIND -- Not implemented
     }
+
+    -- Mark of the Einherjar owners don't need to have all previous tiers KI
+    -- Odin still requires all 9 feathers to be owned.
+    if player:hasKeyItem(xi.ki.MARK_OF_THE_EINHERJAR) then
+        -- TODO: Uncomment when Odin is implemented
+        --local ownedFeathers = xi.einherjar.getFeathers(player)
+        --if
+        --    #ownedFeathers[xi.einherjar.wing.WING_1] == 3 and
+        --    #ownedFeathers[xi.einherjar.wing.WING_2] == 3 and
+        --    #ownedFeathers[xi.einherjar.wing.WING_3] == 3
+        --then
+        --    return 0x0800 -- All 3 wings + Odin
+        --end
+
+        return 0x0C00 -- All 3 wings open
+    end
 
     for i = 1, #wings do
         local tierChambers     = chambersByTier[wings[i]]
@@ -149,4 +167,71 @@ xi.einherjar.getChambersMenu = function(player)
     end
 
     return mask
+end
+
+xi.einherjar.getMissingFeathersMenu = function(player, tier)
+    local mask = 0x3FE  -- Start with nothing missing
+    local tierChambers = chambersByTier[tier]
+
+    for _, chamber in ipairs(tierChambers) do
+        if not player:hasKeyItem(chamber.ki) then
+            mask = bit.band(mask, bit.bnot(chamber.menu))
+        end
+    end
+
+    return mask
+end
+
+xi.einherjar.giveMark = function(player)
+    player:addKeyItem(xi.ki.MARK_OF_THE_EINHERJAR)
+    player:messageSpecial(ID.text.KEYITEM_OBTAINED, xi.ki.MARK_OF_THE_EINHERJAR)
+end
+
+xi.einherjar.giveChamberFeather = function(player, chamberId)
+    if xi.einherjar.chambers[chamberId].ki then
+        if not player:hasKeyItem(xi.einherjar.chambers[chamberId].ki) then
+            player:addKeyItem(xi.einherjar.chambers[chamberId].ki)
+            player:messageSpecial(ID.text.KEYITEM_OBTAINED, xi.einherjar.chambers[chamberId].ki)
+        end
+
+        -- If that was the 9th feather, give the Mark of the Einherjar
+        if not player:hasKeyItem(xi.ki.MARK_OF_THE_EINHERJAR) then
+            local allFeathers = xi.einherjar.getFeathers(player)
+            if
+                #allFeathers[xi.einherjar.wing.WING_1] == 3 and
+                #allFeathers[xi.einherjar.wing.WING_2] == 3 and
+                #allFeathers[xi.einherjar.wing.WING_3] == 3
+            then
+                xi.einherjar.giveMark(player)
+            end
+        end
+    end
+end
+
+xi.einherjar.getFeathers = function(player)
+    local feathersByTier = {}
+
+    for tier, tierChambers in pairs(chambersByTier) do
+        local feathers = {}
+        for _, chamber in pairs(tierChambers) do
+            if player:hasKeyItem(chamber.ki) then
+                table.insert(feathers, chamber.ki)
+            end
+        end
+
+        feathersByTier[tier] = feathers
+    end
+
+    return feathersByTier
+end
+
+-- Entering Odin's Chamber clears all feathers.
+xi.einherjar.consumeAllFeathers = function(player)
+    for _, chamber in pairs(xi.einherjar.chambers) do
+        if chamber.ki and player:hasKeyItem(chamber.ki) then
+            player:delKeyItem(chamber.ki)
+        end
+    end
+
+    player:messageSpecial(ID.text.FEATHERS_CONSUMED)
 end
