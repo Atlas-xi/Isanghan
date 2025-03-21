@@ -224,6 +224,7 @@ local function onSpecialMobDeath(chamberData, mob)
                     mob:getRotPos()
                 )
                 npcUtil.showCrate(chamberData.tempCrate)
+                chamberData.tempCrate:setLocalVar('[ein]tempCrate', chamberData.id)
             end
         end,
     }
@@ -338,7 +339,7 @@ xi.einherjar.new = function(chamberId, leader)
         mods        = {},
         waveIndex   = 0,
         lootCrate   = GetNPCByID(ID.npc.ARMOURY_CRATE[chamberId]),
-        tempCrate   = GetNPCByID(ID.npc.ARMOURY_CRATE[chamberId * 2]),
+        tempCrate   = GetNPCByID(ID.npc.ARMOURY_CRATE[9 + chamberId]),
     }
 
     -- Back out if we failed to create a plan
@@ -429,6 +430,7 @@ xi.einherjar.onChamberEnter = function(chamberData, player, reconnecting)
 end
 
 xi.einherjar.onChamberExit = function(chamberData, player)
+    player:delContainerItems(xi.inv.TEMPITEMS)
     if not chamberData.players[player:getID()] then -- player dropped glass without entering
         return
     end
@@ -605,6 +607,7 @@ end
 -- Zoning out without dropping glass forfeits ichor rewards
 xi.einherjar.onZoneOut = function(chamberData, player)
     if chamberData.players[player:getID()] then
+        player:delContainerItems(xi.inv.TEMPITEMS)
         log(chamberData.id, 'Player zoned out: ' .. player:getName() .. ' (' .. player:getID() .. ')')
         chamberData.players[player:getID()] = nil
     end
