@@ -6,6 +6,19 @@ xi.einherjar = xi.einherjar or {}
 
 local ID = zones[xi.zone.HAZHALM_TESTING_GROUNDS]
 
+local function merge_arrays(a, b)
+    local result = {}
+    for i = 1, #a do
+        result[#result + 1] = a[i]
+    end
+
+    for i = 1, #b do
+        result[#result + 1] = b[i]
+    end
+
+    return result
+end
+
 -- Ensure two concurrent chambers cannot plan the same mobs
 local lockedMobs = {}
 
@@ -47,8 +60,7 @@ local mobPool =
         ID.mob.HAZHALM_BATS,
         ID.mob.HAZHALM_LEECH,
         ID.mob.ODINS_FOOL,
-        ID.mob.ROTTING_HUSKARL_DRK,
-        ID.mob.ROTTING_HUSKARL_THF,
+        merge_arrays(ID.mob.ROTTING_HUSKARL_DRK, ID.mob.ROTTING_HUSKARL_THF),
         ID.mob.SJOKRAKJEN,
         ID.mob.UTGARTH_BAT,
         ID.mob.UTGARTH_BATS,
