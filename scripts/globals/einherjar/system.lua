@@ -623,7 +623,11 @@ xi.einherjar.onReconnection = function(chamberData, player)
 
     chamberData.players[playerId] = player
     log(chamberData.id, 'Player reconnected: ' .. player:getName() .. ' (' .. playerId .. ')')
-    xi.einherjar.onChamberEnter(chamberData, player, true)
+
+    -- Delay the event to ensure the player is fully loaded
+    player:timer(5000, function()
+        xi.einherjar.onChamberEnter(chamberData, player, true)
+    end)
 
     return true
 end
