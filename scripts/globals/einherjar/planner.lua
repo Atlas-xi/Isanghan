@@ -252,7 +252,22 @@ xi.einherjar.makeChamberPlan = function(chamberId)
         waves   = {}
     }
 
-    -- If we didn't get a boss, abort
+    local demonFamily =
+    {
+        ID.mob.HERVARTH,
+        ID.mob.HJORVARTH,
+        ID.mob.HRANI,
+        ID.mob.ANGANTYR,
+        ID.mob.BUI,
+        ID.mob.BRAMI,
+        ID.mob.BARRI,
+        ID.mob.REIFNIR,
+        ID.mob.TIND,
+        ID.mob.TYRFING,
+        ID.mob.HADDING_THE_ELDER,
+        ID.mob.HADDING_THE_YOUNGER
+    }
+
     if not chamberConfig.boss then
         print('ERROR: Einherjar unable to plan chamber: no boss available for tier ', chamberTier)
         return nil
@@ -272,62 +287,45 @@ xi.einherjar.makeChamberPlan = function(chamberId)
         familyCount = (roll > 75 and 4) or (roll > 25 and 3) or 2
     end
 
-    chamberConfig.waveCount = getWaveCount(familyCount, chamberTier)
-
     local families = {}
+    local isMotsognir = chamberConfig.boss == ID.mob.MOTSOGNIR
+    local normalFamilyCount = isMotsognir and (familyCount - 1) or familyCount
 
-    for j = 1, familyCount do
-        local randomFamily = {}
-
-        -- Special case: If the boss is MOTSOGNIR, last wave gets specific IDs
-        if
-            chamberConfig.boss == ID.mob.MOTSOGNIR and
-            j == familyCount
-        then
-            randomFamily =
-            {
-                ID.mob.HERVARTH,
-                ID.mob.HJORVARTH,
-                ID.mob.HRANI,
-                ID.mob.ANGANTYR,
-                ID.mob.BUI,
-                ID.mob.BRAMI,
-                ID.mob.BARRI,
-                ID.mob.REIFNIR,
-                ID.mob.TIND,
-                ID.mob.TYRFING,
-                ID.mob.HADDING_THE_ELDER,
-                ID.mob.HADDING_THE_YOUNGER
-            }
-        else
-            randomFamily = getRandomMobFamily(chamberTier)
-        end
-
-        if not randomFamily then
+    for j = 1, normalFamilyCount do
+        local family = getRandomMobFamily(chamberTier)
+        if not family then
             print('ERROR: Einherjar unable to plan chamber: no mob family available for tier ', chamberTier)
-
-            -- Unlock everything we previously locked while generating this plan
             xi.einherjar.unlockMob(chamberConfig.boss)
-            for _, family in ipairs(families) do
-                for _, mob in ipairs(family) do
-                    xi.einherjar.unlockMob(mob)
+            for _, f in ipairs(families) do
+                for _, id in ipairs(f) do
+                    xi.einherjar.unlockMob(id)
                 end
             end
 
             return nil
         end
 
-        table.insert(families, randomFamily)
+        table.insert(families, family)
     end
 
-    local distribution = generateDistribution(familyCount, chamberConfig.waveCount)
+    -- Enforce max 3 waves total
+    local maxWaveCount = 3
+    local waveCount = getWaveCount(familyCount, chamberTier)
 
-    -- Assign families to waves based on the distribution
+    if isMotsognir and waveCount > maxWaveCount - 1 then
+        waveCount = maxWaveCount - 1
+    elseif waveCount > maxWaveCount then
+        waveCount = maxWaveCount
+    end
+
+    -- Get wave count based on normal family count
+    local normalWaveCount = isMotsognir and (waveCount - 1) or waveCount
+    local distribution = generateDistribution(normalFamilyCount, normalWaveCount)
+
     local familyIndex = 1
     for _, numFamilies in ipairs(distribution) do
         local wave = {}
 
-        -- Assign the correct number of families to this wave
         for _ = 1, numFamilies do
             if families[familyIndex] then
                 for _, id in ipairs(families[familyIndex]) do
@@ -341,6 +339,11 @@ xi.einherjar.makeChamberPlan = function(chamberId)
         table.insert(chamberConfig.waves, wave)
     end
 
+    if isMotsognir then
+        table.insert(chamberConfig.waves, demonFamily)
+    end
+
+    chamberConfig.waveCount = #chamberConfig.waves
     return chamberConfig
 end
 

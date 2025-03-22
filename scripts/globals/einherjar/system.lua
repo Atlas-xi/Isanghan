@@ -631,3 +631,4 @@ xi.einherjar.onReconnection = function(chamberData, player)
 
     return true
 end
+
