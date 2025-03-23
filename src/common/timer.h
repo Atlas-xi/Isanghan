@@ -34,4 +34,6 @@ void timer_final(void);
 
 uint32 getCurrentTimeMs();
 
+auto getMilliseconds(const duration& d) -> int64;
+
 #endif

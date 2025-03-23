@@ -55,7 +55,7 @@ void pump_queues(WorldServer* worldServer, asio::steady_timer* timer)
 }
 */
 
-int32 pump_queues(time_point tick, CTaskMgr::CTask* PTask)
+int32 pump_queues(time_point tick, CTaskManager::CTask* PTask)
 {
     TracyZoneScoped;
 
@@ -75,10 +75,10 @@ WorldServer::WorldServer(int argc, char** argv)
 , httpServer_(std::make_unique<HTTPServer>())
 {
     // Tasks
-    CTaskMgr::getInstance()->AddTask("time_server", server_clock::now(), this, CTaskMgr::TASK_INTERVAL, kTimeServerTickTime, time_server);
+    CTaskManager::getInstance()->AddTask("time_server", server_clock::now(), this, CTaskManager::TASK_INTERVAL, kTimeServerTickTime, time_server);
 
     // TODO: Make this more reactive than a polling job
-    CTaskMgr::getInstance()->AddTask("pump_queues", server_clock::now(), this, CTaskMgr::TASK_INTERVAL, kPumpQueuesTime, pump_queues);
+    CTaskManager::getInstance()->AddTask("pump_queues", server_clock::now(), this, CTaskManager::TASK_INTERVAL, kPumpQueuesTime, pump_queues);
 
     // asio::steady_timer timeServerTimer(io_context_, kPumpQueuesTime);
     // timeServerTimer.async_wait(std::bind(&pump_queues, this, &timeServerTimer));
@@ -92,5 +92,14 @@ void WorldServer::loadConsoleCommands()
 
 void WorldServer::run()
 {
-    Application::run();
+    Application::markLoaded();
+
+    const auto targetInternalTickLength = 200ms;
+    while (Application::isRunning())
+    {
+        const auto tickStart     = server_clock::now();
+        const auto tasksDuration = CTaskManager::getInstance()->doExpiredTasks(tickStart);
+        const auto sleepFor      = targetInternalTickLength - tasksDuration;
+        std::this_thread::sleep_for(sleepFor);
+    }
 }
