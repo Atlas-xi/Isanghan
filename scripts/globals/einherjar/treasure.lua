@@ -135,6 +135,7 @@ local abjurations =
     {
         xi.item.EARTHEN_ABJURATION_HANDS,
         xi.item.PHANTASMAL_ABJURATION_HEAD,
+        xi.item.PHANTASMAL_ABJURATION_FEET,
         xi.item.HADEAN_ABJURATION_HEAD,
         xi.item.HADEAN_ABJURATION_HANDS,
         xi.item.NEPTUNAL_ABJURATION_LEGS,
