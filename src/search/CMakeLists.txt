@@ -41,7 +41,8 @@ target_compile_definitions(xi_search PUBLIC DEFINE_OWN_MAIN)
 
 target_link_libraries(xi_search
     PUBLIC
-        ${EXTERNAL_LIBS}
+        ${SHARED_EXTERNAL_LIBS}
+        ${SEARCH_ONLY_EXTERNAL_LIBS}
         project_options
     PRIVATE
         project_warnings
