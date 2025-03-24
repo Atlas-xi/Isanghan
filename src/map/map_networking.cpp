@@ -22,6 +22,7 @@
 #include "map_networking.h"
 
 #include "common/arguments.h"
+#include "common/md52.h"
 #include "common/tracy.h"
 #include "common/zlib.h"
 

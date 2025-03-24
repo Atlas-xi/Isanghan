@@ -22,6 +22,7 @@
 #pragma once
 
 #include "cbasetypes.h"
+#include "logging.h"
 #include "synchronized.h"
 #include "tracy.h"
 #include "xi.h"
