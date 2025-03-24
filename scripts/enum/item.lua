@@ -2121,6 +2121,7 @@ xi.item =
     HI_POTION_P1                        = 4117,
     HI_POTION_P2                        = 4118,
     HI_POTION_P3                        = 4119,
+    MAX_POTION                          = 4124,
     ETHER                               = 4128,
     ETHER_P1                            = 4129,
     HI_ETHER                            = 4132,
