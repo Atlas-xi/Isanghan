@@ -210,7 +210,8 @@ target_compile_definitions(
 
 target_link_libraries(xi_map
     PUBLIC
-        ${EXTERNAL_LIBS}
+        ${SHARED_EXTERNAL_LIBS}
+        ${MAP_ONLY_EXTERNAL_LIBS}
         project_options
     PRIVATE
         project_warnings
