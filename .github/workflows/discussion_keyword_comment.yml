@@ -28,12 +28,15 @@ jobs:
           if (found) {
             const commentBody = `✨ Hello and thanks for the discussion! ✨\n\n🤖 : This is a friendly automated response to let you know we've detected some keywords that indicate you **might** have opened a discussion when it would have been more relevant to raise an issue.\n\nIt's much easier for us to search and track issues, and you're more likely to get resolution if you raise one.`;
             
-            // Post the comment on the discussion using the GitHub API
-            await github.rest.discussions.createComment({
+            // Post the comment on the discussion using a generic API request, including the required preview Accept header
+            await github.request('POST /repos/{owner}/{repo}/discussions/{discussion_number}/comments', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               discussion_number: discussion.number,
-              body: commentBody
+              body: commentBody,
+              headers: {
+                Accept: 'application/vnd.github.echo-preview+json'
+              }
             });
             console.log("Keyword found. Comment posted.");
           } else {
