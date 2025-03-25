@@ -45,7 +45,10 @@ inline std::string hex32ToString(std::uint32_t hex)
 // clang-format off
 #ifdef TRACY_ENABLE
 
+#ifndef TRACY_CALLSTACK
 #define TRACY_CALLSTACK 4
+#endif
+
 #include "tracy/Tracy.hpp"
 
 #include <cstdint>
