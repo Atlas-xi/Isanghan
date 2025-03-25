@@ -19,7 +19,6 @@ if(TRACY_ENABLE)
         OPTIONS
             "TRACY_ENABLE ON"
             "TRACY_ON_DEMAND ON"
-            "TRACY_CALLSTACK ON" # Value hardcoded to 4 in common/tracy.h
             "TRACY_NO_BROADCAST ON"
             "TRACY_NO_CONTEXT_SWITCH ON"
             "TRACY_NO_EXIT ON"

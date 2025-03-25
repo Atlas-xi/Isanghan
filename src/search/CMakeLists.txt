@@ -31,14 +31,6 @@ if (APPLE)
     disable_lto(xi_connect)
 endif()
 
-target_compile_definitions(
-    xi_search
-    PUBLIC
-    -DDEBUGLOGSEARCH
-)
-
-target_compile_definitions(xi_search PUBLIC DEFINE_OWN_MAIN)
-
 target_link_libraries(xi_search
     PUBLIC
         ${SHARED_EXTERNAL_LIBS}
