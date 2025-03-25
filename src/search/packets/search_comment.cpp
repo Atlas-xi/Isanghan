@@ -37,10 +37,10 @@ SearchCommentPacket::SearchCommentPacket(uint32 playerId, std::string const& com
     ref<uint16>(data, 0x1C) = 124; // Comment length
 
     // Add comment bytes
-    memcpy(&data[0x1E], comment.c_str(), comment.length());
+    std::memcpy(&data[0x1E], comment.c_str(), comment.length());
 
     // Fill rest with whitespace
-    memset(&data[0x1E + comment.length()], ' ', 123 - comment.length());
+    std::memset(&data[0x1E + comment.length()], ' ', 123 - comment.length());
 
     // End comment with 0 byte
     data[0x9A] = 0;
