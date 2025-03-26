@@ -1226,8 +1226,9 @@ void CParty::PushEffectsPacket()
 
         for (auto& PMember : members)
         {
-            auto* PMemberChar = static_cast<CCharEntity*>(PMember);
-            auto  effects     = std::make_unique<CPartyEffectsPacket>();
+            auto*                     PMemberChar = static_cast<CCharEntity*>(PMember);
+            std::vector<CCharEntity*> sameZoneMembers;
+
             for (auto& memberinfo : info)
             {
                 if (memberinfo.partyid == m_PartyID && memberinfo.id != PMemberChar->id)
@@ -1235,11 +1236,13 @@ void CParty::PushEffectsPacket()
                     auto* PPartyMember = zoneutils::GetChar(memberinfo.id);
                     if (PPartyMember && PPartyMember->getZone() == PMemberChar->getZone())
                     {
-                        effects->AddMemberEffects(PPartyMember);
+                        sameZoneMembers.push_back(PPartyMember);
                     }
                 }
             }
-            PMemberChar->pushPacket(std::move(effects));
+
+            // Make and send packet for PMemberChar
+            PMemberChar->pushPacket<CPartyEffectsPacket>(sameZoneMembers);
         }
         m_EffectsChanged = false;
     }
