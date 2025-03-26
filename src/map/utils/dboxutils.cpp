@@ -19,6 +19,8 @@
 ===========================================================================
 */
 
+#include "common/async.h"
+
 #include "dboxutils.h"
 
 #include "common/database.h"
@@ -524,6 +526,26 @@ void dboxutils::SendNewItems(CCharEntity* PChar, uint8 action, uint8 boxtype, ui
                         // the result of this query doesn't really matter, it can be sent from the auction house which has no sender record
                         db::preparedStmt("UPDATE delivery_box SET received = 1 WHERE senderid = ? AND charid = ? AND box = 2 AND received = 0 AND quantity = ? AND sent = 1 AND itemid = ? LIMIT 1",
                                          PChar->id, senderID, PItem->getQuantity(), PItem->getID());
+
+                        if (settings::get<bool>("map.AUDIT_PLAYER_DBOX"))
+                        {
+                            Async::getInstance()->submit(
+                                [itemid        = PItem->getID(),
+                                 quantity      = PItem->getQuantity(),
+                                 sender        = senderID,
+                                 sender_name   = PItem->getSender(),
+                                 receiver      = PChar->id,
+                                 receiver_name = PChar->getName(),
+                                 date          = static_cast<uint32>(time(nullptr))]()
+                                {
+                                    const auto query = "INSERT INTO audit_dbox(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                                    if (!db::preparedStmt(query, itemid, quantity, sender, sender_name, receiver, receiver_name, date))
+                                    {
+                                        ShowErrorFmt("Failed to log delivery box transaction (item: {}, quantity: {}, sender: {}, receiver: {}, date: {})", itemid, quantity, sender, receiver, date);
+                                    }
+                                }
+                            );
+                        }
 
                         const auto rset = db::preparedStmt("SELECT slot FROM delivery_box WHERE charid = ? AND box = 1 AND slot > 7 ORDER BY slot ASC", PChar->id);
                         FOR_DB_SINGLE_RESULT(rset)
