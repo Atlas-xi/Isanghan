@@ -1454,11 +1454,12 @@ namespace charutils
             }
             if (NewSlotID != ERROR_SLOTID)
             {
-                const char* Query = "UPDATE char_inventory "
-                                    "SET slot = %u "
-                                    "WHERE charid = %u AND location = %u AND slot = %u";
+                const auto rset = db::preparedStmt("UPDATE char_inventory "
+                                                   "SET slot = ? "
+                                                   "WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                                                   NewSlotID, PChar->id, LocationID, SlotID);
 
-                if (_sql->Query(Query, NewSlotID, PChar->id, LocationID, SlotID) != SQL_ERROR && _sql->AffectedRows() != 0)
+                if (rset && rset->rowsAffected() != 0)
                 {
                     PItemContainer->InsertItem(nullptr, SlotID);
 
@@ -2471,10 +2472,9 @@ namespace charutils
 
     void AddItemToRecycleBin(CCharEntity* PChar, uint32 container, uint8 slotID, uint8 quantity)
     {
-        CItem*      PItem          = PChar->getStorage(container)->GetItem(slotID);
-        const char* Query          = "UPDATE char_inventory SET location = %u, slot = %u WHERE charid = %u AND location = %u AND slot = %u";
-        auto*       RecycleBin     = PChar->getStorage(LOC_RECYCLEBIN);
-        auto*       OtherContainer = PChar->getStorage(container);
+        CItem* PItem          = PChar->getStorage(container)->GetItem(slotID);
+        auto*  RecycleBin     = PChar->getStorage(LOC_RECYCLEBIN);
+        auto*  OtherContainer = PChar->getStorage(container);
 
         if (PItem == nullptr)
         {
@@ -2485,7 +2485,9 @@ namespace charutils
         uint8 NewSlotID = PChar->getStorage(LOC_RECYCLEBIN)->InsertItem(PItem);
         if (NewSlotID != ERROR_SLOTID)
         {
-            if (_sql->Query(Query, LOC_RECYCLEBIN, NewSlotID, PChar->id, container, slotID) != SQL_ERROR && _sql->AffectedRows() != 0)
+            const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                                               LOC_RECYCLEBIN, NewSlotID, PChar->id, container, slotID);
+            if (rset && rset->rowsAffected() != 0)
             {
                 // Move successful, delete original item
                 OtherContainer->InsertItem(nullptr, slotID);
@@ -2506,8 +2508,8 @@ namespace charutils
         {
             // Evict recycle bin slot 1
             RecycleBin->InsertItem(nullptr, 1);
-            _sql->Query("DELETE FROM char_inventory WHERE charid = %u AND location = %u AND slot = %u",
-                        PChar->id, LOC_RECYCLEBIN, 1);
+            db::preparedStmt("DELETE FROM char_inventory WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                             PChar->id, LOC_RECYCLEBIN, 1);
 
             // Move everything around to accomodate
             for (int i = 2; i <= 10; ++i)
@@ -2517,7 +2519,8 @@ namespace charutils
                 RecycleBin->InsertItem(PMovingItem, i - 1);
 
                 // Update db
-                if (_sql->Query(Query, LOC_RECYCLEBIN, i - 1, PChar->id, LOC_RECYCLEBIN, i) == SQL_ERROR || _sql->AffectedRows() == 0)
+                const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1", LOC_RECYCLEBIN, i - 1, PChar->id, LOC_RECYCLEBIN, i);
+                if (!rset || rset->rowsAffected() == 0)
                 {
                     ShowError("Problem moving Recycle Bin items! (%s - %s)", PChar->getName(), PItem->getName());
                 }
@@ -2526,7 +2529,11 @@ namespace charutils
             // Move item from original container to recycle bin
             OtherContainer->InsertItem(nullptr, slotID);
             RecycleBin->InsertItem(PItem, 10);
-            if (_sql->Query(Query, LOC_RECYCLEBIN, 10, PChar->id, container, slotID) == SQL_ERROR || _sql->AffectedRows() == 0)
+
+            // Update db
+            const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                                               LOC_RECYCLEBIN, 10, PChar->id, container, slotID);
+            if (!rset || rset->rowsAffected() == 0)
             {
                 ShowError("Problem moving Recycle Bin items! (%s - %s)", PChar->getName(), PItem->getName());
             }

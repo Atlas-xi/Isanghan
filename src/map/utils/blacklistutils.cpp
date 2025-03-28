@@ -36,10 +36,8 @@ namespace blacklistutils
 {
     bool IsBlacklisted(uint32 ownerId, uint32 targetId)
     {
-        const char* query = "SELECT * FROM char_blacklist WHERE charid_owner = %u AND charid_target = %u";
-        int32       ret   = _sql->Query(query, ownerId, targetId);
-
-        return (ret != SQL_ERROR && _sql->NumRows() == 1);
+        const auto rset = db::preparedStmt("SELECT * FROM char_blacklist WHERE charid_owner = ? AND charid_target = ? LIMIT 1", ownerId, targetId);
+        return rset && rset->rowsCount();
     }
 
     bool AddBlacklisted(uint32 ownerId, uint32 targetId)
@@ -49,8 +47,8 @@ namespace blacklistutils
             return false;
         }
 
-        const char* query = "INSERT INTO char_blacklist (charid_owner, charid_target) VALUES (%u, %u)";
-        return (_sql->Query(query, ownerId, targetId) != SQL_ERROR && _sql->AffectedRows() == 1);
+        const auto rset = db::preparedStmt("INSERT INTO char_blacklist (charid_owner, charid_target) VALUES (?, ?)", ownerId, targetId);
+        return rset && rset->rowsAffected() == 1;
     }
 
     bool DeleteBlacklisted(uint32 ownerId, uint32 targetId)
@@ -60,8 +58,8 @@ namespace blacklistutils
             return false;
         }
 
-        const char* query = "DELETE FROM char_blacklist WHERE charid_owner = %u AND charid_target = %u";
-        return (_sql->Query(query, ownerId, targetId) != SQL_ERROR && _sql->AffectedRows() == 1);
+        const auto rset = db::preparedStmt("DELETE FROM char_blacklist WHERE charid_owner = ? AND charid_target = ? LIMIT 1", ownerId, targetId);
+        return rset && rset->rowsAffected() == 1;
     }
 
     void SendBlacklist(CCharEntity* PChar)

@@ -323,15 +323,6 @@ int32 SqlConnection::QueryStr(const char* query)
     return SQL_SUCCESS;
 }
 
-uint64 SqlConnection::AffectedRows()
-{
-    if (self)
-    {
-        return (uint64)mysql_affected_rows(&self->handle);
-    }
-    return 0;
-}
-
 uint64 SqlConnection::LastInsertId()
 {
     if (self)

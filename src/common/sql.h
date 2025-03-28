@@ -162,8 +162,6 @@ public:
         return QueryStr(query_v.c_str());
     }
 
-    uint64 AffectedRows();
-
     /// Returns the number of the AUTO_INCREMENT column of the last INSERT/UPDATE query.
     ///
     /// @return Value of the auto-increment column
