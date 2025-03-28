@@ -323,11 +323,11 @@ void CLuaBaseEntity::printToPlayer(std::string const& message, sol::object const
 /************************************************************************
  *  Function: printToArea()
  *  Purpose : Version of printToPlayer that passes to message server
- *  Example : player:printToArea("Im a real boy!", xi.msg.channel.SHOUT, xi.msg.area.SYSTEM, "Pinocchio");
+ *  Example : player:printToArea("Im a real boy!", xi.msg.channel.SHOUT, xi.msg.area.SYSTEM, "Pinocchio", false);
  *          : would print a shout type message from Pinocchio to the entire server
  ************************************************************************/
 
-void CLuaBaseEntity::printToArea(std::string const& message, sol::object const& arg1, sol::object const& arg2, sol::object const& arg3)
+void CLuaBaseEntity::printToArea(std::string const& message, sol::object const& arg1, sol::object const& arg2, sol::object const& arg3, sol::object const& arg4)
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -339,28 +339,30 @@ void CLuaBaseEntity::printToArea(std::string const& message, sol::object const& 
 
     // see scripts\globals\msg.lua or src\map\packets\chat_message.h for values
     CHAT_MESSAGE_TYPE messageLook  = (arg1 == sol::lua_nil) ? MESSAGE_SYSTEM_1 : arg1.as<CHAT_MESSAGE_TYPE>();
-    uint8             messageRange = (arg2 == sol::lua_nil) ? MESSAGE_AREA_SYSTEM : arg2.as<CHAT_MESSAGE_AREA>();
-    std::string       name         = (arg3 == sol::lua_nil) ? std::string() : arg3.as<std::string>();
+    ChatMessageArea   messageRange = (arg2 == sol::lua_nil) ? ChatMessageArea::System : arg2.as<ChatMessageArea>();
+    std::string       name         = (arg3 == sol::lua_nil) ? "" : arg3.as<std::string>();
+    bool              skipSender   = (arg4 == sol::lua_nil) ? false : arg4.as<bool>();
 
-    if (messageRange == MESSAGE_AREA_SYSTEM)
+    if (messageRange == ChatMessageArea::System)
     {
         message::send(ipc::ChatMessageServerMessage{
             .senderId    = PChar->id,
             .senderName  = name,
             .message     = message,
             .messageType = messageLook,
+            .skipSender  = skipSender,
         });
     }
-    else if (messageRange == MESSAGE_AREA_SAY)
+    else if (messageRange == ChatMessageArea::Say)
     {
         PChar->loc.zone->PushPacket(PChar, CHAR_INRANGE_SELF, std::make_unique<CChatMessagePacket>(PChar, messageLook, message, name));
     }
-    else if (messageRange == MESSAGE_AREA_SHOUT)
+    else if (messageRange == ChatMessageArea::Shout)
     {
         PChar->loc.zone->PushPacket(PChar, CHAR_INSHOUT, std::make_unique<CChatMessagePacket>(PChar, messageLook, message, name));
         PChar->pushPacket(std::make_unique<CChatMessagePacket>(PChar, messageLook, message, name));
     }
-    else if (messageRange == MESSAGE_AREA_PARTY)
+    else if (messageRange == ChatMessageArea::Party)
     {
         if (PChar->PParty && PChar->PParty->m_PAlliance)
         {
@@ -383,7 +385,7 @@ void CLuaBaseEntity::printToArea(std::string const& message, sol::object const& 
             });
         }
     }
-    else if (messageRange == MESSAGE_AREA_YELL)
+    else if (messageRange == ChatMessageArea::Yell)
     {
         message::send(ipc::ChatMessageYell{
             .senderId    = PChar->id,
@@ -394,7 +396,7 @@ void CLuaBaseEntity::printToArea(std::string const& message, sol::object const& 
 
         PChar->loc.zone->PushPacket(PChar, CHAR_INRANGE_SELF, std::make_unique<CChatMessagePacket>(PChar, messageLook, message, name));
     }
-    else if (messageRange == MESSAGE_AREA_UNITY)
+    else if (messageRange == ChatMessageArea::Unity)
     {
         message::send(ipc::ChatMessageUnity{
             .unityLeaderId = PChar->id,

@@ -32,9 +32,10 @@ end
 ---@param message string Message to send
 ---@param arg1 integer? Message Type
 ---@param arg2 integer? Message Range
----@param arg3 string Name
+---@param arg3 string? Name
+---@param arg4 boolean? Skip sender
 ---@return nil
-function CBaseEntity:printToArea(message, arg1, arg2, arg3)
+function CBaseEntity:printToArea(message, arg1, arg2, arg3, arg4)
 end
 
 ---@param messageID integer
