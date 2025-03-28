@@ -225,6 +225,7 @@ namespace db
             : resultSet_(nullptr)
             , query_(query)
             , type_(ResultSetType::Update)
+            , rowsAffected_(rowsAffected)
             {
             }
 

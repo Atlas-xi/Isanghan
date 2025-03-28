@@ -48,7 +48,7 @@ namespace blacklistutils
         }
 
         const auto rset = db::preparedStmt("INSERT INTO char_blacklist (charid_owner, charid_target) VALUES (?, ?)", ownerId, targetId);
-        return rset && rset->rowsAffected() == 1;
+        return rset && rset->rowsAffected();
     }
 
     bool DeleteBlacklisted(uint32 ownerId, uint32 targetId)
@@ -59,7 +59,7 @@ namespace blacklistutils
         }
 
         const auto rset = db::preparedStmt("DELETE FROM char_blacklist WHERE charid_owner = ? AND charid_target = ? LIMIT 1", ownerId, targetId);
-        return rset && rset->rowsAffected() == 1;
+        return rset && rset->rowsAffected();
     }
 
     void SendBlacklist(CCharEntity* PChar)

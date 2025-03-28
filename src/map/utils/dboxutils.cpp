@@ -410,7 +410,7 @@ void dboxutils::CancelSendingItem(CCharEntity* PChar, uint8 action, uint8 boxtyp
                         "AND slot >= 8 LIMIT 1",
                         PChar->id, charid, PItem->getID(), PItem->getQuantity());
 
-                    if (rset2 && rset->rowsAffected() == 1)
+                    if (rset2 && rset->rowsAffected())
                     {
                         PChar->UContainer->GetItem(slotID)->setSent(false);
                         PChar->pushPacket<CDeliveryBoxPacket>(action, boxtype, PChar->UContainer->GetItem(slotID), slotID, PChar->UContainer->GetItemsCount(), 0x02);

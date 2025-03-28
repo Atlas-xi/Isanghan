@@ -136,6 +136,22 @@ auto db::detail::validateQueryLeadingKeyword(std::string const& query) -> Result
     {
         return ResultSetType::Update;
     }
+    else if (keyword == "CREATE")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "ALTER")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "DROP")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "TRUNCATE")
+    {
+        return ResultSetType::Update;
+    }
     else if (keyword == "SET")
     {
         return ResultSetType::Update;
@@ -216,7 +232,9 @@ auto db::queryStr(std::string const& rawQuery) -> std::unique_ptr<db::detail::Re
 {
     TracyZoneScoped;
     TracyZoneString(rawQuery);
-    // TODO: Collect up bound args and report to tracy here
+    // TODO: Collect up bound args and report to tracy
+
+    ShowWarning("db::query and db::queryStr are deprecated. Please use db::preparedStmt instead.");
 
     const auto queryType = detail::validateQueryLeadingKeyword(rawQuery);
     if (queryType == detail::ResultSetType::Invalid)

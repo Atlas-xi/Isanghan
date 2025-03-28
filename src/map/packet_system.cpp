@@ -1389,7 +1389,7 @@ void SmallPacket0x029(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
                                                ToLocationID, NewSlotID, PChar->id, FromLocationID, FromSlotID);
-            if (rset && rset->rowsAffected() != 0)
+            if (rset && rset->rowsAffected())
             {
                 PChar->getStorage(FromLocationID)->InsertItem(nullptr, FromSlotID);
 
@@ -6174,7 +6174,7 @@ void SmallPacket0x0FA(MapSession* const PSession, CCharEntity* const PChar, CBas
                                            "WHERE location = ? AND slot = ? AND charid = ? LIMIT 1",
                                            PItem->m_extra, containerID, slotID, PChar->id);
 
-        if (rset && rset->rowsAffected() != 0 && !wasInstalled)
+        if (rset && rset->rowsAffected() && !wasInstalled)
         {
             // Storage mods only apply on the 1st floor
             if (!PItem->getOn2ndFloor())
@@ -6262,7 +6262,7 @@ void SmallPacket0x0FB(MapSession* const PSession, CCharEntity* const PChar, CBas
                                                "WHERE location = ? AND slot = ? AND charid = ? LIMIT 1",
                                                PItem->m_extra, containerID, slotID, PChar->id);
 
-            if (rset && rset->rowsAffected() != 0)
+            if (rset && rset->rowsAffected())
             {
                 uint8 NewSize = PItemContainer->GetSize() - RemovedSize;
                 for (uint8 SlotID = PItemContainer->GetSize(); SlotID > NewSize; --SlotID)

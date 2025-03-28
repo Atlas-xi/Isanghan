@@ -713,7 +713,7 @@ namespace charutils
             }
         }
 
-        db::query(fmt::format("UPDATE char_stats SET zoning = 0 WHERE charid = {}", PChar->id));
+        db::preparedStmt("UPDATE char_stats SET zoning = 0 WHERE charid = ? LIMIT 1", PChar->id);
 
         if (zoning == 2)
         {
@@ -1090,8 +1090,8 @@ namespace charutils
                     uint8 LocationID = PLinkshell1->getLocationID();
                     PLinkshell1->setSubType(ITEM_UNLOCKED);
                     PChar->equip[SLOT_LINK1] = 0;
-                    db::query(fmt::format("DELETE char_equip FROM char_equip WHERE charid = {} AND slotid = {} AND containerid = {}",
-                                          PChar->id, SlotID, LocationID));
+                    db::preparedStmt("DELETE char_equip FROM char_equip WHERE charid = ? AND slotid = ? AND containerid = ? LIMIT 1",
+                                     PChar->id, SlotID, LocationID);
                 }
                 else
                 {
@@ -1108,8 +1108,8 @@ namespace charutils
                     uint8 LocationID = PLinkshell2->getLocationID();
                     PLinkshell2->setSubType(ITEM_UNLOCKED);
                     PChar->equip[SLOT_LINK2] = 0;
-                    db::query(fmt::format("DELETE char_equip FROM char_equip WHERE charid = {} AND slotid = {} AND containerid = {}",
-                                          PChar->id, SlotID, LocationID));
+                    db::preparedStmt("DELETE char_equip FROM char_equip WHERE charid = ? AND slotid = ? AND containerid = ? LIMIT 1",
+                                     PChar->id, SlotID, LocationID);
                 }
                 else
                 {
@@ -1459,7 +1459,7 @@ namespace charutils
                                                    "WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
                                                    NewSlotID, PChar->id, LocationID, SlotID);
 
-                if (rset && rset->rowsAffected() != 0)
+                if (rset && rset->rowsAffected())
                 {
                     PItemContainer->InsertItem(nullptr, SlotID);
 
@@ -2487,7 +2487,7 @@ namespace charutils
         {
             const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
                                                LOC_RECYCLEBIN, NewSlotID, PChar->id, container, slotID);
-            if (rset && rset->rowsAffected() != 0)
+            if (rset && rset->rowsAffected())
             {
                 // Move successful, delete original item
                 OtherContainer->InsertItem(nullptr, slotID);
@@ -2520,7 +2520,7 @@ namespace charutils
 
                 // Update db
                 const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1", LOC_RECYCLEBIN, i - 1, PChar->id, LOC_RECYCLEBIN, i);
-                if (!rset || rset->rowsAffected() == 0)
+                if (!rset || !rset->rowsAffected())
                 {
                     ShowError("Problem moving Recycle Bin items! (%s - %s)", PChar->getName(), PItem->getName());
                 }
@@ -2533,7 +2533,7 @@ namespace charutils
             // Update db
             const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
                                                LOC_RECYCLEBIN, 10, PChar->id, container, slotID);
-            if (!rset || rset->rowsAffected() == 0)
+            if (!rset || !rset->rowsAffected())
             {
                 ShowError("Problem moving Recycle Bin items! (%s - %s)", PChar->getName(), PItem->getName());
             }
