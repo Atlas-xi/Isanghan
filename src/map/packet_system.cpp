@@ -311,53 +311,23 @@ void SmallPacket0x00A(MapSession* const PSession, CCharEntity* const PChar, CBas
 
         destZone->IncreaseZoneCounter(PChar);
 
-        PChar->m_ZonesList[PChar->getZone() >> 3] |= (1 << (PChar->getZone() % 8));
-
-        const char* fmtQuery = "UPDATE accounts_sessions SET targid = %u, server_addr = %u, client_port = %u, last_zoneout_time = 0 WHERE charid = %u";
-
         // Current zone could either be current zone or destination
         CZone* currentZone = zoneutils::GetZone(PChar->getZone());
-
         if (currentZone == nullptr)
         {
             ShowWarning("currentZone was null for Zone ID %d.", PChar->getZone());
             return;
         }
 
-        _sql->Query(fmtQuery, PChar->targid, currentZone->GetIP(), PSession->client_ipp.getPort(), PChar->id);
+        // Update session
+        db::preparedStmt("UPDATE accounts_sessions SET targid = ?, server_addr = ?, client_port = ?, last_zoneout_time = 0 WHERE charid = ? LIMIT 1",
+                         PChar->targid, currentZone->GetIP(), PSession->client_ipp.getPort(), PChar->id);
 
-        fmtQuery  = "SELECT death FROM char_stats WHERE charid = %u";
-        int32 ret = _sql->Query(fmtQuery, PChar->id);
-        if (_sql->NextRow() == SQL_SUCCESS)
-        {
-            // Update the character's death timestamp based off of how long they were previously dead
-            uint32 secondsSinceDeath = _sql->GetUIntData(0);
-            if (PChar->health.hp == 0)
-            {
-                PChar->SetDeathTimestamp((uint32)time(nullptr) - secondsSinceDeath);
-                PChar->Die(CCharEntity::death_duration - std::chrono::seconds(secondsSinceDeath));
-            }
-        }
-
-        fmtQuery = "SELECT pos_prevzone FROM chars WHERE charid = %u";
-        ret      = _sql->Query(fmtQuery, PChar->id);
-        if (ret != SQL_ERROR && _sql->NextRow() == SQL_SUCCESS)
-        {
-            if (PChar->getZone() == _sql->GetUIntData(0))
-            {
-                PChar->loc.zoning = true;
-            }
-        }
-
+        charutils::loadDeathTimestamp(PChar);
+        charutils::loadZoningFlag(PChar);
         charutils::SaveCharPosition(PChar);
         charutils::SaveZonesVisited(PChar);
         charutils::SavePlayTime(PChar);
-
-        if (PChar->m_moghouseID != 0)
-        {
-            PChar->m_charHistory.mhEntrances++;
-            gardenutils::UpdateGardening(PChar, false);
-        }
     }
 
     // Only release client from "Downloading Data" if the packet sequence came in without a drop on 0x00D
@@ -367,56 +337,10 @@ void SmallPacket0x00A(MapSession* const PSession, CCharEntity* const PChar, CBas
     {
         if (PChar->m_moghouseID != 0)
         {
-            // Update any mannequins that might be placed on zonein
-            // Build Mannequin model id list
-            auto getModelIdFromStorageSlot = [](CCharEntity* PChar, uint8 slot) -> uint16
-            {
-                uint16 modelId = 0x0000;
+            gardenutils::UpdateGardening(PChar, false);
+            charutils::updateMannequins(PChar);
 
-                if (slot == 0)
-                {
-                    return modelId;
-                }
-
-                auto* PItem = PChar->getStorage(LOC_STORAGE)->GetItem(slot);
-                if (PItem == nullptr)
-                {
-                    return modelId;
-                }
-
-                if (auto* PItemEquipment = dynamic_cast<CItemEquipment*>(PItem))
-                {
-                    modelId = PItemEquipment->getModelId();
-                }
-
-                return modelId;
-            };
-
-            for (auto safeContainerId : { LOC_MOGSAFE, LOC_MOGSAFE2 })
-            {
-                CItemContainer* PContainer = PChar->getStorage(safeContainerId);
-                for (int slotIndex = 1; slotIndex <= PContainer->GetSize(); ++slotIndex)
-                {
-                    CItem* PContainerItem = PContainer->GetItem(slotIndex);
-                    if (PContainerItem != nullptr && PContainerItem->isType(ITEM_FURNISHING))
-                    {
-                        auto* PFurnishing = static_cast<CItemFurnishing*>(PContainerItem);
-                        if (PFurnishing->isInstalled() && PFurnishing->isMannequin())
-                        {
-                            auto*  PMannequin = PFurnishing;
-                            uint16 mainId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 0]);
-                            uint16 subId      = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 1]);
-                            uint16 rangeId    = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 2]);
-                            uint16 headId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 3]);
-                            uint16 bodyId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 4]);
-                            uint16 handsId    = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 5]);
-                            uint16 legId      = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 6]);
-                            uint16 feetId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 7]);
-                            PChar->pushPacket<CInventoryCountPacket>(safeContainerId, slotIndex, headId, bodyId, handsId, legId, feetId, mainId, subId, rangeId);
-                        }
-                    }
-                }
-            }
+            PChar->m_charHistory.mhEntrances++;
         }
 
         PChar->pushPacket<CDownloadingDataPacket>();
@@ -427,7 +351,6 @@ void SmallPacket0x00A(MapSession* const PSession, CCharEntity* const PChar, CBas
 
 // https://github.com/atom0s/XiPackets/tree/main/world/client/0x000C
 /************************************************************************
- *                                                                       *
  *  GP_CLI_COMMAND_GAMEOK                                                *
  *  Client is ready to receive packets from the server.                  *
  *  Before this packet is sent, all commands are blocked locally.        *
@@ -436,6 +359,7 @@ void SmallPacket0x00A(MapSession* const PSession, CCharEntity* const PChar, CBas
 void SmallPacket0x00C(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     PChar->pushPacket<CInventorySizePacket>(PChar);
     PChar->pushPacket<CMenuConfigPacket>(PChar);
     PChar->pushPacket<CCharJobsPacket>(PChar);
@@ -466,7 +390,6 @@ void SmallPacket0x00C(MapSession* const PSession, CCharEntity* const PChar, CBas
 }
 
 /************************************************************************
- *                                                                       *
  *  Player Leaving Zone (Dezone)                                         *
  *  It is not reliable to recieve this packet, so do nothing.            *
  ************************************************************************/
@@ -489,6 +412,7 @@ void SmallPacket0x00D(MapSession* const PSession, CCharEntity* const PChar, CBas
 void SmallPacket0x00F(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     charutils::SendKeyItems(PChar);
     charutils::SendQuestMissionLog(PChar);
 
@@ -516,6 +440,7 @@ void SmallPacket0x00F(MapSession* const PSession, CCharEntity* const PChar, CBas
 void SmallPacket0x011(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     PSession->blowfish.status = BLOWFISH_ACCEPTED;
     PChar->status             = STATUS_TYPE::NORMAL;
     PChar->health.tp          = 0;
@@ -529,16 +454,6 @@ void SmallPacket0x011(MapSession* const PSession, CCharEntity* const PChar, CBas
     }
 
     PChar->PAI->QueueAction(queueAction_t(4000ms, false, zoneutils::AfterZoneIn));
-
-    // TODO: kill player til theyre dead and bsod
-    const char* fmtQuery = "SELECT version_mismatch FROM accounts_sessions WHERE charid = %u";
-    int32       ret      = _sql->Query(fmtQuery, PChar->id);
-    if (ret != SQL_ERROR && _sql->NextRow() == SQL_SUCCESS)
-    {
-        // On zone change, only sending a version message if mismatch
-        // if ((bool)sql->GetUIntData(0))
-        // PChar->pushPacket<CChatMessagePacket>(PChar, CHAT_MESSAGE_TYPE::MESSAGE_SYSTEM_1, "Server does not support this client version.");
-    }
 }
 
 /************************************************************************
@@ -634,6 +549,7 @@ void SmallPacket0x015(MapSession* const PSession, CCharEntity* const PChar, CBas
 void SmallPacket0x016(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     uint16 targid = data.ref<uint16>(0x04);
 
     if (targid == PChar->targid)
@@ -701,6 +617,7 @@ void SmallPacket0x016(MapSession* const PSession, CCharEntity* const PChar, CBas
 void SmallPacket0x017(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     uint16 targid = data.ref<uint16>(0x04);
     uint32 npcid  = data.ref<uint32>(0x08);
     uint8  type   = data.ref<uint8>(0x12);
@@ -1064,6 +981,7 @@ void SmallPacket0x01A(MapSession* const PSession, CCharEntity* const PChar, CBas
             PChar->animation = ANIMATION_NONE;
             PChar->updatemask |= UPDATE_HP;
             PChar->StatusEffectContainer->DelStatusEffectSilent(EFFECT_MOUNTED);
+
             // Workaround for a bug where dismounting out of update range would cause the character to stop rendering.
             PChar->loc.zone->UpdateEntityPacket(PChar, ENTITY_UPDATE, UPDATE_HP);
         }
@@ -1072,7 +990,6 @@ void SmallPacket0x01A(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             if (data.ref<uint8>(0x0C) == 0 && PChar->m_hasTractor != 0) // ACCEPTED TRACTOR
             {
-                // PChar->PBattleAI->SetCurrentAction(ACTION_RAISE_MENU_SELECTION);
                 PChar->loc.p           = PChar->m_StartActionPos;
                 PChar->loc.destination = PChar->getZone();
                 PChar->status          = STATUS_TYPE::DISAPPEAR;
@@ -1206,7 +1123,36 @@ void SmallPacket0x01A(MapSession* const PSession, CCharEntity* const PChar, CBas
 void SmallPacket0x01B(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
-    // 0 - world pass, 2 - gold world pass; +1 - purchase
+
+    // https://github.com/atom0s/XiPackets/tree/main/world/client/0x001B
+    struct GP_CLI_FRIENDPASS
+    {
+        uint16_t id : 9;
+        uint16_t size : 7;
+        uint16_t sync;
+        uint16_t Para;      // PS2: Para
+        uint16_t padding00; // PS2: Dammy
+    };
+
+    auto* packet = data.as<GP_CLI_FRIENDPASS>();
+    switch (packet->Para)
+    {
+        case 0: // 0: Client has requested to begin the purchase of a world pass.
+            // TODO
+            break;
+        case 1: // 1: Client has confirmed the purchase of a world pass.
+            // TODO
+            break;
+        case 2: // 2: Client has requested to begin the purchase of a gold world pass.
+            // TODO
+            break;
+        case 3: // 3: Client has confirmed the purchase of a gold world pass.
+            // TODO
+            break;
+        default:
+            ShowWarning("SmallPacket0x01B: Unknown Para value %u", packet->Para);
+            break;
+    }
 
     PChar->pushPacket<CWorldPassPacket>(data.ref<uint8>(0x04) & 1 ? (uint32)xirand::GetRandomNumber(9999999999) : 0);
 }
@@ -1272,6 +1218,7 @@ void SmallPacket0x01E(MapSession* const PSession, CCharEntity* const PChar, CBas
 void SmallPacket0x028(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     int32 quantity  = data.ref<uint8>(0x04);
     uint8 container = data.ref<uint8>(0x08);
     uint8 slotID    = data.ref<uint8>(0x09);
@@ -1349,6 +1296,7 @@ void SmallPacket0x028(MapSession* const PSession, CCharEntity* const PChar, CBas
 void SmallPacket0x029(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     uint32 quantity       = data.ref<uint8>(0x04);
     uint8  FromLocationID = data.ref<uint8>(0x08);
     uint8  ToLocationID   = data.ref<uint8>(0x09);
@@ -2146,21 +2094,17 @@ void SmallPacket0x03B(MapSession* const PSession, CCharEntity* const PChar, CBas
     uint16 handsId = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 5]);
     uint16 legId   = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 6]);
     uint16 feetId  = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 7]);
+
+    // TODO: (?)
     // 10 + 8 = Race
     // 10 + 9 = Pose
 
-    // Write out to Mannequin
-    char extra[sizeof(PMannequin->m_extra) * 2 + 1];
-    _sql->EscapeStringLen(extra, (const char*)PMannequin->m_extra, sizeof(PMannequin->m_extra));
-
-    const char* Query = "UPDATE char_inventory "
-                        "SET "
-                        "extra = '%s' "
-                        "WHERE location = %u AND slot = %u AND charid = %u";
-
-    auto ret  = _sql->Query(Query, extra, mannequinStorageLoc, mannequinStorageLocSlot, PChar->id);
-    auto rows = _sql->AffectedRows();
-    if (ret != SQL_ERROR && rows != 0)
+    const auto rset = db::preparedStmt("UPDATE char_inventory "
+                                       "SET "
+                                       "extra = {} "
+                                       "WHERE location = {} AND slot = {} AND charid = {}",
+                                       PMannequin->m_extra, mannequinStorageLoc, mannequinStorageLocSlot, PChar->id);
+    if (rset)
     {
         PChar->pushPacket<CInventoryItemPacket>(PMannequin, mannequinStorageLoc, mannequinStorageLocSlot);
         PChar->pushPacket<CInventoryCountPacket>(mannequinStorageLoc, mannequinStorageLocSlot, headId, bodyId, handsId, legId, feetId, mainId, subId, rangeId);
@@ -4922,7 +4866,7 @@ void SmallPacket0x0BE(MapSession* const PSession, CCharEntity* const PChar, CBas
         case 2: // change mode
         {
             // TODO: you can switch mode anywhere except in besieged & under level restriction
-            if (_sql->Query("UPDATE char_exp SET mode = %u WHERE charid = %u", operation, PChar->id) != SQL_ERROR)
+            if (db::preparedStmt("UPDATE char_exp SET mode = ? WHERE charid = ? LIMIT 1", operation, PChar->id))
             {
                 PChar->MeritMode = operation;
                 PChar->pushPacket<CMenuMeritPacket>(PChar);
@@ -5697,15 +5641,14 @@ void SmallPacket0x0DE(MapSession* const PSession, CCharEntity* const PChar, CBas
 {
     TracyZoneScoped;
 
-    PChar->bazaar.message.clear();
-    PChar->bazaar.message.insert(0, (const char*)data[4], 120); // Maximum bazaar message limit: 120 characters
+    // Maximum bazaar message limit: 120 characters
+    const auto escapedMessage = escapeString(asStringFromUntrustedSource(data[4], 120));
 
-    char message[256];
-    _sql->EscapeString(message, PChar->bazaar.message.c_str());
+    PChar->bazaar.message = escapedMessage;
 
-    _sql->Query("UPDATE char_stats SET bazaar_message = '%s' WHERE charid = %u", message, PChar->id);
+    db::preparedStmt("UPDATE char_stats SET bazaar_message = ? WHERE charid = ? LIMIT 1", escapedMessage, PChar->id);
 
-    DebugBazaarsFmt("Bazaar Interaction [Set Message] - Character: {}, Message: '{}'", PChar->name, message);
+    DebugBazaarsFmt("Bazaar Interaction [Set Message] - Character: {}, Message: '{}'", PChar->name, escapedMessage);
 }
 
 /************************************************************************
@@ -5718,19 +5661,18 @@ void SmallPacket0x0E0(MapSession* const PSession, CCharEntity* const PChar, CBas
 {
     TracyZoneScoped;
 
-    char message[256];
-    _sql->EscapeString(message, (const char*)data[0x04]);
+    const auto message = escapeString(asStringFromUntrustedSource(data[0x04], 256));
 
-    uint8 type = strlen(message) == 0 ? 0 : data.ref<uint8>(data.getSize() - 4);
+    uint8 type = message.empty() ? 0 : data.ref<uint8>(data.getSize() - 4);
 
-    if (type == PChar->search.messagetype && strcmp(message, PChar->search.message.c_str()) == 0)
+    if (type == PChar->search.messagetype && strcmp(message.c_str(), PChar->search.message.c_str()) == 0)
     {
         return;
     }
 
-    auto ret = _sql->Query("UPDATE accounts_sessions SET seacom_type = %u, seacom_message = '%s' WHERE charid = %u", type, message, PChar->id);
-
-    if (ret == SQL_SUCCESS)
+    const auto rset = db::preparedStmt("UPDATE accounts_sessions SET seacom_type = ?, seacom_message = ? WHERE charid = ? LIMIT 1",
+                                       type, message, PChar->id);
+    if (rset)
     {
         PChar->search.message.clear();
         PChar->search.message.insert(0, message);

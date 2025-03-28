@@ -52,6 +52,7 @@
 #include "packets/conquest_map.h"
 #include "packets/delivery_box.h"
 #include "packets/inventory_assign.h"
+#include "packets/inventory_count.h"
 #include "packets/inventory_finish.h"
 #include "packets/inventory_item.h"
 #include "packets/inventory_modify.h"
@@ -423,7 +424,7 @@ namespace charutils
             db::extractFromBlob(rset, "abilities", PChar->m_LearnedAbilities);
             db::extractFromBlob(rset, "weaponskills", PChar->m_LearnedWeaponskills);
             db::extractFromBlob(rset, "titles", PChar->m_TitleList);
-            db::extractFromBlob(rset, "zones", PChar->m_ZonesList);
+            db::extractFromBlob(rset, "zones", PChar->m_ZonesVisitedList);
             db::extractFromBlob(rset, "missions", PChar->m_missionLog);
             db::extractFromBlob(rset, "assault", PChar->m_assaultLog);
             db::extractFromBlob(rset, "campaign", PChar->m_campaignLog);
@@ -5450,8 +5451,8 @@ namespace charutils
 
         const char* fmtQuery = "UPDATE chars SET zones = '%s' WHERE charid = %u";
 
-        char zones[sizeof(PChar->m_ZonesList) * 2 + 1];
-        _sql->EscapeStringLen(zones, (const char*)PChar->m_ZonesList, sizeof(PChar->m_ZonesList));
+        char zones[sizeof(PChar->m_ZonesVisitedList) * 2 + 1];
+        _sql->EscapeStringLen(zones, (const char*)PChar->m_ZonesVisitedList, sizeof(PChar->m_ZonesVisitedList));
 
         _sql->Query(fmtQuery, zones, PChar->id);
     }
@@ -7330,6 +7331,33 @@ namespace charutils
         PChar->status = STATUS_TYPE::DISAPPEAR;
     }
 
+    void loadDeathTimestamp(CCharEntity* PChar)
+    {
+        const auto rset = db::preparedStmt("SELECT death FROM char_stats WHERE charid = ? LIMIT 1", PChar->id);
+        if (rset && rset->rowsCount() && rset->next())
+        {
+            // Update the character's death timestamp based off of how long they were previously dead
+            const auto secondsSinceDeath = rset->get<uint32>("death");
+            if (PChar->health.hp == 0)
+            {
+                PChar->SetDeathTimestamp((uint32)time(nullptr) - secondsSinceDeath);
+                PChar->Die(CCharEntity::death_duration - std::chrono::seconds(secondsSinceDeath));
+            }
+        }
+    }
+
+    void loadZoningFlag(CCharEntity* PChar)
+    {
+        const auto rset = db::preparedStmt("SELECT pos_prevzone FROM chars WHERE charid = ? LIMIT 1", PChar->id);
+        if (rset && rset->rowsCount() && rset->next())
+        {
+            if (PChar->getZone() == rset->get<uint16>("pos_prevzone"))
+            {
+                PChar->loc.zoning = true;
+            }
+        }
+    }
+
     bool isOrchestrionPlaced(CCharEntity* PChar)
     {
         for (auto safeContainerId : { LOC_MOGSAFE, LOC_MOGSAFE2 })
@@ -7350,5 +7378,58 @@ namespace charutils
         }
 
         return false;
+    }
+
+    void updateMannequins(CCharEntity* PChar)
+    {
+        // Build Mannequin model id list
+        auto getModelIdFromStorageSlot = [](CCharEntity* PChar, uint8 slot) -> uint16
+        {
+            uint16 modelId = 0x0000;
+
+            if (slot == 0)
+            {
+                return modelId;
+            }
+
+            auto* PItem = PChar->getStorage(LOC_STORAGE)->GetItem(slot);
+            if (PItem == nullptr)
+            {
+                return modelId;
+            }
+
+            if (auto* PItemEquipment = dynamic_cast<CItemEquipment*>(PItem))
+            {
+                modelId = PItemEquipment->getModelId();
+            }
+
+            return modelId;
+        };
+
+        for (auto safeContainerId : { LOC_MOGSAFE, LOC_MOGSAFE2 })
+        {
+            CItemContainer* PContainer = PChar->getStorage(safeContainerId);
+            for (int slotIndex = 1; slotIndex <= PContainer->GetSize(); ++slotIndex)
+            {
+                CItem* PContainerItem = PContainer->GetItem(slotIndex);
+                if (PContainerItem != nullptr && PContainerItem->isType(ITEM_FURNISHING))
+                {
+                    auto* PFurnishing = static_cast<CItemFurnishing*>(PContainerItem);
+                    if (PFurnishing->isInstalled() && PFurnishing->isMannequin())
+                    {
+                        auto*  PMannequin = PFurnishing;
+                        uint16 mainId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 0]);
+                        uint16 subId      = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 1]);
+                        uint16 rangeId    = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 2]);
+                        uint16 headId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 3]);
+                        uint16 bodyId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 4]);
+                        uint16 handsId    = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 5]);
+                        uint16 legId      = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 6]);
+                        uint16 feetId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 7]);
+                        PChar->pushPacket<CInventoryCountPacket>(safeContainerId, slotIndex, headId, bodyId, handsId, legId, feetId, mainId, subId, rangeId);
+                    }
+                }
+            }
+        }
     }
 }; // namespace charutils

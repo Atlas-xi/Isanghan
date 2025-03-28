@@ -2785,7 +2785,7 @@ bool CLuaBaseEntity::hasVisitedZone(uint16 zone)
     }
 
     auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
-    return hasBit(zone, PChar->m_ZonesList, sizeof(PChar->m_ZonesList));
+    return hasBit(zone, PChar->m_ZonesVisitedList, sizeof(PChar->m_ZonesVisitedList));
 }
 
 /************************************************************************

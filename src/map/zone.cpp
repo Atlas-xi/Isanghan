@@ -1082,6 +1082,9 @@ void CZone::CharZoneIn(CCharEntity* PChar)
         }
     }
 
+    // Mark current zone as visited
+    PChar->m_ZonesVisitedList[PChar->getZone() >> 3] |= (1 << (PChar->getZone() % 8));
+
     monstrosity::HandleZoneIn(PChar);
 
     PChar->PLatentEffectContainer->CheckLatentsZone();

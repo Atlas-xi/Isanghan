@@ -146,7 +146,7 @@ CCharEntity::CCharEntity()
     m_SpellList = {};
     std::memset(&m_LearnedAbilities, 0, sizeof(m_LearnedAbilities));
     std::memset(&m_TitleList, 0, sizeof(m_TitleList));
-    std::memset(&m_ZonesList, 0, sizeof(m_ZonesList));
+    std::memset(&m_ZonesVisitedList, 0, sizeof(m_ZonesVisitedList));
     std::memset(&m_Abilities, 0, sizeof(m_Abilities));
     std::memset(&m_TraitList, 0, sizeof(m_TraitList));
     std::memset(&m_PetCommands, 0, sizeof(m_PetCommands));
