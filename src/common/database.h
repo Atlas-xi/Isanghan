@@ -235,18 +235,41 @@ namespace db
 
             auto next() -> bool
             {
+                if (type_ != ResultSetType::Select)
+                {
+                    ShowErrorFmt("ResultSetWrapper::next: Invalid type {}", static_cast<int>(type_));
+                    ShowErrorFmt("Query: {}", query_.c_str());
+                    return false;
+                }
+
                 return resultSet_->next();
             }
 
             auto rowsCount() -> std::size_t
             {
                 DebugSQLFmt("rowsCount: {}", resultSet_->rowsCount());
+
+                if (type_ != ResultSetType::Select)
+                {
+                    ShowErrorFmt("ResultSetWrapper::rowsCount: Invalid type {}", static_cast<int>(type_));
+                    ShowErrorFmt("Query: {}", query_.c_str());
+                    return 0;
+                }
+
                 return resultSet_->rowsCount();
             }
 
             auto rowsAffected() -> std::size_t
             {
                 DebugSQLFmt("rowsAffected: {}", rowsAffected_);
+
+                if (type_ != ResultSetType::Update)
+                {
+                    ShowErrorFmt("ResultSetWrapper::rowsAffected: Invalid type {}", static_cast<int>(type_));
+                    ShowErrorFmt("Query: {}", query_.c_str());
+                    return 0;
+                }
+
                 return rowsAffected_;
             }
 
@@ -254,6 +277,13 @@ namespace db
             template <typename T>
             auto get(const std::string& key) -> T
             {
+                if (type_ != ResultSetType::Select)
+                {
+                    ShowErrorFmt("ResultSetWrapper::get: Invalid type {}", static_cast<int>(type_));
+                    ShowErrorFmt("Query: {}", query_.c_str());
+                    return T{};
+                }
+
                 using UnderlyingT = std::decay_t<T>;
 
                 UnderlyingT value{};
@@ -339,6 +369,13 @@ namespace db
             template <typename T>
             auto get(const uint32 index) -> T
             {
+                if (type_ != ResultSetType::Select)
+                {
+                    ShowErrorFmt("ResultSetWrapper::get: Invalid type {}", static_cast<int>(type_));
+                    ShowErrorFmt("Query: {}", query_.c_str());
+                    return T{};
+                }
+
                 const auto columnName = resultSet_->getMetaData()->getColumnLabel(index + 1);
                 return get<T>(columnName.c_str());
             }
@@ -347,6 +384,13 @@ namespace db
             template <typename T>
             auto getOrDefault(const std::string& key, T defaultValue) -> T
             {
+                if (type_ != ResultSetType::Select)
+                {
+                    ShowErrorFmt("ResultSetWrapper::getOrDefault: Invalid type {}", static_cast<int>(type_));
+                    ShowErrorFmt("Query: {}", query_.c_str());
+                    return defaultValue;
+                }
+
                 if (resultSet_->isNull(key.c_str()))
                 {
                     return defaultValue;
@@ -359,6 +403,13 @@ namespace db
             template <typename T>
             auto getOrDefault(const uint32 index, T defaultValue) -> T
             {
+                if (type_ != ResultSetType::Select)
+                {
+                    ShowErrorFmt("ResultSetWrapper::getOrDefault: Invalid type {}", static_cast<int>(type_));
+                    ShowErrorFmt("Query: {}", query_.c_str());
+                    return defaultValue;
+                }
+
                 const auto columnName = resultSet_->getMetaData()->getColumnLabel(index + 1);
                 return getOrDefault<T>(columnName.c_str(), defaultValue);
             }
@@ -366,6 +417,13 @@ namespace db
             // Check if the value of the associated key is null/not-populated.
             auto isNull(const std::string& key) -> bool
             {
+                if (type_ != ResultSetType::Select)
+                {
+                    ShowErrorFmt("ResultSetWrapper::isNull: Invalid type {}", static_cast<int>(type_));
+                    ShowErrorFmt("Query: {}", query_.c_str());
+                    return false;
+                }
+
                 return resultSet_->isNull(key.c_str());
             }
 
@@ -545,6 +603,7 @@ namespace db
         TracyZoneString(rawQuery);
         // TODO: Collect up bound args and report to tracy here
 
+        // TODO: This could be cached inside lazyPreparedStatements
         const auto queryType = detail::validateQueryLeadingKeyword(rawQuery);
         if (queryType == detail::ResultSetType::Invalid)
         {

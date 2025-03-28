@@ -98,7 +98,18 @@ auto db::detail::isConnectionIssue(const std::exception& e) -> bool
 
 auto db::detail::validateQueryLeadingKeyword(std::string const& query) -> ResultSetType
 {
-    const auto parts = split(to_upper(query), " ");
+    auto parts = split(to_upper(query), " ");
+
+    std::vector<std::string> cleanedParts;
+    for (const auto& part : parts)
+    {
+        if (!part.empty() && part != "\n")
+        {
+            cleanedParts.push_back(trim(trim(part), "\n"));
+        }
+    }
+    parts = std::move(cleanedParts);
+
     if (parts.size() < 2)
     {
         return ResultSetType::Invalid;
@@ -131,7 +142,7 @@ auto db::detail::validateQueryLeadingKeyword(std::string const& query) -> Result
     }
     else if (keyword == "SHOW")
     {
-        return ResultSetType::Update;
+        return ResultSetType::Select;
     }
     else if (keyword == "START")
     {
