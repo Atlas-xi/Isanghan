@@ -26,6 +26,7 @@
 #include "macros.h"
 #include "settings.h"
 #include "task_manager.h"
+#include "utils.h"
 
 #include <chrono>
 using namespace std::chrono_literals;
@@ -95,6 +96,60 @@ auto db::detail::isConnectionIssue(const std::exception& e) -> bool
     return false;
 }
 
+auto db::detail::validateQueryLeadingKeyword(std::string const& query) -> ResultSetType
+{
+    const auto parts = split(to_upper(query), " ");
+    if (parts.size() < 2)
+    {
+        return ResultSetType::Invalid;
+    }
+
+    const auto keyword = parts[0];
+    if (keyword == "SELECT")
+    {
+        return ResultSetType::Select;
+    }
+    else if (keyword == "INSERT")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "UPDATE")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "DELETE")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "REPLACE")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "SET")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "SHOW")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "START")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "COMMIT")
+    {
+        return ResultSetType::Update;
+    }
+    else if (keyword == "ROLLBACK")
+    {
+        return ResultSetType::Update;
+    }
+
+    // Else
+    return ResultSetType::Invalid;
+}
+
 Synchronized<db::detail::State>& db::detail::getState()
 {
     TracyZoneScoped;
@@ -152,6 +207,13 @@ auto db::queryStr(std::string const& rawQuery) -> std::unique_ptr<db::detail::Re
     TracyZoneString(rawQuery);
     // TODO: Collect up bound args and report to tracy here
 
+    const auto queryType = detail::validateQueryLeadingKeyword(rawQuery);
+    if (queryType == detail::ResultSetType::Invalid)
+    {
+        ShowErrorFmt("Invalid query: {}", rawQuery);
+        return nullptr;
+    }
+
     // clang-format off
     return detail::getState().write([&](detail::State& state) -> std::unique_ptr<db::detail::ResultSetWrapper>
     {
@@ -161,8 +223,17 @@ auto db::queryStr(std::string const& rawQuery) -> std::unique_ptr<db::detail::Re
 
             DebugSQL(fmt::format("query: {}", rawQuery));
             auto queryTimer = detail::timer(rawQuery);
-            auto rset       = std::unique_ptr<sql::ResultSet>(stmt->executeQuery(rawQuery.data()));
-            return std::make_unique<db::detail::ResultSetWrapper>(std::move(rset), rawQuery);
+
+            if (queryType == detail::ResultSetType::Select)
+            {
+                auto rset = std::unique_ptr<sql::ResultSet>(stmt->executeQuery(rawQuery.c_str()));
+                return std::make_unique<db::detail::ResultSetWrapper>(std::move(rset), rawQuery);
+            }
+            else // Update
+            {
+                auto rowsAffected = stmt->executeUpdate(rawQuery.c_str());
+                return std::make_unique<db::detail::ResultSetWrapper>(rowsAffected, rawQuery);
+            }
         };
 
         const auto queryRetryCount = 1 + settings::get<uint32>("network.SQL_QUERY_RETRY_COUNT");

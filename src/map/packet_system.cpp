@@ -219,7 +219,7 @@ namespace
 {
     auto escapeString(const std::string_view str) -> std::string
     {
-        // TODO: Replace with db::escapeString
+        // TODO: Replace with db::escapeString once it's verified they behave exactly the same
         return _sql->EscapeString(str);
     }
 } // namespace
@@ -1387,9 +1387,9 @@ void SmallPacket0x029(MapSession* const PSession, CCharEntity* const PChar, CBas
 
         if (NewSlotID != ERROR_SLOTID)
         {
-            const char* Query = "UPDATE char_inventory SET location = %u, slot = %u WHERE charid = %u AND location = %u AND slot = %u";
-
-            if (_sql->Query(Query, ToLocationID, NewSlotID, PChar->id, FromLocationID, FromSlotID) != SQL_ERROR && _sql->AffectedRows() != 0)
+            const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                                               ToLocationID, NewSlotID, PChar->id, FromLocationID, FromSlotID);
+            if (rset && rset->rowsAffected() != 0)
             {
                 PChar->getStorage(FromLocationID)->InsertItem(nullptr, FromSlotID);
 
@@ -3537,8 +3537,8 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
 
                     if (const auto victimId = charutils::getCharIdFromName(victimName))
                     {
-                        const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows("DELETE FROM accounts_parties WHERE partyid = ? AND charid = ?", PChar->id, victimId);
-                        if (rset && affectedRows)
+                        const auto rset = db::preparedStmt("DELETE FROM accounts_parties WHERE partyid = ? AND charid = ?", PChar->id, victimId);
+                        if (rset && rset->rowsAffected())
                         {
                             ShowDebug("%s has removed %s from party", PChar->getName(), victimName);
 
@@ -3645,9 +3645,9 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
                         {
                             uint32 partyid = rset->get<uint32>("partyid");
 
-                            const auto [rset2, affectedRows] = db::preparedStmtWithAffectedRows("UPDATE accounts_parties SET allianceid = 0, partyflag = partyflag & ~? WHERE partyid = ?",
-                                                                                                PARTY_SECOND | PARTY_THIRD, partyid);
-                            if (rset2 && affectedRows)
+                            const auto rset2 = db::preparedStmt("UPDATE accounts_parties SET allianceid = 0, partyflag = partyflag & ~? WHERE partyid = ?",
+                                                                PARTY_SECOND | PARTY_THIRD, partyid);
+                            if (rset2 && rset2->rowsAffected())
                             {
                                 ShowDebug("%s has removed %s party from alliance", PChar->getName(), victimName);
 
@@ -5054,13 +5054,9 @@ void SmallPacket0x0C4(MapSession* const PSession, CCharEntity* const PChar, CBas
                 PItemLinkshell->setSignature(EncodedName); // because apparently the format from the packet isn't right, and is missing terminators
                 PItemLinkshell->SetLSColor(LinkshellColor);
 
-                char extra[sizeof(PItemLinkshell->m_extra) * 2 + 1];
-                _sql->EscapeStringLen(extra, (const char*)PItemLinkshell->m_extra, sizeof(PItemLinkshell->m_extra));
-
-                const char* Query =
-                    "UPDATE char_inventory SET signature = '%s', extra = '%s', itemId = 513 WHERE charid = %u AND location = 0 AND slot = %u LIMIT 1";
-
-                if (_sql->Query(Query, DecodedName, extra, PChar->id, SlotID) != SQL_ERROR && _sql->AffectedRows() != 0)
+                const auto rset = db::preparedStmt("UPDATE char_inventory SET signature = ?, extra = ?, itemId = 513 WHERE charid = ? AND location = 0 AND slot = ? LIMIT 1",
+                                                   DecodedName, PItemLinkshell->m_extra, PChar->id, SlotID);
+                if (rset && rset->rowsAffected())
                 {
                     PChar->pushPacket<CInventoryItemPacket>(PItemLinkshell, LocationID, SlotID);
                 }
@@ -5103,16 +5099,14 @@ void SmallPacket0x0C4(MapSession* const PSession, CCharEntity* const PChar, CBas
                 break;
                 case 1: // equip linkshell
                 {
-                    auto ret = _sql->Query("SELECT broken FROM linkshells WHERE linkshellid = %u LIMIT 1", PItemLinkshell->GetLSID());
-                    if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS && _sql->GetUIntData(0) == 1)
-                    { // if the linkshell has been broken, break the item
+                    const auto rset = db::preparedStmt("SELECT broken FROM linkshells WHERE linkshellid = ? LIMIT 1", PItemLinkshell->GetLSID());
+                    if (rset && rset->rowsCount() && rset->next() && rset->get<uint8>("broken") == 1)
+                    {
+                        // if the linkshell has been broken, break the item
                         PItemLinkshell->SetLSType(LSTYPE_BROKEN);
 
-                        char extra[sizeof(PItemLinkshell->m_extra) * 2 + 1];
-                        _sql->EscapeStringLen(extra, (const char*)PItemLinkshell->m_extra, sizeof(PItemLinkshell->m_extra));
-
-                        const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u LIMIT 1";
-                        _sql->Query(Query, extra, PChar->id, PItemLinkshell->getLocationID(), PItemLinkshell->getSlotID());
+                        db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                                         PItemLinkshell->m_extra, PChar->id, PItemLinkshell->getLocationID(), PItemLinkshell->getSlotID());
 
                         PChar->pushPacket<CInventoryItemPacket>(PItemLinkshell, PItemLinkshell->getLocationID(), PItemLinkshell->getSlotID());
                         PChar->pushPacket<CInventoryFinishPacket>();
@@ -6174,15 +6168,13 @@ void SmallPacket0x0FA(MapSession* const PSession, CCharEntity* const PChar, CBas
 
         PChar->pushPacket<CFurnitureInteractPacket>(PItem, containerID, slotID);
 
-        char extra[sizeof(PItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
+        const auto rset = db::preparedStmt("UPDATE char_inventory "
+                                           "SET "
+                                           "extra = ? "
+                                           "WHERE location = ? AND slot = ? AND charid = ? LIMIT 1",
+                                           PItem->m_extra, containerID, slotID, PChar->id);
 
-        const char* Query = "UPDATE char_inventory "
-                            "SET "
-                            "extra = '%s' "
-                            "WHERE location = %u AND slot = %u AND charid = %u";
-
-        if (_sql->Query(Query, extra, containerID, slotID, PChar->id) != SQL_ERROR && _sql->AffectedRows() != 0 && !wasInstalled)
+        if (rset && rset->rowsAffected() != 0 && !wasInstalled)
         {
             // Storage mods only apply on the 1st floor
             if (!PItem->getOn2ndFloor())
@@ -6264,15 +6256,13 @@ void SmallPacket0x0FB(MapSession* const PSession, CCharEntity* const PChar, CBas
                 }
             }
 
-            char extra[sizeof(PItem->m_extra) * 2 + 1];
-            _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
+            const auto rset = db::preparedStmt("UPDATE char_inventory "
+                                               "SET "
+                                               "extra = ? "
+                                               "WHERE location = ? AND slot = ? AND charid = ? LIMIT 1",
+                                               PItem->m_extra, containerID, slotID, PChar->id);
 
-            const char* Query = "UPDATE char_inventory "
-                                "SET "
-                                "extra = '%s' "
-                                "WHERE location = %u AND slot = %u AND charid = %u";
-
-            if (_sql->Query(Query, extra, containerID, slotID, PChar->id) != SQL_ERROR && _sql->AffectedRows() != 0)
+            if (rset && rset->rowsAffected() != 0)
             {
                 uint8 NewSize = PItemContainer->GetSize() - RemovedSize;
                 for (uint8 SlotID = PItemContainer->GetSize(); SlotID > NewSize; --SlotID)
@@ -6390,10 +6380,8 @@ void SmallPacket0x0FC(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     if (updatedPot)
     {
-        char extra[sizeof(PPotItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PPotItem->m_extra, sizeof(PPotItem->m_extra));
-        const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u";
-        _sql->Query(Query, extra, PChar->id, PPotItem->getLocationID(), PPotItem->getSlotID());
+        db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                         PPotItem->m_extra, PChar->id, PPotItem->getLocationID(), PPotItem->getSlotID());
 
         PChar->pushPacket<CFurnitureInteractPacket>(PPotItem, potContainerID, potSlotID);
 
@@ -6468,10 +6456,9 @@ void SmallPacket0x0FD(MapSession* const PSession, CCharEntity* const PChar, CBas
         if (!PItem->wasExamined())
         {
             PItem->markExamined();
-            char extra[sizeof(PItem->m_extra) * 2 + 1];
-            _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-            const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u";
-            _sql->Query(Query, extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
+
+            db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                             PItem->m_extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
         }
     }
 
@@ -6550,10 +6537,8 @@ void SmallPacket0x0FE(MapSession* const PSession, CCharEntity* const PChar, CBas
         PChar->pushPacket<CFurnitureInteractPacket>(PItem, containerID, slotID);
         PItem->cleanPot();
 
-        char extra[sizeof(PItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-        const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u";
-        _sql->Query(Query, extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
+        db::preparedStmt("UPDATE char_inventory SET extra = {} WHERE charid = {} AND location = {} AND slot = {} LIMIT 1",
+                         PItem->m_extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
 
         PChar->pushPacket<CInventoryItemPacket>(PItem, containerID, slotID);
         PChar->pushPacket<CInventoryFinishPacket>();
@@ -6591,10 +6576,8 @@ void SmallPacket0x0FF(MapSession* const PSession, CCharEntity* const PChar, CBas
         PChar->pushPacket<CFurnitureInteractPacket>(PItem, containerID, slotID);
         PItem->setDried(true);
 
-        char extra[sizeof(PItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-        const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u";
-        _sql->Query(Query, extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
+        db::preparedStmt("UPDATE char_inventory SET extra = {} WHERE charid = {} AND location = {} AND slot = {} LIMIT 1",
+                         PItem->m_extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
 
         PChar->pushPacket<CInventoryItemPacket>(PItem, containerID, slotID);
         PChar->pushPacket<CInventoryFinishPacket>();
@@ -6641,7 +6624,7 @@ void SmallPacket0x100(MapSession* const PSession, CCharEntity* const PChar, CBas
             bool canUseMeritMode = PChar->jobs.job[PChar->GetMJob()] >= 75 && charutils::hasKeyItem(PChar, 606);
             if (!canUseMeritMode && PChar->MeritMode)
             {
-                if (_sql->Query("UPDATE char_exp SET mode = %u WHERE charid = %u", 0, PChar->id) != SQL_ERROR)
+                if (db::preparedStmt("UPDATE char_exp SET mode = {} WHERE charid = {} LIMIT 1", 0, PChar->id))
                 {
                     PChar->MeritMode = false;
                 }
@@ -7182,7 +7165,7 @@ void SmallPacket0x10A(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     if ((PItem != nullptr) && !(PItem->getFlag() & ITEM_FLAG_EX) && (!PItem->isSubType(ITEM_LOCKED) || PItem->getCharPrice() != 0))
     {
-        _sql->Query("UPDATE char_inventory SET bazaar = %u WHERE charid = %u AND location = 0 AND slot = %u", price, PChar->id, slotID);
+        db::preparedStmt("UPDATE char_inventory SET bazaar = {} WHERE charid = {} AND location = 0 AND slot = {}", price, PChar->id, slotID);
 
         PItem->setCharPrice(price);
         PItem->setSubType((price == 0 ? ITEM_UNLOCKED : ITEM_LOCKED));

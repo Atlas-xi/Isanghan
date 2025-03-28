@@ -110,11 +110,6 @@ public:
     /// @return SQL_SUCCESS or SQL_ERROR
     int32 GetTimeout(uint32* out_timeout);
 
-    /// Retrieves the name of the columns of a table into out_buf, with the separator after each name.
-    ///
-    /// @return SQL_SUCCESS or SQL_ERROR
-    int32 GetColumnNames(const char* table, char* out_buf, size_t buf_len, char sep);
-
     /// Changes the encoding of the connection.
     ///
     /// @return SQL_SUCCESS or SQL_ERROR

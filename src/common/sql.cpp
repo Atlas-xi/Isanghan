@@ -140,36 +140,6 @@ int32 SqlConnection::GetTimeout(uint32* out_timeout)
     return SQL_ERROR;
 }
 
-int32 SqlConnection::GetColumnNames(const char* table, char* out_buf, size_t buf_len, char sep)
-{
-    char*  data = nullptr;
-    size_t len  = 0;
-    size_t off  = 0;
-
-    if (self == nullptr || SQL_ERROR == Query("EXPLAIN `%s`", table))
-    {
-        return SQL_ERROR;
-    }
-
-    out_buf[off] = '\0';
-    while (SQL_SUCCESS == NextRow() && SQL_SUCCESS == GetData(0, &data, &len))
-    {
-        len = strnlen(data, len);
-        if (off + len + 2 > buf_len)
-        {
-            ShowDebug("GetColumns: output buffer is too small");
-            *out_buf = '\0';
-            return SQL_ERROR;
-        }
-        memcpy(out_buf + off, data, len);
-        off += len;
-        out_buf[off++] = sep;
-    }
-    out_buf[off] = '\0';
-    FreeResult();
-    return SQL_SUCCESS;
-}
-
 int32 SqlConnection::SetEncoding(const char* encoding)
 {
     if (mysql_set_character_set(&self->handle, encoding) == 0)
