@@ -3285,7 +3285,7 @@ void CLuaBaseEntity::addTeleport(uint8 teleType, uint32 bitval, sol::object cons
     }
     else if (type == TELEPORT_TYPE::ABYSSEA_CONFLUX && (setval == sol::lua_nil || set >= MAX_ABYSSEAZONES))
     {
-        ShowError("Lua::addTeleport : Attempt to add Abyssea Conflux with invalid setval or set variable.\n");
+        ShowError("Lua::addTeleport : Attempt to add Abyssea Conflux with invalid setval or set variable.");
         return;
     }
 
@@ -4064,7 +4064,7 @@ bool CLuaBaseEntity::addItem(sol::variadic_args va)
             }
             else
             {
-                ShowWarning("charplugin::AddItem: Item <%i> is not found in a database", id);
+                ShowWarning("AddItem: Item <%i> is not found in a database", id);
                 break;
             }
         }
@@ -4146,7 +4146,7 @@ bool CLuaBaseEntity::addItem(sol::variadic_args va)
             }
             else
             {
-                ShowWarning("charplugin::AddItem: Item <%i> is not found in a database", itemID);
+                ShowWarning("AddItem: Item <%i> is not found in a database", itemID);
                 break;
             }
         }
@@ -4303,7 +4303,7 @@ bool CLuaBaseEntity::addUsedItem(uint16 itemID)
         }
         else
         {
-            ShowWarning("charplugin::AddItem: Item <%i> is not found in a database", itemID);
+            ShowWarning("AddItem: Item <%i> is not found in a database", itemID);
         }
     }
 
@@ -4408,7 +4408,7 @@ bool CLuaBaseEntity::addTempItem(uint16 itemID, sol::object const& arg1)
         }
         else
         {
-            ShowWarning("charplugin::AddItem: Item <%i> is not found in a database", itemID);
+            ShowWarning("AddItem: Item <%i> is not found in a database", itemID);
         }
     }
 
@@ -18752,7 +18752,7 @@ void CLuaBaseEntity::setMannequinPose(uint16 itemID, uint8 race, uint8 pose)
                                                "WHERE charid = ? AND itemId = ?"
                                                "LIMIT 1";
 
-                        if (db::preparedStmt(fmtQuery, PMannequin->m_extra, PChar->id, PMannequin->getID()))
+                        if (!db::preparedStmt(fmtQuery, PMannequin->m_extra, PChar->id, PMannequin->getID()))
                         {
                             ShowError("lua_baseentity::setMannequinPose: Cannot insert item to database");
                         }

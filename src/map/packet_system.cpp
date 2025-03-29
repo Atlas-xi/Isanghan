@@ -6528,7 +6528,7 @@ void SmallPacket0x0FE(MapSession* const PSession, CCharEntity* const PChar, CBas
         PChar->pushPacket<CFurnitureInteractPacket>(PItem, containerID, slotID);
         PItem->cleanPot();
 
-        db::preparedStmt("UPDATE char_inventory SET extra = {} WHERE charid = {} AND location = {} AND slot = {} LIMIT 1",
+        db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
                          PItem->m_extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
 
         PChar->pushPacket<CInventoryItemPacket>(PItem, containerID, slotID);
@@ -6567,7 +6567,7 @@ void SmallPacket0x0FF(MapSession* const PSession, CCharEntity* const PChar, CBas
         PChar->pushPacket<CFurnitureInteractPacket>(PItem, containerID, slotID);
         PItem->setDried(true);
 
-        db::preparedStmt("UPDATE char_inventory SET extra = {} WHERE charid = {} AND location = {} AND slot = {} LIMIT 1",
+        db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
                          PItem->m_extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
 
         PChar->pushPacket<CInventoryItemPacket>(PItem, containerID, slotID);
@@ -6615,7 +6615,7 @@ void SmallPacket0x100(MapSession* const PSession, CCharEntity* const PChar, CBas
             bool canUseMeritMode = PChar->jobs.job[PChar->GetMJob()] >= 75 && charutils::hasKeyItem(PChar, 606);
             if (!canUseMeritMode && PChar->MeritMode)
             {
-                if (db::preparedStmt("UPDATE char_exp SET mode = {} WHERE charid = {} LIMIT 1", 0, PChar->id))
+                if (db::preparedStmt("UPDATE char_exp SET mode = ? WHERE charid = ? LIMIT 1", 0, PChar->id))
                 {
                     PChar->MeritMode = false;
                 }
@@ -7156,7 +7156,7 @@ void SmallPacket0x10A(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     if ((PItem != nullptr) && !(PItem->getFlag() & ITEM_FLAG_EX) && (!PItem->isSubType(ITEM_LOCKED) || PItem->getCharPrice() != 0))
     {
-        db::preparedStmt("UPDATE char_inventory SET bazaar = {} WHERE charid = {} AND location = 0 AND slot = {}", price, PChar->id, slotID);
+        db::preparedStmt("UPDATE char_inventory SET bazaar = ? WHERE charid = ? AND location = 0 AND slot = ?", price, PChar->id, slotID);
 
         PItem->setCharPrice(price);
         PItem->setSubType((price == 0 ? ITEM_UNLOCKED : ITEM_LOCKED));

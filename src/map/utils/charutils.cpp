@@ -1274,7 +1274,7 @@ namespace charutils
             PItem->setQuantity(quantity);
             return AddItem(PChar, LocationID, PItem, silence);
         }
-        ShowWarning("charplugin::AddItem: Item <%i> is not found in a database", ItemID);
+        ShowWarning("AddItem: Item <%i> is not found in a database", ItemID);
         return ERROR_SLOTID;
     }
 
@@ -1331,19 +1331,20 @@ namespace charutils
                 DecodeStringSignature(PItem->getSignature().c_str(), signature);
             }
 
-            if (db::preparedStmt(Query, PChar->id, LocationID, SlotID, PItem->getID(), PItem->getQuantity(), signature, PItem->m_extra))
+            if (!db::preparedStmt(Query, PChar->id, LocationID, SlotID, PItem->getID(), PItem->getQuantity(), signature, PItem->m_extra))
             {
-                ShowError("charplugin::AddItem: Cannot insert item to database");
+                ShowError("AddItem: Cannot insert item to database");
                 PChar->getStorage(LocationID)->InsertItem(nullptr, SlotID);
                 destroy(PItem);
                 return ERROR_SLOTID;
             }
+
             PChar->pushPacket<CInventoryItemPacket>(PItem, LocationID, SlotID);
             PChar->pushPacket<CInventoryFinishPacket>();
         }
         else
         {
-            ShowDebug("charplugin::AddItem: Location %i is full", LocationID);
+            ShowDebug("AddItem: Location %i is full", LocationID);
             destroy(PItem);
         }
         return SlotID;
@@ -5516,11 +5517,17 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* Query = "UPDATE %s SET %s %u WHERE charid = %u";
+        db::preparedStmt("UPDATE chars "
+                         "SET gmlevel = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->m_GMlevel, PChar->id);
 
-        _sql->Query(Query, "chars", "gmlevel =", PChar->m_GMlevel, PChar->id);
-
-        _sql->Query(Query, "char_flags", "gmModeEnabled =", PChar->visibleGmLevel >= 3 ? 1 : 0, PChar->id);
+        db::preparedStmt("UPDATE char_flags "
+                         "SET gmModeEnabled = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->visibleGmLevel >= 3 ? 1 : 0, PChar->id);
     }
 
     void SaveMentorFlag(CCharEntity* PChar)

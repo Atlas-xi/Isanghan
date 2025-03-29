@@ -99,7 +99,7 @@ auto db::detail::validateQueryLeadingKeyword(std::string const& query) -> Result
     }
     parts = std::move(cleanedParts);
 
-    if (parts.size() < 2)
+    if (parts.empty())
     {
         return ResultSetType::Invalid;
     }
@@ -286,8 +286,8 @@ auto db::queryStr(std::string const& rawQuery) -> std::unique_ptr<db::detail::Re
 
 auto db::escapeString(std::string_view str) -> std::string
 {
-    // Replacement map similar to str_replace in PHP
     static const std::unordered_map<char, std::string> replacements = {
+        // Replacement map similar to str_replace in PHP
         { '\\', "\\\\" },
         { '\0', "\\0" },
         { '\n', "\\n" },
@@ -298,7 +298,6 @@ auto db::escapeString(std::string_view str) -> std::string
 
         // Extras
         { '\b', "\\b" },
-        { '_', "\\_" },
         { '%', "\\%" },
         { '|', "\\|" },
         { ';', "\\;" },
@@ -393,7 +392,7 @@ void db::checkCharset()
     TracyZoneScoped;
 
     // Check that the SQL charset is what we require
-    auto rset = query("SELECT @@character_set_database, @@collation_database");
+    auto rset = preparedStmt("SELECT @@character_set_database, @@collation_database");
     if (rset && rset->rowsCount())
     {
         bool foundError = false;

@@ -66,9 +66,9 @@ namespace blacklistutils
     {
         std::vector<std::pair<uint32, std::string>> blacklist;
 
-        // Obtain this users blacklist info..
-        const char* query = "SELECT c.charid, c.charname FROM char_blacklist AS b INNER JOIN chars AS c ON b.charid_target = c.charid WHERE charid_owner = %u";
-        if (_sql->Query(query, PChar->id) == SQL_ERROR || _sql->NumRows() == 0)
+        // Obtain this users blacklist info
+        const auto rset = db::preparedStmt("SELECT c.charid, c.charname FROM char_blacklist AS b INNER JOIN chars AS c ON b.charid_target = c.charid WHERE charid_owner = ?", PChar->id);
+        if (!rset || !rset->rowsCount())
         {
             PChar->pushPacket<CSendBlacklist>(PChar, blacklist, true, true);
             return;
@@ -77,12 +77,12 @@ namespace blacklistutils
         // Loop and build blacklist
         int currentCount = 0;
         int totalCount   = 0;
-        int rowCount     = _sql->NumRows();
+        int rowCount     = rset->rowsCount();
 
-        while (_sql->NextRow() == SQL_SUCCESS)
+        while (rset->next())
         {
-            uint32      accid_target = _sql->GetUIntData(0);
-            std::string targetName   = _sql->GetStringData(1);
+            uint32      accid_target = rset->get<uint32>(0);
+            std::string targetName   = rset->get<std::string>(1);
 
             blacklist.emplace_back(accid_target, targetName);
             currentCount++;
