@@ -1794,6 +1794,25 @@ void SmallPacket0x034(MapSession* const PSession, CCharEntity* const PChar, CBas
                     PItem->setReserve(quantity + PItem->getReserve());
                     PChar->UContainer->SetItem(tradeSlotID, PItem);
                 }
+
+                if (settings::get<bool>("map.AUDIT_PLAYER_TRADES"))
+                {
+                    Async::getInstance()->submit(
+                        [itemID        = PItem->getID(),
+                         quantity      = quantity,
+                         sender        = PChar->id,
+                         sender_name   = PChar->getName(),
+                         receiver      = PTarget->id,
+                         receiver_name = PTarget->getName(),
+                         date          = static_cast<uint32>(time(nullptr))]()
+                        {
+                            const auto query = "INSERT INTO audit_trade(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                            if (!db::preparedStmt(query, itemID, quantity, sender, sender_name, receiver, receiver_name, date))
+                            {
+                                ShowErrorFmt("Failed to log trade transaction (item: {}, quantity: {}, sender: {}, receiver: {}, date: {})", itemID, quantity, sender, receiver, date);
+                            }
+                        });
+                }
             }
             else
             {
@@ -1878,6 +1897,25 @@ void SmallPacket0x036(MapSession* const PSession, CCharEntity* const PChar, CBas
             {
                 ShowError("Player %s trying to trade NPC %s with reserved item! ", PChar->getName(), PNpc->getName());
                 return;
+            }
+
+            if (settings::get<bool>("map.AUDIT_PLAYER_TRADES"))
+            {
+                Async::getInstance()->submit(
+                    [itemID        = PItem->getID(),
+                     quantity      = Quantity,
+                     sender        = PChar->id,
+                     sender_name   = PChar->getName(),
+                     receiver      = PNpc->id,
+                     receiver_name = PNpc->getName(),
+                     date          = static_cast<uint32>(time(nullptr))]()
+                    {
+                        const auto query = "INSERT INTO audit_trade(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        if (!db::preparedStmt(query, itemID, quantity, sender, sender_name, receiver, receiver_name, date))
+                        {
+                            ShowErrorFmt("Failed to log trade transaction (item: {}, quantity: {}, sender: {}, receiver: {}, date: {})", itemID, quantity, sender, receiver, date);
+                        }
+                    });
             }
 
             PItem->setReserve(Quantity);
@@ -4115,6 +4153,25 @@ void SmallPacket0x085(MapSession* const PSession, CCharEntity* const PChar, CBas
     }
 
     const auto cost = quantity * PItem->getBasePrice();
+
+    if (settings::get<bool>("map.AUDIT_PLAYER_VENDOR"))
+    {
+        Async::getInstance()->submit(
+            [itemid      = PItem->getID(),
+             quantity    = quantity,
+             seller      = PChar->id,
+             seller_name = PChar->getName(),
+             baseprice   = PItem->getBasePrice(),
+             totalprice  = cost,
+             time        = static_cast<uint32>(time(nullptr))]()
+            {
+                const auto query = "INSERT INTO audit_vendor(itemid, quantity, seller, seller_name, baseprice, totalprice, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                if (!db::preparedStmt(query, itemid, quantity, seller, seller_name, baseprice, totalprice, time))
+                {
+                    ShowErrorFmt("Failed to log vendor sale (item: {}, quantity: {}, seller: {}, totalprice: {}, time: {})", itemid, quantity, seller, totalprice, time);
+                }
+            });
+    }
 
     charutils::UpdateItem(PChar, LOC_INVENTORY, 0, cost);
     charutils::UpdateItem(PChar, LOC_INVENTORY, slotID, -(int32)quantity);
@@ -7133,6 +7190,26 @@ void SmallPacket0x106(MapSession* const PSession, CCharEntity* const PChar, CBas
         if (charutils::AddItem(PChar, LOC_INVENTORY, PItem) == ERROR_SLOTID)
         {
             return;
+        }
+
+        if (settings::get<bool>("map.AUDIT_PLAYER_BAZAAR"))
+        {
+            Async::getInstance()->submit(
+                [itemID        = PItem->getID(),
+                 quantity      = Quantity,
+                 sellerID      = PTarget->id,
+                 sellerName    = PTarget->getName(),
+                 purchaserID   = PChar->id,
+                 purchaserName = PChar->getName(),
+                 price         = PriceWithTax,
+                 date          = static_cast<uint32>(time(nullptr))]
+                {
+                    const auto query = "INSERT INTO audit_bazaar(itemid, quantity, seller, seller_name, purchaser, purchaser_name, price, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    if (!db::preparedStmt(query, itemID, quantity, sellerID, sellerName, purchaserID, purchaserName, price, date))
+                    {
+                        ShowErrorFmt("Failed to log bazaar purchase (ItemID: {}, Quantity: {}, Seller: {}, Purchaser: {}, Price: {})", itemID, quantity, sellerName, purchaserName, price);
+                    }
+                });
         }
 
         charutils::UpdateItem(PChar, LOC_INVENTORY, 0, -(int32)PriceWithTax);
