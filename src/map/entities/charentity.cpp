@@ -143,7 +143,7 @@ CCharEntity::CCharEntity()
     std::memset(&equip, 0, sizeof(equip));
     std::memset(&equipLoc, 0, sizeof(equipLoc));
 
-    m_SpellList = {};
+    m_SpellList.reset();
     std::memset(&m_LearnedAbilities, 0, sizeof(m_LearnedAbilities));
     std::memset(&m_TitleList, 0, sizeof(m_TitleList));
     std::memset(&m_ZonesVisitedList, 0, sizeof(m_ZonesVisitedList));
@@ -2576,14 +2576,10 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
         }
         PItem->setLastUseTime(CVanaTime::getInstance()->getVanaTime());
 
-        char extra[sizeof(PItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-
-        const char* Query = "UPDATE char_inventory "
-                            "SET extra = '%s' "
-                            "WHERE charid = %u AND location = %u AND slot = %u";
-
-        _sql->Query(Query, extra, this->id, PItem->getLocationID(), PItem->getSlotID());
+        db::preparedStmt("UPDATE char_inventory "
+                         "SET extra = ? "
+                         "WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                         PItem->m_extra, this->id, PItem->getLocationID(), PItem->getSlotID());
 
         if (PItem->getCurrentCharges() != 0)
         {

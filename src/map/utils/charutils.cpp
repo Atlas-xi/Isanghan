@@ -1311,14 +1311,15 @@ namespace charutils
         if (SlotID != ERROR_SLOTID)
         {
             const char* Query = "INSERT INTO char_inventory("
-                                "charid,"
-                                "location,"
-                                "slot,"
-                                "itemId,"
-                                "quantity,"
-                                "signature,"
+                                "charid, "
+                                "location, "
+                                "slot, "
+                                "itemId, "
+                                "quantity, "
+                                "signature, "
                                 "extra) "
-                                "VALUES(%u,%u,%u,%u,%u,'%s','%s')";
+                                "VALUES(?, ?, ?, ?, ?, ?, ?) "
+                                "LIMIT 1";
 
             char signature[DecodeStringLength];
             if (PItem->isType(ITEM_LINKSHELL))
@@ -1330,10 +1331,7 @@ namespace charutils
                 DecodeStringSignature(PItem->getSignature().c_str(), signature);
             }
 
-            char extra[sizeof(PItem->m_extra) * 2 + 1];
-            _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-
-            if (_sql->Query(Query, PChar->id, LocationID, SlotID, PItem->getID(), PItem->getQuantity(), signature, extra) == SQL_ERROR)
+            if (db::preparedStmt(Query, PChar->id, LocationID, SlotID, PItem->getID(), PItem->getQuantity(), signature, PItem->m_extra))
             {
                 ShowError("charplugin::AddItem: Cannot insert item to database");
                 PChar->getStorage(LocationID)->InsertItem(nullptr, SlotID);
@@ -3794,7 +3792,7 @@ namespace charutils
             return false;
         }
 
-        if (wsUnlockId > std::size(PChar->m_LearnedWeaponskills) - 1)
+        if (wsUnlockId > PChar->m_LearnedWeaponskills.size() - 1)
         {
             ShowError("wsUnlockId is greater than learned weaponskill bitset.");
             return false;
@@ -3811,7 +3809,7 @@ namespace charutils
             return;
         }
 
-        if (wsUnlockId > std::size(PChar->m_LearnedWeaponskills) - 1)
+        if (wsUnlockId > PChar->m_LearnedWeaponskills.size() - 1)
         {
             ShowError("wsUnlockId is greater than learned weaponskill bitset.");
             return;
@@ -3828,7 +3826,7 @@ namespace charutils
             return;
         }
 
-        if (wsUnlockId > std::size(PChar->m_LearnedWeaponskills) - 1)
+        if (wsUnlockId > PChar->m_LearnedWeaponskills.size() - 1)
         {
             ShowError("wsUnlockId is greater than learned weaponskill bitset.");
             return;
@@ -5239,15 +5237,12 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* Query = "UPDATE chars "
-                            "SET "
-                            "quests = '%s' "
-                            "WHERE charid = %u";
-
-        char questslist[sizeof(PChar->m_questLog) * 2 + 1];
-        _sql->EscapeStringLen(questslist, (const char*)PChar->m_questLog, sizeof(PChar->m_questLog));
-
-        _sql->Query(Query, questslist, PChar->id);
+        db::preparedStmt("UPDATE chars "
+                         "SET "
+                         "quests = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->m_questLog, PChar->id);
     }
 
     void SaveFame(CCharEntity* PChar)
@@ -5288,29 +5283,26 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* Query = "UPDATE chars "
-                            "LEFT JOIN char_profile USING(charid) "
-                            "SET "
-                            "missions = '%s',"
-                            "assault = '%s',"
-                            "campaign = '%s',"
-                            "rank_points = %u,"
-                            "rank_sandoria = %u,"
-                            "rank_bastok = %u,"
-                            "rank_windurst = %u "
-                            "WHERE charid = %u";
-
-        char missionslist[sizeof(PChar->m_missionLog) * 2 + 1];
-        _sql->EscapeStringLen(missionslist, (const char*)PChar->m_missionLog, sizeof(PChar->m_missionLog));
-
-        char assaultList[sizeof(PChar->m_assaultLog) * 2 + 1];
-        _sql->EscapeStringLen(assaultList, (const char*)&PChar->m_assaultLog, sizeof(PChar->m_assaultLog));
-
-        char campaignList[sizeof(PChar->m_campaignLog) * 2 + 1];
-        _sql->EscapeStringLen(campaignList, (const char*)&PChar->m_campaignLog, sizeof(PChar->m_campaignLog));
-
-        _sql->Query(Query, missionslist, assaultList, campaignList, PChar->profile.rankpoints, PChar->profile.rank[0], PChar->profile.rank[1],
-                    PChar->profile.rank[2], PChar->id);
+        db::preparedStmt("UPDATE chars "
+                         "LEFT JOIN char_profile USING(charid) "
+                         "SET "
+                         "missions = ?, "
+                         "assault = ?, "
+                         "campaign = ?, "
+                         "rank_points = ?, "
+                         "rank_sandoria = ?, "
+                         "rank_bastok = ?, "
+                         "rank_windurst = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->m_missionLog,
+                         PChar->m_assaultLog,
+                         PChar->m_campaignLog,
+                         PChar->profile.rankpoints,
+                         PChar->profile.rank[0],
+                         PChar->profile.rank[1],
+                         PChar->profile.rank[2],
+                         PChar->id);
     }
 
     /************************************************************************
@@ -5328,15 +5320,13 @@ namespace charutils
             return;
         }
 
-        const char* Query = "UPDATE chars "
-                            "SET "
-                            "eminence = '%s' "
-                            "WHERE charid = %u";
+        db::preparedStmt("UPDATE chars "
+                         "SET "
+                         "eminence = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->m_eminenceLog, PChar->id);
 
-        char eminenceList[sizeof(PChar->m_eminenceLog) * 2 + 1];
-        _sql->EscapeStringLen(eminenceList, (const char*)&PChar->m_eminenceLog, sizeof(PChar->m_eminenceLog));
-
-        _sql->Query(Query, eminenceList, PChar->id);
         PChar->m_eminenceCache.lastWriteout = static_cast<uint32>(time(nullptr));
     }
 
@@ -5390,78 +5380,63 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* fmtQuery = "UPDATE chars SET keyitems = '%s' WHERE charid = %u";
-
-        char keyitems[sizeof(PChar->keys) * 2 + 1];
-        _sql->EscapeStringLen(keyitems, (const char*)&PChar->keys, sizeof(PChar->keys));
-
-        _sql->Query(fmtQuery, keyitems, PChar->id);
+        db::preparedStmt("UPDATE chars SET keyitems = ? WHERE charid = ? LIMIT 1",
+                         PChar->keys, PChar->id);
     }
 
     void SaveSpell(CCharEntity* PChar, uint16 spellID)
     {
         TracyZoneScoped;
 
-        const char* Query = "INSERT IGNORE INTO char_spells "
-                            "VALUES (%u, %u)";
-
-        _sql->Query(Query, PChar->id, spellID);
+        db::preparedStmt("INSERT IGNORE INTO char_spells "
+                         "VALUES (?, ?) LIMIT 1",
+                         PChar->id, spellID);
     }
 
     void DeleteSpell(CCharEntity* PChar, uint16 spellID)
     {
         TracyZoneScoped;
 
-        const char* Query = "DELETE FROM char_spells "
-                            "WHERE charid = %u AND spellid = %u";
-
-        _sql->Query(Query, PChar->id, spellID);
+        db::preparedStmt("DELETE FROM char_spells "
+                         "WHERE charid = ? AND spellid = ? LIMIT 1",
+                         PChar->id, spellID);
     }
 
     void SaveLearnedAbilities(CCharEntity* PChar)
     {
         TracyZoneScoped;
 
-        const char* Query = "UPDATE chars SET "
-                            "abilities = '%s', "
-                            "weaponskills = '%s' "
-                            "WHERE charid = %u";
-
-        char abilities[sizeof(PChar->m_LearnedAbilities) * 2 + 1];
-        char weaponskills[sizeof(PChar->m_LearnedWeaponskills) * 2 + 1];
-        _sql->EscapeStringLen(abilities, (const char*)PChar->m_LearnedAbilities, sizeof(PChar->m_LearnedAbilities));
-        _sql->EscapeStringLen(weaponskills, (const char*)&PChar->m_LearnedWeaponskills, sizeof(PChar->m_LearnedWeaponskills));
-
-        _sql->Query(Query, abilities, weaponskills, PChar->id);
+        db::preparedStmt("UPDATE chars SET "
+                         "abilities = ?, "
+                         "weaponskills = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->m_LearnedAbilities, PChar->m_LearnedWeaponskills, PChar->id);
     }
 
     void SaveTitles(CCharEntity* PChar)
     {
         TracyZoneScoped;
 
-        const char* Query = "UPDATE chars "
-                            "LEFT JOIN char_stats USING(charid) "
-                            "SET "
-                            "titles = '%s',"
-                            "title = %u "
-                            "WHERE charid = %u";
-
-        char titles[sizeof(PChar->m_TitleList) * 2 + 1];
-        _sql->EscapeStringLen(titles, (const char*)PChar->m_TitleList, sizeof(PChar->m_TitleList));
-
-        _sql->Query(Query, titles, PChar->profile.title, PChar->id);
+        db::preparedStmt("UPDATE chars "
+                         "LEFT JOIN char_stats USING(charid) "
+                         "SET "
+                         "titles = ?, "
+                         "title = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->m_TitleList, PChar->profile.title, PChar->id);
     }
 
     void SaveZonesVisited(CCharEntity* PChar)
     {
         TracyZoneScoped;
 
-        const char* fmtQuery = "UPDATE chars SET zones = '%s' WHERE charid = %u";
-
-        char zones[sizeof(PChar->m_ZonesVisitedList) * 2 + 1];
-        _sql->EscapeStringLen(zones, (const char*)PChar->m_ZonesVisitedList, sizeof(PChar->m_ZonesVisitedList));
-
-        _sql->Query(fmtQuery, zones, PChar->id);
+        db::preparedStmt("UPDATE chars "
+                         "SET zones = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->m_ZonesVisitedList, PChar->id);
     }
 
     void SaveCharEquip(CCharEntity* PChar)
@@ -5920,42 +5895,32 @@ namespace charutils
                 break;
             case TELEPORT_TYPE::HOMEPOINT:
             {
-                char buf[sizeof(PChar->teleport.homepoint) * 2 + 1];
-                _sql->EscapeStringLen(buf, (const char*)&PChar->teleport.homepoint, sizeof(PChar->teleport.homepoint));
-                const char* query = "UPDATE char_unlocks SET homepoints = '%s' WHERE charid = %u";
-                _sql->Query(query, buf, PChar->id);
+                db::preparedStmt("UPDATE char_unlocks SET homepoints = ? WHERE charid = ? LIMIT 1",
+                                 PChar->teleport.homepoint, PChar->id);
                 return;
             }
             case TELEPORT_TYPE::SURVIVAL:
             {
-                char buf[sizeof(PChar->teleport.survival) * 2 + 1];
-                _sql->EscapeStringLen(buf, (const char*)&PChar->teleport.survival, sizeof(PChar->teleport.survival));
-                const char* query = "UPDATE char_unlocks SET survivals = '%s' WHERE charid = %u";
-                _sql->Query(query, buf, PChar->id);
+                db::preparedStmt("UPDATE char_unlocks SET survivals = ? WHERE charid = ? LIMIT 1",
+                                 PChar->teleport.survival, PChar->id);
                 return;
             }
             case TELEPORT_TYPE::ABYSSEA_CONFLUX:
             {
-                char buf[sizeof(PChar->teleport.abysseaConflux) * 2 + 1];
-                _sql->EscapeStringLen(buf, (const char*)&PChar->teleport.abysseaConflux, sizeof(PChar->teleport.abysseaConflux));
-                const char* query = "UPDATE char_unlocks SET abyssea_conflux = '%s' WHERE charid = %u";
-                _sql->Query(query, buf, PChar->id);
+                db::preparedStmt("UPDATE char_unlocks SET abyssea_conflux = ? WHERE charid = ? LIMIT 1",
+                                 PChar->teleport.abysseaConflux, PChar->id);
                 return;
             }
             case TELEPORT_TYPE::WAYPOINT:
             {
-                char buf[sizeof(PChar->teleport.waypoints) * 2 + 1];
-                _sql->EscapeStringLen(buf, (const char*)&PChar->teleport.waypoints, sizeof(PChar->teleport.waypoints));
-                const char* query = "UPDATE char_unlocks SET waypoints = '%s' WHERE charid = %u";
-                _sql->Query(query, buf, PChar->id);
+                db::preparedStmt("UPDATE char_unlocks SET waypoints = ? WHERE charid = ? LIMIT 1",
+                                 PChar->teleport.waypoints, PChar->id);
                 return;
             }
             case TELEPORT_TYPE::ESCHAN_PORTAL:
             {
-                char buf[sizeof(PChar->teleport.eschanPortal) * 2 + 1];
-                _sql->EscapeStringLen(buf, (const char*)&PChar->teleport.eschanPortal, sizeof(PChar->teleport.eschanPortal));
-                const char* query = "UPDATE char_unlocks SET eschan_portals = '%s' WHERE charid = %u";
-                _sql->Query(query, buf, PChar->id);
+                db::preparedStmt("UPDATE char_unlocks SET eschan_portals = ? WHERE charid = ? LIMIT 1",
+                                 PChar->teleport.eschanPortal, PChar->id);
                 return;
             }
             default:
@@ -6662,11 +6627,10 @@ namespace charutils
                 PChar->PLatentEffectContainer->CheckLatentsWeaponBreak(slotid);
                 PChar->pushPacket<CCharStatsPacket>(PChar);
             }
-            char extra[sizeof(PWeapon->m_extra) * 2 + 1];
-            _sql->EscapeStringLen(extra, (const char*)PWeapon->m_extra, sizeof(PWeapon->m_extra));
 
-            const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u LIMIT 1";
-            _sql->Query(Query, extra, PChar->id, PWeapon->getLocationID(), PWeapon->getSlotID());
+            db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                             PWeapon->m_extra, PChar->id, PWeapon->getLocationID(), PWeapon->getSlotID());
+
             return true;
         }
         return false;

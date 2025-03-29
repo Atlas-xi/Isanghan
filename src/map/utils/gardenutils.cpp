@@ -116,10 +116,8 @@ namespace gardenutils
 
                         PPotItem->clearExamined();
 
-                        char extra[sizeof(PItem->m_extra) * 2 + 1];
-                        _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-                        const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u";
-                        _sql->Query(Query, extra, PChar->id, containerID, slotID);
+                        db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                                         PItem->m_extra, PChar->id, containerID, slotID);
 
                         if (sendPacket)
                         {

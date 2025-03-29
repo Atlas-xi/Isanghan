@@ -215,15 +215,6 @@ void PrintPacket(CBasicPacket& packet)
     }
 }
 
-namespace
-{
-    auto escapeString(const std::string_view str) -> std::string
-    {
-        // TODO: Replace with db::escapeString once it's verified they behave exactly the same
-        return _sql->EscapeString(str);
-    }
-} // namespace
-
 /************************************************************************
  *                                                                       *
  *  Unknown Packet                                                       *
@@ -2135,7 +2126,7 @@ void SmallPacket0x03D(MapSession* const PSession, CCharEntity* const PChar, CBas
 {
     TracyZoneScoped;
 
-    const auto name = escapeString(asStringFromUntrustedSource(data[0x08], 15));
+    const auto name = db::escapeString(asStringFromUntrustedSource(data[0x08], 15));
     const auto cmd  = data.ref<uint8>(0x18);
 
     const auto sendFailPacket = [&]()
@@ -3502,7 +3493,7 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             if (PChar->PParty && PChar->PParty->GetLeader() == PChar)
             {
-                const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
+                const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
 
                 CCharEntity* PVictim = dynamic_cast<CCharEntity*>(PChar->PParty->GetMemberByName(victimName));
                 if (PVictim)
@@ -3533,7 +3524,7 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
                 }
                 else
                 {
-                    const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
+                    const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
 
                     if (const auto victimId = charutils::getCharIdFromName(victimName))
                     {
@@ -3571,7 +3562,7 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
             CItemLinkshell* PItemLinkshell = (CItemLinkshell*)PChar->getEquip(SLOT_LINK1);
             if (PChar->PLinkshell1 && PItemLinkshell)
             {
-                const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
+                const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
 
                 message::send(ipc::LinkshellRemove{
                     .changerId     = PChar->id,
@@ -3588,7 +3579,7 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
             CItemLinkshell* PItemLinkshell = (CItemLinkshell*)PChar->getEquip(SLOT_LINK2);
             if (PChar->PLinkshell2 && PItemLinkshell)
             {
-                const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
+                const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
 
                 message::send(ipc::LinkshellRemove{
                     .changerId     = PChar->id,
@@ -3606,7 +3597,7 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
                 CCharEntity* PVictim = nullptr;
                 for (std::size_t i = 0; i < PChar->PParty->m_PAlliance->partyList.size(); ++i)
                 {
-                    const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
+                    const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
 
                     PVictim = dynamic_cast<CCharEntity*>(PChar->PParty->m_PAlliance->partyList[i]->GetMemberByName(victimName));
                     if (PVictim && PVictim->PParty && PVictim->PParty->m_PAlliance) // victim is in this party
@@ -3632,7 +3623,7 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
                 }
                 if (!PVictim && PChar->PParty->m_PAlliance->getMainParty() == PChar->PParty)
                 {
-                    const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
+                    const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
                     uint32     allianceID = PChar->PParty->m_PAlliance->m_AllianceID;
 
                     if (const auto victimId = charutils::getCharIdFromName(victimName))
@@ -3831,7 +3822,7 @@ void SmallPacket0x077(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             if (PChar->PParty != nullptr && PChar->PParty->GetLeader() == PChar)
             {
-                const auto memberName = escapeString(asStringFromUntrustedSource(data[0x04], 15));
+                const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
                 const auto permission = data.ref<uint8>(0x15);
 
                 ShowDebug(fmt::format("(Party) Altering permissions of {} to {}", memberName, permission));
@@ -3843,7 +3834,7 @@ void SmallPacket0x077(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             if (PChar->PLinkshell1 != nullptr)
             {
-                const auto memberName = escapeString(asStringFromUntrustedSource(data[0x04], 15));
+                const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
                 const auto permission = data.ref<uint8>(0x15);
 
                 message::send(ipc::LinkshellRankChange{
@@ -3859,7 +3850,7 @@ void SmallPacket0x077(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             if (PChar->PLinkshell2 != nullptr)
             {
-                const auto memberName = escapeString(asStringFromUntrustedSource(data[0x04], 15));
+                const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
                 const auto permission = data.ref<uint8>(0x15);
 
                 message::send(ipc::LinkshellRankChange{
@@ -3876,7 +3867,7 @@ void SmallPacket0x077(MapSession* const PSession, CCharEntity* const PChar, CBas
             if (PChar->PParty && PChar->PParty->m_PAlliance && PChar->PParty->GetLeader() == PChar &&
                 PChar->PParty->m_PAlliance->getMainParty() == PChar->PParty)
             {
-                const auto memberName = escapeString(asStringFromUntrustedSource(data[0x04], 15));
+                const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
 
                 ShowDebug(fmt::format("(Alliance) Changing leader to {}", memberName));
                 PChar->PParty->m_PAlliance->assignAllianceLeader(memberName);
@@ -4809,7 +4800,7 @@ void SmallPacket0x0B6(MapSession* const PSession, CCharEntity* const PChar, CBas
         return;
     }
 
-    const auto recipientName = escapeString(asStringFromUntrustedSource(data[0x06], 15));
+    const auto recipientName = db::escapeString(asStringFromUntrustedSource(data[0x06], 15));
 
     char  message[256]    = {}; // /t messages using "<t>" with a long named NPC targeted caps out at 138 bytes, increasing to the nearest power of 2
     uint8 messagePosition = 0x15;
@@ -5030,7 +5021,7 @@ void SmallPacket0x0C4(MapSession* const PSession, CCharEntity* const PChar, CBas
             std::memset(&DecodedName, 0, sizeof(DecodedName));
             std::memset(&EncodedName, 0, sizeof(EncodedName));
 
-            const auto incomingName = escapeString(asStringFromUntrustedSource(data[0x0C], 20));
+            const auto incomingName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 20));
 
             DecodeStringLinkshell(incomingName.data(), DecodedName);
             EncodeStringLinkshell(DecodedName, EncodedName);
@@ -5636,7 +5627,7 @@ void SmallPacket0x0DE(MapSession* const PSession, CCharEntity* const PChar, CBas
     TracyZoneScoped;
 
     // Maximum bazaar message limit: 120 characters
-    const auto escapedMessage = escapeString(asStringFromUntrustedSource(data[4], 120));
+    const auto escapedMessage = db::escapeString(asStringFromUntrustedSource(data[4], 120));
 
     PChar->bazaar.message = escapedMessage;
 
@@ -5655,7 +5646,7 @@ void SmallPacket0x0E0(MapSession* const PSession, CCharEntity* const PChar, CBas
 {
     TracyZoneScoped;
 
-    const auto message = escapeString(asStringFromUntrustedSource(data[0x04], 256));
+    const auto message = db::escapeString(asStringFromUntrustedSource(data[0x04], 256));
 
     uint8 type = message.empty() ? 0 : data.ref<uint8>(data.getSize() - 4);
 
@@ -5736,7 +5727,7 @@ void SmallPacket0x0E2(MapSession* const PSession, CCharEntity* const PChar, CBas
             {
                 if (static_cast<uint8>(PItemLinkshell->GetLSType()) <= PChar->PLinkshell1->m_postRights)
                 {
-                    const auto lsMessage = escapeString(asStringFromUntrustedSource(data[0x10], 128));
+                    const auto lsMessage = db::escapeString(asStringFromUntrustedSource(data[0x10], 128));
                     PChar->PLinkshell1->setMessage(lsMessage, PChar->getName());
                     return;
                 }

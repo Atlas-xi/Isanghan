@@ -197,22 +197,18 @@ void CLinkshell::ChangeMemberRank(const std::string& MemberName, uint8 toSack)
                     uint8 SlotID     = PItemLinkshell->getSlotID();
                     destroy(PItemLinkshell);
 
-                    PItemLinkshell = newShellItem;
-                    char extra[sizeof(PItemLinkshell->m_extra) * 2 + 1];
-                    _sql->EscapeStringLen(extra, (const char*)PItemLinkshell->m_extra, sizeof(PItemLinkshell->m_extra));
-
                     PMember->getStorage(LocationID)->InsertItem(PItemLinkshell, SlotID);
-                    const char* Query = "UPDATE char_inventory SET itemid = %u, extra = '%s' WHERE charid = %u AND location = %u AND slot = %u LIMIT 1";
-                    _sql->Query(Query, PItemLinkshell->getID(), extra, PMember->id, LocationID, SlotID);
+                    db::preparedStmt("UPDATE char_inventory SET itemid = ?, extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                                     PItemLinkshell->getID(), PItemLinkshell->m_extra, PMember->id, LocationID, SlotID);
                     if (lsID == 1)
                     {
-                        _sql->Query("UPDATE accounts_sessions SET linkshellid1 = %u , linkshellrank1 = %u WHERE charid = %u", m_id,
-                                    static_cast<uint8>(PItemLinkshell->GetLSType()), PMember->id);
+                        db::preparedStmt("UPDATE accounts_sessions SET linkshellid1 = ?, linkshellrank1 = ? WHERE charid = ? LIMIT 1",
+                                         m_id, static_cast<uint8>(PItemLinkshell->GetLSType()), PMember->id);
                     }
                     else if (lsID == 2)
                     {
-                        _sql->Query("UPDATE accounts_sessions SET linkshellid2 = %u , linkshellrank2 = %u WHERE charid = %u", m_id,
-                                    static_cast<uint8>(PItemLinkshell->GetLSType()), PMember->id);
+                        db::preparedStmt("UPDATE accounts_sessions SET linkshellid2 = ?, linkshellrank2 = ? WHERE charid = ?",
+                                         m_id, static_cast<uint8>(PItemLinkshell->GetLSType()), PMember->id);
                     }
 
                     PMember->pushPacket<CInventoryAssignPacket>(PItemLinkshell, INV_NORMAL);
@@ -282,10 +278,10 @@ void CLinkshell::RemoveMemberByName(const std::string& MemberName, uint8 kickerR
                             if (newPItemLinkshell->GetLSType() != LSTYPE_LINKSHELL)
                             {
                                 newPItemLinkshell->SetLSType(LSTYPE_BROKEN);
-                                char extra[sizeof(newPItemLinkshell->m_extra) * 2 + 1];
-                                _sql->EscapeStringLen(extra, (const char*)newPItemLinkshell->m_extra, sizeof(newPItemLinkshell->m_extra));
-                                const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u LIMIT 1";
-                                _sql->Query(Query, extra, PMember->id, LocationID, SlotID);
+
+                                db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                                                 newPItemLinkshell->m_extra, PMember->id, LocationID, SlotID);
+
                                 PMember->pushPacket<CInventoryItemPacket>(newPItemLinkshell, LocationID, SlotID);
                             }
                         }

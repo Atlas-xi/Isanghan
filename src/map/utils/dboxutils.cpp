@@ -41,15 +41,6 @@
 #include "trade_container.h"
 #include "universal_container.h"
 
-namespace
-{
-    auto escapeString(const std::string_view str) -> std::string
-    {
-        // TODO: Replace with db::escapeString
-        return _sql->EscapeString(str);
-    }
-} // namespace
-
 void dboxutils::HandlePacket(CCharEntity* PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
@@ -97,7 +88,7 @@ void dboxutils::HandlePacket(CCharEntity* PChar, CBasicPacket& data)
         {
             const uint8  invslot      = data.ref<uint8>(0x07);
             const uint32 quantity     = data.ref<uint32>(0x08);
-            const auto   recieverName = escapeString(asStringFromUntrustedSource(data[0x10], 15));
+            const auto   recieverName = db::escapeString(asStringFromUntrustedSource(data[0x10], 15));
 
             DebugDeliveryBoxFmt("DBOX: AddItemsToBeSent (action: {:02X}): player: {} ({}), boxtype: {}, slotID: {}, invslot: {}, quantity: {}, recieverName: {}",
                                 action, charName, PChar->id, boxtype, slotID, invslot, quantity, recieverName);
@@ -160,7 +151,7 @@ void dboxutils::HandlePacket(CCharEntity* PChar, CBasicPacket& data)
         break;
         case 0x0C:
         {
-            const auto recieverName = escapeString(asStringFromUntrustedSource(data[0x10], 15));
+            const auto recieverName = db::escapeString(asStringFromUntrustedSource(data[0x10], 15));
 
             DebugDeliveryBoxFmt("DBOX: ConfirmNameBeforeSending (action: {:02X}): player: {} ({}), boxtype: {}, recieverName: {}", action, charName, PChar->id, boxtype, recieverName);
             ConfirmNameBeforeSending(PChar, action, boxtype, recieverName);

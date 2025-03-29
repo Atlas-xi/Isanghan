@@ -37,17 +37,6 @@ namespace
     // Each thread gets its own connection, so we don't need to worry about thread safety.
     thread_local Synchronized<db::detail::State> state;
 
-    // Replacement map similar to str_replace in PHP
-    const std::unordered_map<char, std::string> replacements = {
-        { '\\', "\\\\" },
-        { '\0', "\\0" },
-        { '\n', "\\n" },
-        { '\r', "\\r" },
-        { '\'', "\\'" },
-        { '\"', "\\\"" },
-        { '\x1a', "\\Z" }
-    };
-
     const std::vector<std::string> connectionIssues = {
         "Lost connection",
         "Server has gone away",
@@ -295,8 +284,26 @@ auto db::queryStr(std::string const& rawQuery) -> std::unique_ptr<db::detail::Re
     // clang-format on
 }
 
-auto db::escapeString(std::string const& str) -> std::string
+auto db::escapeString(std::string_view str) -> std::string
 {
+    // Replacement map similar to str_replace in PHP
+    static const std::unordered_map<char, std::string> replacements = {
+        { '\\', "\\\\" },
+        { '\0', "\\0" },
+        { '\n', "\\n" },
+        { '\r', "\\r" },
+        { '\'', "\\'" },
+        { '\"', "\\\"" },
+        { '\x1a', "\\Z" },
+
+        // Extras
+        { '\b', "\\b" },
+        { '_', "\\_" },
+        { '%', "\\%" },
+        { '|', "\\|" },
+        { ';', "\\;" },
+    };
+
     std::string escapedStr;
 
     for (size_t i = 0; i < str.size(); ++i)
@@ -321,6 +328,26 @@ auto db::escapeString(std::string const& str) -> std::string
     }
 
     return escapedStr;
+}
+
+auto db::escapeString(const std::string& str) -> std::string
+{
+    if (str.empty())
+    {
+        return {};
+    }
+
+    return db::escapeString(std::string_view(str));
+}
+
+auto db::escapeString(const char* str) -> std::string
+{
+    if (str == nullptr)
+    {
+        return {};
+    }
+
+    return db::escapeString(std::string_view(str));
 }
 
 auto db::getDatabaseSchema() -> std::string

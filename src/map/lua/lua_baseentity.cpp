@@ -4363,14 +4363,12 @@ uint8 CLuaBaseEntity::incrementItemWear(uint16 itemID)
 
         ++PItem->m_extra[0];
 
-        char extra[sizeof(PItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-
         const char* Query = "UPDATE char_inventory "
-                            "SET extra = '%s' "
-                            "WHERE charid = %u AND location = %u AND slot = %u";
+                            "SET extra = ? "
+                            "WHERE charid = ? AND location = ? AND slot = ? "
+                            "LIMIT 1";
 
-        _sql->Query(Query, extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
+        db::preparedStmt(Query, PItem->m_extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
 
         return PItem->m_extra[0];
     }
@@ -5286,14 +5284,12 @@ uint8 CLuaBaseEntity::storeWithPorterMoogle(uint16 slipId, sol::table const& ext
         }
     }
 
-    char extra[sizeof(slip->m_extra) * 2 + 1];
-    _sql->EscapeStringLen(extra, (const char*)slip->m_extra, sizeof(slip->m_extra));
-
     const char* Query = "UPDATE char_inventory "
-                        "SET extra = '%s' "
-                        "WHERE charid = %u AND location = %u AND slot = %u";
+                        "SET extra = ? "
+                        "WHERE charid = ? AND location = ? AND slot = ? "
+                        "LIMIT 1";
 
-    _sql->Query(Query, extra, PChar->id, slip->getLocationID(), slip->getSlotID());
+    db::preparedStmt(Query, slip->m_extra, PChar->id, slip->getLocationID(), slip->getSlotID());
 
     return 0;
 }
@@ -5372,14 +5368,12 @@ void CLuaBaseEntity::retrieveItemFromSlip(uint16 slipId, uint16 itemId, uint16 e
 
     slip->m_extra[extraId] &= extraData;
 
-    char extra[sizeof(slip->m_extra) * 2 + 1];
-    _sql->EscapeStringLen(extra, (const char*)slip->m_extra, sizeof(slip->m_extra));
-
     const char* Query = "UPDATE char_inventory "
-                        "SET extra = '%s' "
-                        "WHERE charid = %u AND location = %u AND slot = %u";
+                        "SET extra = ? "
+                        "WHERE charid = ? AND location = ? AND slot = ? "
+                        "LIMIT 1";
 
-    _sql->Query(Query, extra, PChar->id, slip->getLocationID(), slip->getSlotID());
+    db::preparedStmt(Query, slip->m_extra, PChar->id, slip->getLocationID(), slip->getSlotID());
 
     auto* item = itemutils::GetItem(itemId);
     if (item)
@@ -8382,11 +8376,8 @@ void CLuaBaseEntity::toggleReceivedDeedRewards()
     // the first bit of the first array index.
     PChar->m_claimedDeeds[0] ^= 1;
 
-    const char* query = "UPDATE char_unlocks SET claimed_deeds = '%s' WHERE charid = %u";
-    char        buf[sizeof(PChar->m_claimedDeeds) * 2 + 1];
-
-    _sql->EscapeStringLen(buf, (const char*)&PChar->m_claimedDeeds, sizeof(PChar->m_claimedDeeds));
-    _sql->Query(query, buf, PChar->id);
+    const char* query = "UPDATE char_unlocks SET claimed_deeds = ? WHERE charid = ? LIMIT 1";
+    db::preparedStmt(query, PChar->m_claimedDeeds, PChar->id);
 }
 
 /************************************************************************
@@ -8409,11 +8400,8 @@ void CLuaBaseEntity::setClaimedDeed(uint16 deedBitNum)
 
     PChar->m_claimedDeeds[index] |= (1 << setBit);
 
-    const char* query = "UPDATE char_unlocks SET claimed_deeds = '%s' WHERE charid = %u";
-    char        buf[sizeof(PChar->m_claimedDeeds) * 2 + 1];
-
-    _sql->EscapeStringLen(buf, (const char*)&PChar->m_claimedDeeds, sizeof(PChar->m_claimedDeeds));
-    _sql->Query(query, buf, PChar->id);
+    const char* query = "UPDATE char_unlocks SET claimed_deeds = ? WHERE charid = ? LIMIT 1";
+    db::preparedStmt(query, PChar->m_claimedDeeds, PChar->id);
 }
 
 /************************************************************************
@@ -8438,11 +8426,8 @@ void CLuaBaseEntity::resetClaimedDeeds()
     PChar->m_claimedDeeds[3] = PChar->m_claimedDeeds[3] & 0b11;
     PChar->m_claimedDeeds[4] = numResets << 18;
 
-    const char* query = "UPDATE char_unlocks SET claimed_deeds = '%s' WHERE charid = %u";
-    char        buf[sizeof(PChar->m_claimedDeeds) * 2 + 1];
-
-    _sql->EscapeStringLen(buf, (const char*)&PChar->m_claimedDeeds, sizeof(PChar->m_claimedDeeds));
-    _sql->Query(query, buf, PChar->id);
+    const char* query = "UPDATE char_unlocks SET claimed_deeds = ? WHERE charid = ? LIMIT 1";
+    db::preparedStmt(query, PChar->m_claimedDeeds, PChar->id);
 }
 
 /************************************************************************
@@ -8464,11 +8449,8 @@ void CLuaBaseEntity::setUniqueEvent(uint16 uniqueEventId)
 
     PChar->m_uniqueEvents[index] |= (1 << setBit);
 
-    const char* query = "UPDATE char_unlocks SET unique_event = '%s' WHERE charid = %u";
-    char        buf[sizeof(PChar->m_uniqueEvents) * 2 + 1];
-
-    _sql->EscapeStringLen(buf, (const char*)&PChar->m_uniqueEvents, sizeof(PChar->m_uniqueEvents));
-    _sql->Query(query, buf, PChar->id);
+    const char* query = "UPDATE char_unlocks SET unique_event = ? WHERE charid = ? LIMIT 1";
+    db::preparedStmt(query, PChar->m_uniqueEvents, PChar->id);
 }
 
 /************************************************************************
@@ -8491,11 +8473,8 @@ void CLuaBaseEntity::delUniqueEvent(uint16 uniqueEventId)
 
     PChar->m_uniqueEvents[index] &= ~(1 << setBit);
 
-    const char* query = "UPDATE char_unlocks SET unique_event = '%s' WHERE charid = %u";
-    char        buf[sizeof(PChar->m_uniqueEvents) * 2 + 1];
-
-    _sql->EscapeStringLen(buf, (const char*)&PChar->m_uniqueEvents, sizeof(PChar->m_uniqueEvents));
-    _sql->Query(query, buf, PChar->id);
+    const char* query = "UPDATE char_unlocks SET unique_event = ? WHERE charid = ? LIMIT 1";
+    db::preparedStmt(query, PChar->m_uniqueEvents, PChar->id);
 }
 
 /************************************************************************
@@ -10291,19 +10270,20 @@ void CLuaBaseEntity::capAllSkills()
     {
         const char* Query = "INSERT INTO char_skills "
                             "SET "
-                            "charid = %u,"
-                            "skillid = %u,"
-                            "value = %u,"
-                            "rank = %u "
-                            "ON DUPLICATE KEY UPDATE value = %u, rank = %u";
+                            "charid = ?, "
+                            "skillid = ?, "
+                            "value = ?, "
+                            "rank = ? "
+                            "ON DUPLICATE KEY UPDATE value = ?, rank = ? LIMIT 1";
 
-        _sql->Query(Query, PChar->id, i, 5000, PChar->RealSkills.rank[i], 5000, PChar->RealSkills.rank[i]);
+        db::preparedStmt(Query, PChar->id, i, 5000, PChar->RealSkills.rank[i], 5000, PChar->RealSkills.rank[i]);
 
         uint16 maxSkill               = 10 * battleutils::GetMaxSkill(static_cast<SKILLTYPE>(i), PChar->GetMJob(), PChar->GetMLevel());
         PChar->RealSkills.skill[i]    = maxSkill; // set to capped
         PChar->WorkingSkills.skill[i] = maxSkill / 10;
         PChar->WorkingSkills.skill[i] |= 0x8000; // set blue capped flag
     }
+
     charutils::CheckWeaponSkill(PChar, SKILL_NONE);
     PChar->pushPacket<CCharSkillsPacket>(PChar);
 }
@@ -18552,83 +18532,82 @@ auto CLuaBaseEntity::getChocoboRaisingInfo() -> sol::table
 
     // Check to see if the user already has a chocobo
     {
-        const char* Query = "SELECT \
-            charid, \
-            first_name, \
-            last_name, \
-            sex, \
-            UNIX_TIMESTAMP(`created`), \
-            last_update_age, \
-            stage, \
-            location, \
-            color, \
-            dominant_gene, \
-            recessive_gene, \
-            strength, \
-            endurance, \
-            discernment, \
-            receptivity, \
-            affection, \
-            energy, \
-            satisfaction, \
-            conditions, \
-            ability1, \
-            ability2, \
-            personality, \
-            weather_preference, \
-            hunger, \
-            care_plan, \
-            held_item \
-            FROM char_chocobos WHERE charid = %u";
+        const char* Query = "SELECT "
+                            "charid, "
+                            "first_name, "
+                            "last_name, "
+                            "sex, "
+                            "UNIX_TIMESTAMP(`created`), "
+                            "last_update_age, "
+                            "stage, "
+                            "location, "
+                            "color, "
+                            "dominant_gene, "
+                            "recessive_gene, "
+                            "strength, "
+                            "endurance, "
+                            "discernment, "
+                            "receptivity, "
+                            "affection, "
+                            "energy, "
+                            "satisfaction, "
+                            "conditions, "
+                            "ability1, "
+                            "ability2, "
+                            "personality, "
+                            "weather_preference, "
+                            "hunger, "
+                            "care_plan, "
+                            "held_item "
+                            "FROM char_chocobos WHERE charid = ? LIMIT 1";
 
-        int32 ret = _sql->Query(Query, m_PBaseEntity->id);
-
-        if (ret == SQL_ERROR)
+        const auto rset = db::preparedStmt(Query, m_PBaseEntity->id);
+        if (!rset)
         {
             ShowDebug("SELECT Query failed");
             return sol::lua_nil;
         }
 
-        if (_sql->NumRows() == 0)
+        if (rset->rowsCount() == 0)
         {
             ShowDebug("No Raised Chocobo information found");
             return sol::lua_nil;
         }
 
-        if (_sql->NextRow() == SQL_SUCCESS)
+        if (rset->next())
         {
             auto table = lua.create_table();
 
-            table["charid"]          = _sql->GetUIntData(0);
-            table["first_name"]      = _sql->GetStringData(1);
-            table["last_name"]       = _sql->GetStringData(2);
-            table["sex"]             = _sql->GetUIntData(3);
-            table["created"]         = _sql->GetUIntData(4);
-            table["last_update_age"] = _sql->GetUIntData(5);
-            table["stage"]           = _sql->GetUIntData(6);
-            table["location"]        = _sql->GetUIntData(7);
-            table["color"]           = _sql->GetUIntData(8);
+            table["charid"]          = rset->get<uint32>("charid");
+            table["first_name"]      = rset->get<std::string>("first_name");
+            table["last_name"]       = rset->get<std::string>("last_name");
+            table["sex"]             = rset->get<uint32>("sex");
+            table["created"]         = rset->get<uint32>("UNIX_TIMESTAMP(`created`)");
+            table["last_update_age"] = rset->get<uint32>("last_update_age");
+            table["stage"]           = rset->get<uint32>("stage");
+            table["location"]        = rset->get<uint32>("location");
+            table["color"]           = rset->get<uint32>("color");
 
-            table["dominant_gene"]  = _sql->GetUIntData(9);
-            table["recessive_gene"] = _sql->GetUIntData(10);
+            table["dominant_gene"]  = rset->get<uint32>("dominant_gene");
+            table["recessive_gene"] = rset->get<uint32>("recessive_gene");
 
-            table["strength"]    = _sql->GetUIntData(11);
-            table["endurance"]   = _sql->GetUIntData(12);
-            table["discernment"] = _sql->GetUIntData(13);
-            table["receptivity"] = _sql->GetUIntData(14);
+            table["strength"]    = rset->get<uint32>("strength");
+            table["endurance"]   = rset->get<uint32>("endurance");
+            table["discernment"] = rset->get<uint32>("discernment");
+            table["receptivity"] = rset->get<uint32>("receptivity");
 
-            table["affection"]          = _sql->GetUIntData(15);
-            table["energy"]             = _sql->GetUIntData(16);
-            table["satisfaction"]       = _sql->GetUIntData(17);
-            table["conditions"]         = _sql->GetUIntData(18);
-            table["ability1"]           = _sql->GetUIntData(19);
-            table["ability2"]           = _sql->GetUIntData(20);
-            table["personality"]        = _sql->GetUIntData(21);
-            table["weather_preference"] = _sql->GetUIntData(22);
-            table["hunger"]             = _sql->GetUIntData(23);
+            table["affection"]          = rset->get<uint32>("affection");
+            table["energy"]             = rset->get<uint32>("energy");
+            table["satisfaction"]       = rset->get<uint32>("satisfaction");
+            table["conditions"]         = rset->get<uint32>("conditions");
+            table["ability1"]           = rset->get<uint32>("ability1");
+            table["ability2"]           = rset->get<uint32>("ability2");
+            table["personality"]        = rset->get<uint32>("personality");
+            table["weather_preference"] = rset->get<uint32>("weather_preference");
+            table["hunger"]             = rset->get<uint32>("hunger");
 
-            table["care_plan"] = _sql->GetUIntData(24);
-            table["held_item"] = _sql->GetUIntData(25);
+            table["care_plan"] = rset->get<uint32>("care_plan");
+            table["held_item"] = rset->get<uint32>("held_item");
 
             return table;
         }
@@ -18647,63 +18626,64 @@ bool CLuaBaseEntity::setChocoboRaisingInfo(sol::table const& table)
         return false;
     }
 
-    const char* Query = "REPLACE INTO char_chocobos SET \
-                                charid = %u, \
-                                first_name = '%s', \
-                                last_name = '%s', \
-                                sex = %u, \
-                                created = FROM_UNIXTIME(%u), \
-                                last_update_age = %u, \
-                                stage = %u, \
-                                location = %u, \
-                                color = %u, \
-                                dominant_gene = %u, \
-                                recessive_gene = %u, \
-                                strength = %u, \
-                                endurance = %u, \
-                                discernment = %u, \
-                                receptivity = %u, \
-                                affection = %u, \
-                                energy = %u, \
-                                satisfaction = %u, \
-                                conditions = %u, \
-                                ability1 = %u, \
-                                ability2 = %u, \
-                                personality = %u, \
-                                weather_preference = %u, \
-                                hunger = %u, \
-                                care_plan = %u, \
-                                held_item = %u";
+    const char* Query = "REPLACE INTO char_chocobos SET "
+                        "charid = ?, "
+                        "first_name = ?, "
+                        "last_name = ?, "
+                        "sex = ?, "
+                        "created = FROM_UNIXTIME(?), "
+                        "last_update_age = ?, "
+                        "stage = ?, "
+                        "location = ?, "
+                        "color = ?, "
+                        "dominant_gene = ?, "
+                        "recessive_gene = ?, "
+                        "strength = ?, "
+                        "endurance = ?, "
+                        "discernment = ?, "
+                        "receptivity = ?, "
+                        "affection = ?, "
+                        "energy = ?, "
+                        "satisfaction = ?, "
+                        "conditions = ?, "
+                        "ability1 = ?, "
+                        "ability2 = ?, "
+                        "personality = ?, "
+                        "weather_preference = ?, "
+                        "hunger = ?, "
+                        "care_plan = ?, "
+                        "held_item = ? "
+                        "LIMIT 1";
 
-    int32 ret = _sql->Query(Query,
-                            m_PBaseEntity->id,
-                            table.get_or<std::string>("first_name", "Chocobo"),
-                            table.get_or<std::string>("last_name", "Chocobo"),
-                            table.get_or<uint32>("sex", 0),
-                            table.get_or<uint32>("created", 0),
-                            table.get_or<uint32>("last_update_age", 0),
-                            table.get_or<uint32>("stage", 1),
-                            table.get_or<uint32>("location", 0),
-                            table.get_or<uint32>("color", 0),
-                            table.get_or<uint32>("dominant_gene", 0),
-                            table.get_or<uint32>("recessive_gene", 0),
-                            table.get_or<uint32>("strength", 0),
-                            table.get_or<uint32>("endurance", 0),
-                            table.get_or<uint32>("discernment", 0),
-                            table.get_or<uint32>("receptivity", 0),
-                            table.get_or<uint32>("affection", 0),
-                            table.get_or<uint32>("energy", 0),
-                            table.get_or<uint32>("satisfaction", 0),
-                            table.get_or<uint32>("conditions", 0),
-                            table.get_or<uint32>("ability1", 0),
-                            table.get_or<uint32>("ability2", 0),
-                            table.get_or<uint32>("personality", 0),
-                            table.get_or<uint32>("weather_preference", 0),
-                            table.get_or<uint32>("hunger", 0),
-                            table.get_or<uint32>("care_plan", 0),
-                            table.get_or<uint32>("held_item", 0));
+    const auto rset = db::preparedStmt(Query,
+                                       m_PBaseEntity->id,
+                                       table.get_or<std::string>("first_name", "Chocobo"),
+                                       table.get_or<std::string>("last_name", "Chocobo"),
+                                       table.get_or<uint32>("sex", 0),
+                                       table.get_or<uint32>("created", 0),
+                                       table.get_or<uint32>("last_update_age", 0),
+                                       table.get_or<uint32>("stage", 1),
+                                       table.get_or<uint32>("location", 0),
+                                       table.get_or<uint32>("color", 0),
+                                       table.get_or<uint32>("dominant_gene", 0),
+                                       table.get_or<uint32>("recessive_gene", 0),
+                                       table.get_or<uint32>("strength", 0),
+                                       table.get_or<uint32>("endurance", 0),
+                                       table.get_or<uint32>("discernment", 0),
+                                       table.get_or<uint32>("receptivity", 0),
+                                       table.get_or<uint32>("affection", 0),
+                                       table.get_or<uint32>("energy", 0),
+                                       table.get_or<uint32>("satisfaction", 0),
+                                       table.get_or<uint32>("conditions", 0),
+                                       table.get_or<uint32>("ability1", 0),
+                                       table.get_or<uint32>("ability2", 0),
+                                       table.get_or<uint32>("personality", 0),
+                                       table.get_or<uint32>("weather_preference", 0),
+                                       table.get_or<uint32>("hunger", 0),
+                                       table.get_or<uint32>("care_plan", 0),
+                                       table.get_or<uint32>("held_item", 0));
 
-    if (ret == SQL_ERROR)
+    if (!rset)
     {
         ShowDebug("REPLACE Query failed");
         return false;
@@ -18722,8 +18702,8 @@ bool CLuaBaseEntity::deleteRaisedChocobo()
         return false;
     }
 
-    int32 ret = _sql->Query("DELETE FROM char_chocobos WHERE charid = %u", m_PBaseEntity->id);
-    if (ret == SQL_ERROR)
+    const auto rset = db::preparedStmt("DELETE FROM char_chocobos WHERE charid = ? LIMIT 1", m_PBaseEntity->id);
+    if (!rset)
     {
         ShowDebug("DELETE Query failed");
         return false;
@@ -18767,14 +18747,12 @@ void CLuaBaseEntity::setMannequinPose(uint16 itemID, uint8 race, uint8 pose)
                         PMannequin->setMannequinRace(race);
                         PMannequin->setMannequinPose(pose);
 
-                        // Include the update into the database
-                        char        extra[sizeof(PMannequin->m_extra) * 2 + 1];
-                        const char* fmtQuery = "UPDATE char_inventory  \
-                               SET extra = '%s' \
-                               WHERE charid = %u AND itemId = %u";
+                        const char* fmtQuery = "UPDATE char_inventory "
+                                               "SET extra = ? "
+                                               "WHERE charid = ? AND itemId = ?"
+                                               "LIMIT 1";
 
-                        _sql->EscapeStringLen(extra, (const char*)PMannequin->m_extra, sizeof(PMannequin->m_extra));
-                        if (_sql->Query(fmtQuery, extra, PChar->id, PMannequin->getID()) == SQL_ERROR)
+                        if (db::preparedStmt(fmtQuery, PMannequin->m_extra, PChar->id, PMannequin->getID()))
                         {
                             ShowError("lua_baseentity::setMannequinPose: Cannot insert item to database");
                         }

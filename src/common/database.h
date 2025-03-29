@@ -27,10 +27,14 @@
 #include "tracy.h"
 #include "xi.h"
 
+#include <array>
+#include <bitset>
 #include <istream>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 // TODO: mariadb-connector-cpp triggers this. Remove once they fix it.
 // 4263 'function': member function does not override any base class member functions
@@ -730,7 +734,9 @@ namespace db
     // @brief Escape a string for use in a query.
     // @param str The string to escape.
     // @return The escaped string.
-    auto escapeString(std::string const& str) -> std::string;
+    auto escapeString(std::string_view str) -> std::string;
+    auto escapeString(const std::string& str) -> std::string;
+    auto escapeString(const char* str) -> std::string;
 
     // @brief Get the database schema.
     // @return The database schema.

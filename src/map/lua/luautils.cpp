@@ -4786,8 +4786,6 @@ namespace luautils
                 PMob->m_SpawnPoint.x        = _sql->GetFloatData(0);
                 PMob->m_SpawnPoint.y        = _sql->GetFloatData(1);
                 PMob->m_SpawnPoint.z        = _sql->GetFloatData(2);
-                // ShowDebug(CL_RED"UpdateNMSpawnPoint: After %i - %f, %f, %f, %i", r,
-                // PMob->m_SpawnPoint.x,PMob->m_SpawnPoint.y,PMob->m_SpawnPoint.z,PMob->m_SpawnPoint.rotation);
             }
             else
             {
@@ -5050,14 +5048,13 @@ namespace luautils
     {
         TracyZoneScoped;
 
-        uint16 effectId = 0;
-        int32  ret      = _sql->Query("SELECT effectId FROM despoil_effects WHERE itemId = %u", itemId);
-        if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
+        const auto rset = db::preparedStmt("SELECT effectId FROM despoil_effects WHERE itemId = ? LIMIT 1", itemId);
+        if (rset && rset->rowsCount() && rset->next())
         {
-            effectId = (uint16)_sql->GetUIntData(0);
+            return rset->get<uint16>("effectId");
         }
 
-        return effectId;
+        return 0;
     }
 
     void OnFurniturePlaced(CCharEntity* PChar, CItemFurnishing* PItem)
