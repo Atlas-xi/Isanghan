@@ -2759,6 +2759,20 @@ void SmallPacket0x05A(MapSession* const PSession, CCharEntity* const PChar, CBas
  *                                                                       *
  ************************************************************************/
 
+// https://github.com/atom0s/XiPackets/blob/main/world/client/0x005B/README.md
+struct GP_CLI_EVENTEND
+{
+    uint16_t id : 9;
+    uint16_t size : 7;
+    uint16_t sync;
+    uint32_t UniqueNo;  // PS2: UniqueNo
+    uint32_t EndPara;   // PS2: EndPara
+    uint16_t ActIndex;  // PS2: ActIndex
+    uint16_t Mode;      // PS2: Mode
+    uint16_t EventNum;  // PS2: EventNum
+    uint16_t EventPara; // PS2: EventPara
+};
+
 void SmallPacket0x05B(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
@@ -2766,8 +2780,10 @@ void SmallPacket0x05B(MapSession* const PSession, CCharEntity* const PChar, CBas
     if (!PChar->isInEvent())
         return;
 
-    auto Result  = data.ref<uint32>(0x08);
-    auto EventID = data.ref<uint16>(0x12);
+    auto eventData = data.as<GP_CLI_EVENTEND>();
+
+    auto Result  = eventData->EndPara;
+    auto EventID = eventData->EventPara;
 
     if (PChar->currentEvent->eventId == EventID)
     {
@@ -2776,7 +2792,7 @@ void SmallPacket0x05B(MapSession* const PSession, CCharEntity* const PChar, CBas
             Result = PChar->currentEvent->option;
         }
 
-        if (data.ref<uint8>(0x0E) != 0)
+        if (eventData->Mode == 1) // This mode is used when updating a pending event tag.
         {
             // If optional cutscene is started, we check to see if the selected option should lock the player
             if (Result != -1 && PChar->currentEvent->hasCutsceneOption(Result))
@@ -2806,6 +2822,24 @@ void SmallPacket0x05B(MapSession* const PSession, CCharEntity* const PChar, CBas
  *                                                                       *
  ************************************************************************/
 
+// https://github.com/atom0s/XiPackets/blob/main/world/client/0x005C/README.md
+struct GP_CLI_EVENTENDXZY
+{
+    uint16_t id : 9;
+    uint16_t size : 7;
+    uint16_t sync;
+    float    x;         // PS2: x
+    float    y;         // PS2: y
+    float    z;         // PS2: z
+    uint32_t UniqueNo;  // PS2: UniqueNo
+    uint32_t EndPara;   // PS2: EndPara
+    uint16_t EventNum;  // PS2: EventNum
+    uint16_t EventPara; // PS2: EventPara
+    uint16_t ActIndex;  // PS2: ActIndex
+    uint8_t  Mode;      // PS2: Mode
+    uint8_t  dir;       // PS2: dir
+};
+
 void SmallPacket0x05C(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
@@ -2813,14 +2847,16 @@ void SmallPacket0x05C(MapSession* const PSession, CCharEntity* const PChar, CBas
     if (!PChar->isInEvent())
         return;
 
-    auto Result  = data.ref<uint32>(0x14);
-    auto EventID = data.ref<uint16>(0x1A);
+    auto eventData = data.as<GP_CLI_EVENTENDXZY>();
+
+    auto Result  = eventData->EndPara;
+    auto EventID = eventData->EventPara;
 
     if (PChar->currentEvent->eventId == EventID)
     {
         bool updatePosition = false;
 
-        if (data.ref<uint8>(0x1E) != 0)
+        if (eventData->Mode == 1) // This value is always set to 1.
         {
             // TODO: Currently the return value for onEventUpdate in Interaction Framework is not received.  Remove
             // the localVar check when this is resolved.
@@ -2844,14 +2880,18 @@ void SmallPacket0x05C(MapSession* const PSession, CCharEntity* const PChar, CBas
         if (updatePosition)
         {
             position_t newPos = {
-                data.ref<float>(0x04),
-                data.ref<float>(0x08),
-                data.ref<float>(0x0C),
+                eventData->x,
+                eventData->y,
+                eventData->z,
                 0,
-                data.ref<uint8>(0x1F),
+                eventData->dir,
             };
-            PChar->pushPacket<CPositionPacket>(PChar, newPos, POSMODE::EVENT);
-            // PChar->pushPacket<CCSPositionPacket>(PChar); // Same as CPositionPacket? When is this one sent?
+            PChar->pushPacket<CCSPositionPacket>(PChar, newPos, POSMODE::EVENT);
+            PChar->pushPacket<CPositionPacket>(PChar, newPos, POSMODE::NORMAL);
+        }
+        else
+        {
+            PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::CLEAR);
         }
     }
     PChar->pushPacket<CReleasePacket>(PChar, RELEASE_TYPE::EVENT);
@@ -3069,7 +3109,7 @@ void SmallPacket0x05E(MapSession* const PSession, CCharEntity* const PChar, CBas
                 PChar->loc.p.rotation += 128;
 
                 PChar->pushPacket<CMessageSystemPacket>(0, 0, MsgStd::CouldNotEnter); // You could not enter the next area.
-                PChar->pushPacket<CCSPositionPacket>(PChar);
+                PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::RESET);
 
                 PChar->status = STATUS_TYPE::NORMAL;
                 return;
@@ -3079,7 +3119,7 @@ void SmallPacket0x05E(MapSession* const PSession, CCharEntity* const PChar, CBas
                 PChar->loc.p.rotation += 128;
 
                 PChar->pushPacket<CMessageSystemPacket>(0, 0, MsgStd::CouldNotEnter); // You could not enter the next area.
-                PChar->pushPacket<CCSPositionPacket>(PChar);
+                PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::RESET);
 
                 PChar->status = STATUS_TYPE::NORMAL;
                 return;
@@ -3095,7 +3135,7 @@ void SmallPacket0x05E(MapSession* const PSession, CCharEntity* const PChar, CBas
                     PChar->loc.p.rotation += 128;
 
                     PChar->pushPacket<CMessageSystemPacket>(0, 0, MsgStd::CouldNotEnter); // You could not enter the next area.
-                    PChar->pushPacket<CCSPositionPacket>(PChar);
+                    PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::RESET);
 
                     PChar->status = STATUS_TYPE::NORMAL;
                     return;
@@ -3137,7 +3177,7 @@ void SmallPacket0x05E(MapSession* const PSession, CCharEntity* const PChar, CBas
         PChar->loc.p.rotation += 128;
 
         PChar->pushPacket<CMessageSystemPacket>(0, 0, MsgStd::CouldNotEnter); // You could not enter the next area.
-        PChar->pushPacket<CCSPositionPacket>(PChar);
+        PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::RESET);
 
         PChar->status = STATUS_TYPE::NORMAL;
 
