@@ -283,7 +283,7 @@ xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, action
     -- Multipliers.
     local sdt                         = xi.spells.damage.calculateSDT(target, actionElement)
     local resist                      = xi.mobskills.applyPlayerResistance(actor, nil, target, actor:getStat(xi.mod.INT) - target:getStat(xi.mod.INT), petAccBonus, actionElement)
-    local dayAndWeather               = xi.spells.damage.calculateDayAndWeather(actor, 0, actionElement)
+    local dayAndWeather               = xi.spells.damage.calculateDayAndWeather(actor, actionElement, false)
     local magicBonusDiff              = xi.spells.damage.calculateMagicBonusDiff(actor, target, 0, 0, actionElement)
     local targetMagicDamageAdjustment = xi.spells.damage.calculateTMDA(target, actionElement)
 
