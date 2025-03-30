@@ -256,9 +256,9 @@ void SmallPacket0x00A(MapSession* const PSession, CCharEntity* const PChar, CBas
         return;
     }
 
-    /*
-     * Handle out of sync zone correction..
-     */
+    //
+    // Handle out of sync zone correction..
+    //
     if (data.ref<uint16_t>(0x02) > 1)
     {
         PSession->server_packet_id = data.ref<uint16_t>(0x02);
@@ -310,15 +310,19 @@ void SmallPacket0x00A(MapSession* const PSession, CCharEntity* const PChar, CBas
             return;
         }
 
-        // Update session
-        db::preparedStmt("UPDATE accounts_sessions SET targid = ?, server_addr = ?, client_port = ?, last_zoneout_time = 0 WHERE charid = ? LIMIT 1",
-                         PChar->targid, currentZone->GetIP(), PSession->client_ipp.getPort(), PChar->id);
-
+        charutils::updateSession(PSession, PChar, currentZone);
         charutils::loadDeathTimestamp(PChar);
         charutils::loadZoningFlag(PChar);
         charutils::SaveCharPosition(PChar);
         charutils::SaveZonesVisited(PChar);
         charutils::SavePlayTime(PChar);
+
+        if (PChar->m_moghouseID != 0)
+        {
+            PChar->m_charHistory.mhEntrances++;
+            charutils::updateMannequins(PChar);
+            gardenutils::UpdateGardening(PChar, false);
+        }
     }
 
     // Only release client from "Downloading Data" if the packet sequence came in without a drop on 0x00D
@@ -326,14 +330,6 @@ void SmallPacket0x00A(MapSession* const PSession, CCharEntity* const PChar, CBas
     // TODO: Need further research into the relationship between 0x00D and 0x00A, if any.
     if (PChar->loc.zone != nullptr)
     {
-        if (PChar->m_moghouseID != 0)
-        {
-            gardenutils::UpdateGardening(PChar, false);
-            charutils::updateMannequins(PChar);
-
-            PChar->m_charHistory.mhEntrances++;
-        }
-
         PChar->pushPacket<CDownloadingDataPacket>();
         PChar->pushPacket<CZoneInPacket>(PChar, PChar->currentEvent);
         PChar->pushPacket<CZoneVisitedPacket>(PChar);
@@ -1378,7 +1374,7 @@ void SmallPacket0x029(MapSession* const PSession, CCharEntity* const PChar, CBas
 
         if (NewSlotID != ERROR_SLOTID)
         {
-            const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+            const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ?",
                                                ToLocationID, NewSlotID, PChar->id, FromLocationID, FromSlotID);
             if (rset && rset->rowsAffected())
             {
@@ -2092,8 +2088,8 @@ void SmallPacket0x03B(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     const auto rset = db::preparedStmt("UPDATE char_inventory "
                                        "SET "
-                                       "extra = {} "
-                                       "WHERE location = {} AND slot = {} AND charid = {}",
+                                       "extra = ? "
+                                       "WHERE location = ? AND slot = ? AND charid = ?",
                                        PMannequin->m_extra, mannequinStorageLoc, mannequinStorageLocSlot, PChar->id);
     if (rset)
     {
@@ -3122,8 +3118,6 @@ void SmallPacket0x064(MapSession* const PSession, CCharEntity* const PChar, CBas
         return;
     }
 
-    // Write 64 bytes to PChar->keys.tables[KeyTable].seenList (512 bits)
-    // std::memcpy(&PChar->keys.tables[KeyTable].seenList, data[0x08], 0x40);
     for (int i = 0; i < 0x40; i++)
     {
         // copy each bit of byte into std::bit location
@@ -3487,14 +3481,15 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
 {
     TracyZoneScoped;
 
-    switch (data.ref<uint8>(0x0A))
+    const auto type       = data.ref<uint8>(0x0A);
+    const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
+
+    switch (type)
     {
         case 0: // party - party leader may remove member of his own party
         {
             if (PChar->PParty && PChar->PParty->GetLeader() == PChar)
             {
-                const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                 CCharEntity* PVictim = dynamic_cast<CCharEntity*>(PChar->PParty->GetMemberByName(victimName));
                 if (PVictim)
                 {
@@ -3524,8 +3519,6 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
                 }
                 else
                 {
-                    const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                     if (const auto victimId = charutils::getCharIdFromName(victimName))
                     {
                         const auto rset = db::preparedStmt("DELETE FROM accounts_parties WHERE partyid = ? AND charid = ?", PChar->id, victimId);
@@ -3562,8 +3555,6 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
             CItemLinkshell* PItemLinkshell = (CItemLinkshell*)PChar->getEquip(SLOT_LINK1);
             if (PChar->PLinkshell1 && PItemLinkshell)
             {
-                const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                 message::send(ipc::LinkshellRemove{
                     .changerId     = PChar->id,
                     .victimName    = victimName,
@@ -3579,8 +3570,6 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
             CItemLinkshell* PItemLinkshell = (CItemLinkshell*)PChar->getEquip(SLOT_LINK2);
             if (PChar->PLinkshell2 && PItemLinkshell)
             {
-                const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                 message::send(ipc::LinkshellRemove{
                     .changerId     = PChar->id,
                     .victimName    = victimName,
@@ -3597,8 +3586,6 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
                 CCharEntity* PVictim = nullptr;
                 for (std::size_t i = 0; i < PChar->PParty->m_PAlliance->partyList.size(); ++i)
                 {
-                    const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                     PVictim = dynamic_cast<CCharEntity*>(PChar->PParty->m_PAlliance->partyList[i]->GetMemberByName(victimName));
                     if (PVictim && PVictim->PParty && PVictim->PParty->m_PAlliance) // victim is in this party
                     {
@@ -3623,8 +3610,7 @@ void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBas
                 }
                 if (!PVictim && PChar->PParty->m_PAlliance->getMainParty() == PChar->PParty)
                 {
-                    const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-                    uint32     allianceID = PChar->PParty->m_PAlliance->m_AllianceID;
+                    uint32 allianceID = PChar->PParty->m_PAlliance->m_AllianceID;
 
                     if (const auto victimId = charutils::getCharIdFromName(victimName))
                     {
@@ -3808,7 +3794,7 @@ void SmallPacket0x076(MapSession* const PSession, CCharEntity* const PChar, CBas
 
 /************************************************************************
  *                                                                       *
- *                                                                       *
+ *  Group Permission Change                                              *
  *                                                                       *
  ************************************************************************/
 
@@ -3816,15 +3802,16 @@ void SmallPacket0x077(MapSession* const PSession, CCharEntity* const PChar, CBas
 {
     TracyZoneScoped;
 
-    switch (data.ref<uint8>(0x14))
+    const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
+    const auto type       = data.ref<uint8>(0x14);
+    const auto permission = data.ref<uint8>(0x15);
+
+    switch (type)
     {
         case 0: // party
         {
             if (PChar->PParty != nullptr && PChar->PParty->GetLeader() == PChar)
             {
-                const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
-                const auto permission = data.ref<uint8>(0x15);
-
                 ShowDebug(fmt::format("(Party) Altering permissions of {} to {}", memberName, permission));
                 PChar->PParty->AssignPartyRole(memberName, permission);
             }
@@ -3834,9 +3821,6 @@ void SmallPacket0x077(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             if (PChar->PLinkshell1 != nullptr)
             {
-                const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
-                const auto permission = data.ref<uint8>(0x15);
-
                 message::send(ipc::LinkshellRankChange{
                     .changerId   = PChar->id,
                     .memberName  = memberName,
@@ -3850,9 +3834,6 @@ void SmallPacket0x077(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             if (PChar->PLinkshell2 != nullptr)
             {
-                const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
-                const auto permission = data.ref<uint8>(0x15);
-
                 message::send(ipc::LinkshellRankChange{
                     .changerId   = PChar->id,
                     .memberName  = memberName,
@@ -3867,8 +3848,6 @@ void SmallPacket0x077(MapSession* const PSession, CCharEntity* const PChar, CBas
             if (PChar->PParty && PChar->PParty->m_PAlliance && PChar->PParty->GetLeader() == PChar &&
                 PChar->PParty->m_PAlliance->getMainParty() == PChar->PParty)
             {
-                const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
-
                 ShowDebug(fmt::format("(Alliance) Changing leader to {}", memberName));
                 PChar->PParty->m_PAlliance->assignAllianceLeader(memberName);
 
@@ -4479,31 +4458,28 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
 {
     TracyZoneScoped;
 
-    char  msgBuffer[256]  = {};
-    uint8 messagePosition = 0x07;
+    const auto messagePosition            = 0x06;
+    const auto messageLength              = std::min<std::size_t>(data.getSize() - messagePosition, 256);
+    const auto rawMessage                 = asStringFromUntrustedSource(data[messagePosition], messageLength);
+    const auto firstChar                  = rawMessage[0];
+    const auto rawMessageWithoutFirstChar = rawMessage.substr(1);
 
-    std::memcpy(&msgBuffer, data[messagePosition], std::min(data.getSize() - messagePosition, sizeof(msgBuffer)));
-
-    if (data.ref<uint8>(0x06) == '!' && !jailutils::InPrison(PChar) && (CCommandHandler::call(lua, PChar, msgBuffer) == 0 || PChar->m_GMlevel > 0))
+    if (firstChar == '!' && !jailutils::InPrison(PChar) && (CCommandHandler::call(lua, PChar, rawMessageWithoutFirstChar) == 0 || PChar->m_GMlevel > 0))
     {
         // this makes sure a command isn't sent to chat
     }
-    else if (data.ref<uint8>(0x06) == '#' && PChar->m_GMlevel > 0)
+    else if (firstChar == '#' && PChar->m_GMlevel > 0)
     {
-        const auto rawMessage = asStringFromUntrustedSource(data[0x07]);
-
         message::send(ipc::ChatMessageServerMessage{
             .senderId   = PChar->id,
             .senderName = PChar->getName(),
-            .message    = rawMessage,
+            .message    = rawMessageWithoutFirstChar,
             .zoneId     = PChar->getZone(),
             .gmLevel    = PChar->m_GMlevel,
         });
     }
     else
     {
-        const auto rawMessage = asStringFromUntrustedSource(data[0x06]);
-
         if (jailutils::InPrison(PChar))
         {
             if (data.ref<uint8>(0x04) == MESSAGE_SAY)
@@ -4511,8 +4487,6 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                 if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_SAY"))
                 {
                     // clang-format off
-                    // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                    //     : be gone by the time we action this lambda on the worker thread.
                     Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                     {
                         const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'SAY', ?, ?, current_timestamp())";
@@ -4539,8 +4513,6 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                     if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_SAY"))
                     {
                         // clang-format off
-                        // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                        //     : be gone by the time we action this lambda on the worker thread.
                         Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                         {
                             const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'SAY', ?, ?, current_timestamp())";
@@ -4564,8 +4536,6 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                     if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_SHOUT"))
                     {
                         // clang-format off
-                        // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                        //     : be gone by the time we action this lambda on the worker thread.
                         Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                         {
                             const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'SHOUT', ?, ?, current_timestamp())";
@@ -4598,8 +4568,6 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                             DecodeStringLinkshell(PChar->PLinkshell1->getName(), decodedLinkshellName);
 
                             // clang-format off
-                            // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                            //     : be gone by the time we action this lambda on the worker thread.
                             Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage, decodedLinkshellName]()
                             {
                                 const auto query = "INSERT INTO audit_chat (speaker, type, lsName, zoneid, message, datetime) VALUES(?, 'LINKSHELL', ?, ?, ?, current_timestamp())";
@@ -4632,8 +4600,6 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                             DecodeStringLinkshell(PChar->PLinkshell2->getName(), decodedLinkshellName);
 
                             // clang-format off
-                            // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                            //     : be gone by the time we action this lambda on the worker thread.
                             Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage, decodedLinkshellName]()
                             {
                                 const auto query = "INSERT INTO audit_chat (speaker, type, lsName, zoneid, message, datetime) VALUES(?, 'LINKSHELL', ?, ?, ?, current_timestamp())";
@@ -4677,8 +4643,6 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                         if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_PARTY"))
                         {
                             // clang-format off
-                            // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                            //     : be gone by the time we action this lambda on the worker thread.
                             Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                             {
                                 const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'PARTY', ?, ?, current_timestamp())";
@@ -4720,8 +4684,6 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                             if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_YELL"))
                             {
                                 // clang-format off
-                                // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                                //     : be gone by the time we action this lambda on the worker thread.
                                 Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                                 {
                                     const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'YELL', ?, ?, current_timestamp())";
@@ -4762,8 +4724,6 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                         if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_UNITY"))
                         {
                             // clang-format off
-                            // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                            //     : be gone by the time we action this lambda on the worker thread.
                             Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), unityLeader = PChar->PUnityChat->getLeader(), rawMessage]()
                             {
                                 const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, unity, message, datetime) VALUES(?, 'UNITY', ?, ?, ?, current_timestamp())";
@@ -4802,15 +4762,14 @@ void SmallPacket0x0B6(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     const auto recipientName = db::escapeString(asStringFromUntrustedSource(data[0x06], 15));
 
-    char  message[256]    = {}; // /t messages using "<t>" with a long named NPC targeted caps out at 138 bytes, increasing to the nearest power of 2
-    uint8 messagePosition = 0x15;
-
-    std::memcpy(&message, data[messagePosition], std::min(data.getSize() - messagePosition, sizeof(message)));
+    const auto messagePosition = 0x15;
+    const auto messageLength   = std::min<std::size_t>(data.getSize() - messagePosition, 256);
+    const auto rawMessage      = asStringFromUntrustedSource(data[messagePosition], messageLength);
 
     if (strcmp(recipientName.c_str(), "_CUSTOM_MENU") == 0 &&
         luautils::HasCustomMenuContext(PChar))
     {
-        luautils::HandleCustomMenu(PChar, message);
+        luautils::HandleCustomMenu(PChar, rawMessage);
         return;
     }
 
@@ -4818,7 +4777,7 @@ void SmallPacket0x0B6(MapSession* const PSession, CCharEntity* const PChar, CBas
         .senderId      = PChar->id,
         .senderName    = PChar->getName(),
         .recipientName = recipientName,
-        .message       = message,
+        .message       = rawMessage,
         .zoneId        = PChar->getZone(),
         .gmLevel       = PChar->m_GMlevel,
     });
@@ -4826,12 +4785,10 @@ void SmallPacket0x0B6(MapSession* const PSession, CCharEntity* const PChar, CBas
     if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<bool>("map.AUDIT_TELL"))
     {
         // clang-format off
-        // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-        //     : be gone by the time we action this lambda on the worker thread.
-        Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), recipient = recipientName, message]()
+        Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), recipient = recipientName, rawMessage]()
         {
             const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, recipient, message, datetime) VALUES(?, 'TELL', ?, ?, ?, current_timestamp())";
-            if (!db::preparedStmt(query, name, zoneId, recipient, message))
+            if (!db::preparedStmt(query, name, zoneId, recipient, rawMessage))
             {
                 ShowError("Failed to insert TELL audit_chat record for player '%s'", name);
             }
@@ -5627,13 +5584,17 @@ void SmallPacket0x0DE(MapSession* const PSession, CCharEntity* const PChar, CBas
     TracyZoneScoped;
 
     // Maximum bazaar message limit: 120 characters
-    const auto escapedMessage = db::escapeString(asStringFromUntrustedSource(data[4], 120));
+    //
+    // NOTE: We are NOT escaping this because the exact message needs to be stored to
+    //     : be correctly displayed in the bazaar. We're storing through a prepared statement so
+    //     : this is safe from injection.
+    const auto message = asStringFromUntrustedSource(data[4], 120);
 
-    PChar->bazaar.message = escapedMessage;
-
-    db::preparedStmt("UPDATE char_stats SET bazaar_message = ? WHERE charid = ? LIMIT 1", escapedMessage, PChar->id);
-
-    DebugBazaarsFmt("Bazaar Interaction [Set Message] - Character: {}, Message: '{}'", PChar->name, escapedMessage);
+    if (db::preparedStmt("UPDATE char_stats SET bazaar_message = ? WHERE charid = ? LIMIT 1", message, PChar->id))
+    {
+        DebugBazaarsFmt("Bazaar Interaction [Set Message] - Character: {}, Message: '{}'", PChar->name, message);
+        PChar->bazaar.message = message;
+    }
 }
 
 /************************************************************************
@@ -5646,7 +5607,10 @@ void SmallPacket0x0E0(MapSession* const PSession, CCharEntity* const PChar, CBas
 {
     TracyZoneScoped;
 
-    const auto message = db::escapeString(asStringFromUntrustedSource(data[0x04], 256));
+    // NOTE: As with the bazaar message, we aren't going to escape this because we need the
+    //     : exact message to be stored to be displayed correctly. We're storing through a prepared statement so
+    //     : this is safe from injection.
+    const auto message = asStringFromUntrustedSource(data[0x04], 256);
 
     uint8 type = message.empty() ? 0 : data.ref<uint8>(data.getSize() - 4);
 
@@ -5655,15 +5619,11 @@ void SmallPacket0x0E0(MapSession* const PSession, CCharEntity* const PChar, CBas
         return;
     }
 
-    const auto rset = db::preparedStmt("UPDATE accounts_sessions SET seacom_type = ?, seacom_message = ? WHERE charid = ? LIMIT 1",
-                                       type, message, PChar->id);
-    if (rset)
+    if (db::preparedStmt("UPDATE accounts_sessions SET seacom_type = ?, seacom_message = ? WHERE charid = ? LIMIT 1", type, message, PChar->id))
     {
-        PChar->search.message.clear();
-        PChar->search.message.insert(0, message);
+        PChar->search.message     = message;
         PChar->search.messagetype = type;
     }
-    return;
 }
 
 /************************************************************************
@@ -5727,7 +5687,10 @@ void SmallPacket0x0E2(MapSession* const PSession, CCharEntity* const PChar, CBas
             {
                 if (static_cast<uint8>(PItemLinkshell->GetLSType()) <= PChar->PLinkshell1->m_postRights)
                 {
-                    const auto lsMessage = db::escapeString(asStringFromUntrustedSource(data[0x10], 128));
+                    // NOTE: We are not escaping this because we need the exact message to be stored
+                    //     : to be displayed correctly. We're storing through a prepared statement so
+                    //     : this is safe from injection.
+                    const auto lsMessage = asStringFromUntrustedSource(data[0x10], 128);
                     PChar->PLinkshell1->setMessage(lsMessage, PChar->getName());
                     return;
                 }

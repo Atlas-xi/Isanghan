@@ -1822,7 +1822,8 @@ namespace luautils
     {
         TracyZoneScoped;
         charutils::PersistCharVar(playerId, "inJail", cellId);
-        _sql->Query("UPDATE chars SET pos_x=%f, pos_y=%f, pos_z=%f, pos_rot=%u, pos_zone=%d, moghouse=0 WHERE charid=%u", posX, posY, posZ, rot, ZONEID::ZONE_MORDION_GAOL, playerId);
+        db::preparedStmt("UPDATE chars SET pos_x = ?, pos_y = ?, pos_z = ?, pos_rot = ?, pos_zone = ?, moghouse = 0 WHERE charid = ?",
+                         posX, posY, posZ, rot, ZONEID::ZONE_MORDION_GAOL, playerId);
     }
 
     void DrawIn(CLuaBaseEntity* PLuaBaseEntity, sol::table const& table, float offset, float degrees)
@@ -4767,11 +4768,12 @@ namespace luautils
         CMobEntity* PMob = (CMobEntity*)zoneutils::GetEntity(mobid, TYPE_MOB);
         if (PMob != nullptr)
         {
-            int32 r   = 0;
-            int32 ret = _sql->Query("SELECT count(mobid) FROM `nm_spawn_points` where mobid=%u", mobid);
-            if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS && _sql->GetUIntData(0) > 0)
+            int32 r = 0;
+
+            const auto rset = db::preparedStmt("SELECT COUNT(mobid) FROM `nm_spawn_points` WHERE mobid = ?", mobid);
+            if (rset && rset->rowsCount() && rset->next() && rset->get<uint32>(0) > 0)
             {
-                r = xirand::GetRandomNumber(_sql->GetUIntData(0));
+                r = xirand::GetRandomNumber(rset->get<uint32>(0));
             }
             else
             {
@@ -4779,13 +4781,13 @@ namespace luautils
                 return;
             }
 
-            ret = _sql->Query("SELECT pos_x, pos_y, pos_z FROM `nm_spawn_points` WHERE mobid=%u AND pos=%i", mobid, r);
-            if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
+            const auto rset2 = db::preparedStmt("SELECT pos_x, pos_y, pos_z FROM `nm_spawn_points` WHERE mobid = ? AND pos = ?", mobid, r);
+            if (rset2 && rset2->rowsCount() && rset2->next())
             {
                 PMob->m_SpawnPoint.rotation = xirand::GetRandomNumber(256);
-                PMob->m_SpawnPoint.x        = _sql->GetFloatData(0);
-                PMob->m_SpawnPoint.y        = _sql->GetFloatData(1);
-                PMob->m_SpawnPoint.z        = _sql->GetFloatData(2);
+                PMob->m_SpawnPoint.x        = rset2->get<float>(0);
+                PMob->m_SpawnPoint.y        = rset2->get<float>(1);
+                PMob->m_SpawnPoint.z        = rset2->get<float>(2);
             }
             else
             {
@@ -4838,19 +4840,20 @@ namespace luautils
                               "INNER JOIN zone_settings z ON z.zoneid = c.pos_zone "
                               "WHERE "
                               "varname = '[Fish]LastCastTime' AND "
-                              "FROM_UNIXTIME(cv.value) > NOW() - INTERVAL %u MINUTE "
+                              "FROM_UNIXTIME(cv.value) > NOW() - INTERVAL ? MINUTE "
                               "ORDER BY z.name, z.name, stats.mlvl, skill";
 
-        if (_sql->Query(Query, lookbackTime) != SQL_ERROR && _sql->NumRows() != 0)
+        const auto rset = db::preparedStmt(Query, lookbackTime);
+        if (rset && rset->rowsCount())
         {
-            while (_sql->NextRow() == SQL_SUCCESS)
+            while (rset->next())
             {
                 auto fisher          = lua.create_table();
-                auto charId          = _sql->GetUIntData(0);
-                fisher["playerName"] = _sql->GetStringData(1);
-                fisher["jobLevel"]   = _sql->GetUIntData(2);
-                fisher["zoneName"]   = _sql->GetStringData(3);
-                fisher["skill"]      = _sql->GetUIntData(4);
+                auto charId          = rset->get<uint32>(0);
+                fisher["playerName"] = rset->get<std::string>(1);
+                fisher["jobLevel"]   = rset->get<uint32>(2);
+                fisher["zoneName"]   = rset->get<std::string>(3);
+                fisher["skill"]      = rset->get<uint32>(4);
                 fishers[charId]      = fisher;
             }
         }

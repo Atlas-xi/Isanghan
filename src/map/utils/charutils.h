@@ -287,6 +287,7 @@ namespace charutils
 
     void removeCharFromZone(CCharEntity* PChar);
 
+    void updateSession(MapSession* PSession, CCharEntity* PChar, CZone* currentZone);
     void loadDeathTimestamp(CCharEntity* PChar);
     void loadZoningFlag(CCharEntity* PChar);
 

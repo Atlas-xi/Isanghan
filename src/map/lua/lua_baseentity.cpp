@@ -3682,12 +3682,12 @@ void CLuaBaseEntity::setHomePoint()
     PChar->profile.home_point.p           = PChar->loc.p;
     PChar->profile.home_point.destination = PChar->getZone();
 
-    const char* fmtQuery = "UPDATE chars \
-                            SET home_zone = %u, home_rot = %u, home_x = %.3f, home_y = %.3f, home_z = %.3f \
-                            WHERE charid = %u";
-
-    _sql->Query(fmtQuery, PChar->profile.home_point.destination, PChar->profile.home_point.p.rotation, PChar->profile.home_point.p.x,
-                PChar->profile.home_point.p.y, PChar->profile.home_point.p.z, PChar->id);
+    db::preparedStmt("UPDATE chars "
+                     "SET home_zone = ?, home_rot = ?, home_x = ?, home_y = ?, home_z = ? "
+                     "WHERE charid = ? "
+                     "LIMIT 1",
+                     PChar->profile.home_point.destination, PChar->profile.home_point.p.rotation, PChar->profile.home_point.p.x,
+                     PChar->profile.home_point.p.y, PChar->profile.home_point.p.z, PChar->id);
 }
 
 /************************************************************************
@@ -4614,17 +4614,17 @@ bool CLuaBaseEntity::breakLinkshell(std::string const& lsname)
 {
     bool found = false;
 
-    int32 ret = _sql->Query("SELECT broken, linkshellid FROM linkshells WHERE name = '%s'", lsname);
-    if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
+    const auto rset = db::preparedStmt("SELECT broken, linkshellid FROM linkshells WHERE name = ?", lsname);
+    if (rset && rset->rowsCount() && rset->next())
     {
-        uint8 broken = _sql->GetUIntData(0);
+        uint8 broken = rset->get<uint8>("broken");
 
         if (broken)
         {
             return true;
         }
 
-        uint32      lsid       = _sql->GetUIntData(1);
+        uint32      lsid       = rset->get<uint32>("linkshellid");
         CLinkshell* PLinkshell = linkshell::GetLinkshell(lsid);
 
         if (!PLinkshell)
@@ -4659,9 +4659,8 @@ bool CLuaBaseEntity::addLinkpearl(std::string const& lsname, bool equip)
     LSTYPE          lstype         = PChar->m_GMlevel > 0 ? LSTYPE_PEARLSACK : LSTYPE_LINKPEARL;
     if (PItemLinkPearl != nullptr)
     {
-        const char* Query = "SELECT linkshellid, color FROM linkshells WHERE name = '%s' AND broken = 0";
-        int32       ret   = _sql->Query(Query, lsname);
-        if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
+        const auto rset = db::preparedStmt("SELECT linkshellid, color FROM linkshells WHERE name = ? AND broken = 0", lsname);
+        if (rset && rset->rowsCount() && rset->next())
         {
             // build linkpearl
             char EncodedString[LinkshellStringLength];
@@ -4669,8 +4668,8 @@ bool CLuaBaseEntity::addLinkpearl(std::string const& lsname, bool equip)
             std::memset(&EncodedString, 0, sizeof(EncodedString));
             EncodeStringLinkshell(lsname, EncodedString);
             ((CItem*)PItemLinkPearl)->setSignature(EncodedString);
-            PItemLinkPearl->SetLSID(_sql->GetUIntData(0));
-            PItemLinkPearl->SetLSColor(_sql->GetIntData(1));
+            PItemLinkPearl->SetLSID(rset->get<uint32>("linkshellid"));
+            PItemLinkPearl->SetLSColor(rset->get<uint16>("color"));
             PItemLinkPearl->SetLSType(lstype);
             PItemLinkPearl->setQuantity(1);
             if (charutils::AddItem(PChar, LOC_INVENTORY, PItemLinkPearl) != ERROR_SLOTID)
@@ -6118,7 +6117,7 @@ void CLuaBaseEntity::setGMHidden(bool isHidden)
 
     PChar->updatemask |= UPDATE_HP;
 
-    _sql->Query("UPDATE char_flags SET gmHiddenEnabled = %u WHERE charid = %u", isHidden ? 1 : 0, PChar->id);
+    db::preparedStmt("UPDATE char_flags SET gmHiddenEnabled = ? WHERE charid = ?", isHidden ? 1 : 0, PChar->id);
 
     if (PChar->loc.zone)
     {
@@ -6821,7 +6820,7 @@ void CLuaBaseEntity::setLevelCap(uint8 cap)
     if (PChar->jobs.genkai != cap)
     {
         PChar->jobs.genkai = cap;
-        _sql->Query("UPDATE char_jobs SET genkai = %u WHERE charid = %u LIMIT 1", PChar->jobs.genkai, PChar->id);
+        db::preparedStmt("UPDATE char_jobs SET genkai = ? WHERE charid = ? LIMIT 1", PChar->jobs.genkai, PChar->id);
     }
 }
 
@@ -15833,12 +15832,11 @@ void CLuaBaseEntity::setPetName(uint8 pType, uint16 value, sol::object const& ar
     {
         if (petType == PET_TYPE::WYVERN)
         {
-            _sql->Query("INSERT INTO char_pet SET charid = %u, wyvernid = %u ON DUPLICATE KEY UPDATE wyvernid = %u", m_PBaseEntity->id, value, value);
+            db::preparedStmt("INSERT INTO char_pet SET charid = ?, wyvernid = ? ON DUPLICATE KEY UPDATE wyvernid = ?", m_PBaseEntity->id, value, value);
         }
         else if (petType == PET_TYPE::AUTOMATON)
         {
-            _sql->Query("INSERT INTO char_pet SET charid = %u, automatonid = %u ON DUPLICATE KEY UPDATE automatonid = %u", m_PBaseEntity->id, value,
-                        value);
+            db::preparedStmt("INSERT INTO char_pet SET charid = ?, automatonid = ? ON DUPLICATE KEY UPDATE automatonid = ?", m_PBaseEntity->id, value, value);
             puppetutils::LoadAutomaton(static_cast<CCharEntity*>(m_PBaseEntity));
         }
     }
@@ -15851,8 +15849,7 @@ void CLuaBaseEntity::setPetName(uint8 pType, uint16 value, sol::object const& ar
 
             uint32 nameValue = chocoboname1 + chocoboname2;
 
-            _sql->Query("INSERT INTO char_pet SET charid = %u, chocoboid = %u ON DUPLICATE KEY UPDATE chocoboid = %u", m_PBaseEntity->id, nameValue,
-                        nameValue);
+            db::preparedStmt("INSERT INTO char_pet SET charid = ?, chocoboid = ? ON DUPLICATE KEY UPDATE chocoboid = ?", m_PBaseEntity->id, nameValue, nameValue);
         }
     }
 }
@@ -15867,7 +15864,7 @@ void CLuaBaseEntity::registerChocobo(uint32 value)
 
     auto* PChar           = static_cast<CCharEntity*>(m_PBaseEntity);
     PChar->m_FieldChocobo = value;
-    _sql->Query("UPDATE char_pet SET field_chocobo = %u WHERE charid = %u", value, PChar->id);
+    db::preparedStmt("UPDATE char_pet SET field_chocobo = ? WHERE charid = ?", value, PChar->id);
 }
 
 /************************************************************************
@@ -16036,18 +16033,17 @@ auto CLuaBaseEntity::getAutomatonName() -> std::string
         return {};
     }
 
-    const char* Query = "SELECT name FROM "
-                        "char_pet LEFT JOIN pet_name ON automatonid = id "
-                        "WHERE charid = %u";
+    const auto rset = db::preparedStmt("SELECT name FROM "
+                                       "char_pet LEFT JOIN pet_name ON automatonid = id "
+                                       "WHERE charid = %u LIMIT 1",
+                                       m_PBaseEntity->id);
 
-    int32 ret = _sql->Query(Query, m_PBaseEntity->id);
-
-    if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
+    if (rset && rset->rowsCount() && rset->next())
     {
-        return _sql->GetStringData(0);
+        return rset->get<std::string>("name");
     }
 
-    return {}; // TODO: Verify this case
+    return "";
 }
 
 /************************************************************************

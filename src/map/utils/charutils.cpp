@@ -5534,43 +5534,57 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* Query = "UPDATE %s SET %s %u WHERE charid = %u";
-
-        _sql->Query(Query, "chars", "mentor =", PChar->m_mentorUnlocked, PChar->id);
+        db::preparedStmt("UPDATE chars "
+                         "SET mentor = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->m_mentorUnlocked, PChar->id);
     }
 
     void SavePlayerSettings(CCharEntity* PChar)
     {
         TracyZoneScoped;
-        const char* Query = "UPDATE %s SET %s %llu WHERE charid = %u";
 
         uint32_t playerSettings = {};
-
         std::memcpy(&playerSettings, &PChar->playerConfig, sizeof(uint32_t));
-        _sql->Query(Query, "chars", "settings =", playerSettings, PChar->id);
+
+        db::preparedStmt("UPDATE chars "
+                         "SET "
+                         "settings = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         playerSettings, PChar->id);
     }
 
     void SaveJobMasterDisplay(CCharEntity* PChar)
     {
         TracyZoneScoped;
-        const char* Query = "UPDATE %s SET %s %u WHERE charid = %u";
 
-        _sql->Query(Query, "chars", "job_master =", PChar->m_jobMasterDisplay, PChar->id);
+        db::preparedStmt("UPDATE chars "
+                         "SET "
+                         "job_master = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         PChar->m_jobMasterDisplay, PChar->id);
     }
 
     void SaveChatFilterFlags(CCharEntity* PChar)
     {
         TracyZoneScoped;
-        uint32_t    filters = {};
-        const char* Query   = "UPDATE chars SET chatfilters_1 = %llu WHERE charid = %u";
 
-        std::memcpy(&filters, &PChar->playerConfig.MessageFilter, sizeof(uint32_t));
+        uint32_t filters1 = {};
+        uint32_t filters2 = {};
 
-        _sql->Query(Query, filters, PChar->id);
-        Query = "UPDATE chars SET chatfilters_2 = %llu WHERE charid = %u";
+        std::memcpy(&filters1, &PChar->playerConfig.MessageFilter, sizeof(uint32_t));
+        std::memcpy(&filters2, &PChar->playerConfig.MessageFilter2, sizeof(uint32_t));
 
-        std::memcpy(&filters, &PChar->playerConfig.MessageFilter2, sizeof(uint32_t));
-        _sql->Query(Query, filters, PChar->id);
+        db::preparedStmt("UPDATE chars "
+                         "SET "
+                         "chatfilters_1 = ?, "
+                         "chatfilters_2 = ? "
+                         "WHERE charid = ? "
+                         "LIMIT 1",
+                         filters1, filters2, PChar->id);
     }
 
     /************************************************************************
@@ -5935,8 +5949,8 @@ namespace charutils
                 return;
         }
 
-        const char* query = "UPDATE char_unlocks SET %s = %u WHERE charid = %u";
-        _sql->Query(query, column, value, PChar->id);
+        db::preparedStmt("UPDATE char_unlocks SET ? = ? WHERE charid = ?",
+                         column, value, PChar->id);
     }
 
     float AddExpBonus(CCharEntity* PChar, float exp)
@@ -6417,17 +6431,16 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* Query = "UPDATE char_points SET %s = GREATEST(LEAST(%s+%d, %d), 0) WHERE charid = %u";
-
-        _sql->Query(Query, type, type, amount, max, PChar->id);
+        db::preparedStmt("UPDATE char_points SET ? = GREATEST(LEAST(? + ?, ?), 0) WHERE charid = ?", type, type, amount, max, PChar->id);
 
         if (strcmp(type, "unity_accolades") == 0 && amount > 0)
         {
-            float       evalPoints   = static_cast<float>(amount) / 1000;
-            const char* rankingQuery = "UPDATE unity_system SET points_current = points_current+%f WHERE leader=%d";
+            float evalPoints = static_cast<float>(amount) / 1000;
 
             AddPoints(PChar, "current_accolades", amount, std::numeric_limits<int32>::max()); // Do not cap current_accolades
-            _sql->Query(rankingQuery, evalPoints, PChar->profile.unity_leader);
+
+            db::preparedStmt("UPDATE unity_system SET points_current = points_current + ? WHERE leader = ?", evalPoints, PChar->profile.unity_leader);
+
             roeutils::UpdateUnityTrust(PChar, true);
 
             PChar->pushPacket<CCharStatsPacket>(PChar);
@@ -6442,9 +6455,7 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* Query = "UPDATE char_points SET %s = %d WHERE charid = %u";
-
-        _sql->Query(Query, type, amount, PChar->id);
+        db::preparedStmt("UPDATE char_points SET ? = ? WHERE charid = ?", type, amount, PChar->id);
 
         if (strcmp(type, "spark_of_eminence") == 0)
         {
@@ -6456,14 +6467,12 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* Query = "SELECT %s FROM char_points WHERE charid = %u";
-
-        int ret = _sql->Query(Query, type, PChar->id);
-
-        if (ret != SQL_ERROR && _sql->NextRow() == SQL_SUCCESS)
+        const auto rset = db::preparedStmt("SELECT * FROM char_points WHERE charid = ? LIMIT 1", type, PChar->id);
+        if (rset && rset->rowsCount() && rset->next())
         {
-            return _sql->GetIntData(0);
+            return rset->get<int32>(type);
         }
+
         return 0;
     }
 
@@ -6696,7 +6705,7 @@ namespace charutils
     {
         if (!localOnly)
         {
-            _sql->Query("DELETE FROM char_vars WHERE varname = '%s'", varName);
+            db::preparedStmt("DELETE FROM char_vars WHERE varname = ?", varName);
         }
 
         // clang-format off
@@ -6717,32 +6726,29 @@ namespace charutils
             return;
         }
 
-        const char* Query = "INSERT INTO char_vars SET charid = %u, varname = '%s', value = %i ON DUPLICATE KEY UPDATE value = value + %i";
-
-        _sql->Query(Query, PChar->id, var, value, value);
+        db::preparedStmt("INSERT INTO char_vars SET charid = ?, varname = ?, value = ? ON DUPLICATE KEY UPDATE value = value + ?", PChar->id, var, value, value);
 
         PChar->removeFromCharVarCache(var);
     }
 
     auto FetchCharVar(uint32 charId, std::string const& varName) -> std::pair<int32, uint32>
     {
-        const char* fmtQuery = "SELECT value, expiry FROM char_vars WHERE charid = %u AND varname = '%s' LIMIT 1";
-
-        int32 ret = _sql->Query(fmtQuery, charId, varName);
+        const auto rset = db::preparedStmt("SELECT value, expiry FROM char_vars WHERE charid = ? AND varname = ? LIMIT 1", charId, varName);
 
         int32  value  = 0;
         uint32 expiry = 0;
-        if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
+
+        if (rset && rset->rowsCount() && rset->next())
         {
-            value  = _sql->GetIntData(0);
-            expiry = _sql->GetUIntData(1);
+            value  = rset->get<int32>(0);
+            expiry = rset->get<uint32>(1);
 
             uint32 currentTimestamp = CVanaTime::getInstance()->getSysTime();
 
             if (expiry > 0 && expiry <= currentTimestamp)
             {
                 value = 0;
-                _sql->Query("DELETE FROM char_vars WHERE charid = %u AND varname = '%s'", charId, varName);
+                db::preparedStmt("DELETE FROM char_vars WHERE charid = ? AND varname = ?", charId, varName);
             }
         }
 
@@ -6753,11 +6759,11 @@ namespace charutils
     {
         if (value == 0)
         {
-            _sql->Query("DELETE FROM char_vars WHERE charid = %u AND varname = '%s' LIMIT 1", charId, var);
+            db::preparedStmt("DELETE FROM char_vars WHERE charid = ? AND varname = ? LIMIT 1", charId, var);
         }
         else
         {
-            _sql->Query("INSERT INTO char_vars SET charid = %u, varname = '%s', value = %i, expiry = %d ON DUPLICATE KEY UPDATE value = %i, expiry = %i", charId, var, value, expiry, value, expiry);
+            db::preparedStmt("INSERT INTO char_vars SET charid = ?, varname = ?, value = ?, expiry = ? ON DUPLICATE KEY UPDATE value = ?, expiry = ?", charId, var, value, expiry, value, expiry);
         }
     }
 
@@ -7309,6 +7315,12 @@ namespace charutils
         PChar->status = STATUS_TYPE::DISAPPEAR;
     }
 
+    void updateSession(MapSession* PSession, CCharEntity* PChar, CZone* currentZone)
+    {
+        db::preparedStmt("UPDATE accounts_sessions SET targid = ?, server_addr = ?, client_port = ?, last_zoneout_time = 0 WHERE charid = ? LIMIT 1",
+                         PChar->targid, currentZone->GetIP(), PSession->client_ipp.getPort(), PChar->id);
+    }
+
     void loadDeathTimestamp(CCharEntity* PChar)
     {
         const auto rset = db::preparedStmt("SELECT death FROM char_stats WHERE charid = ? LIMIT 1", PChar->id);
@@ -7395,15 +7407,26 @@ namespace charutils
                     auto* PFurnishing = static_cast<CItemFurnishing*>(PContainerItem);
                     if (PFurnishing->isInstalled() && PFurnishing->isMannequin())
                     {
-                        auto*  PMannequin = PFurnishing;
-                        uint16 mainId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 0]);
-                        uint16 subId      = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 1]);
-                        uint16 rangeId    = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 2]);
-                        uint16 headId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 3]);
-                        uint16 bodyId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 4]);
-                        uint16 handsId    = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 5]);
-                        uint16 legId      = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 6]);
-                        uint16 feetId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 7]);
+                        auto* PMannequin = PFurnishing;
+
+                        uint16 mainId  = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 0]);
+                        uint16 subId   = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 1]);
+                        uint16 rangeId = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 2]);
+                        uint16 headId  = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 3]);
+                        uint16 bodyId  = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 4]);
+                        uint16 handsId = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 5]);
+                        uint16 legId   = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 6]);
+                        uint16 feetId  = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 7]);
+                        uint8  race    = PMannequin->m_extra[10 + 8];
+                        uint8  pose    = PMannequin->m_extra[10 + 9];
+
+                        std::ignore = pose;
+
+                        if (race == 0)
+                        {
+                            ShowWarning("Invalid Mannequin placed (race of 0 in exdata, when races start at 1). It will be unusable.");
+                        }
+
                         PChar->pushPacket<CInventoryCountPacket>(safeContainerId, slotIndex, headId, bodyId, handsId, legId, feetId, mainId, subId, rangeId);
                     }
                 }

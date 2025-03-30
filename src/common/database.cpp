@@ -166,6 +166,21 @@ auto db::detail::validateQueryLeadingKeyword(std::string const& query) -> Result
     return ResultSetType::Invalid;
 }
 
+auto db::detail::validateQueryContent(std::string const& query) -> bool
+{
+    if (query.find("{}") != std::string::npos)
+    {
+        return false;
+    }
+
+    if (query.find(";") != std::string::npos)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 Synchronized<db::detail::State>& db::detail::getState()
 {
     TracyZoneScoped;
@@ -229,6 +244,12 @@ auto db::queryStr(std::string const& rawQuery) -> std::unique_ptr<db::detail::Re
     if (queryType == detail::ResultSetType::Invalid)
     {
         ShowErrorFmt("Invalid query: {}", rawQuery);
+        return nullptr;
+    }
+
+    if (!detail::validateQueryContent(rawQuery))
+    {
+        ShowErrorFmt("Invalid query content: {}", rawQuery);
         return nullptr;
     }
 

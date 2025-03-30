@@ -2415,6 +2415,7 @@ bool CCharEntity::IsMobOwner(CBattleEntity* PBattleTarget)
 void CCharEntity::HandleErrorMessage(std::unique_ptr<CBasicPacket>& msg)
 {
     TracyZoneScoped;
+
     if (msg && !isCharmed)
     {
         pushPacket(std::move(msg));
@@ -2424,6 +2425,7 @@ void CCharEntity::HandleErrorMessage(std::unique_ptr<CBasicPacket>& msg)
 void CCharEntity::OnDeathTimer()
 {
     TracyZoneScoped;
+
     charutils::SetCharVar(this, "expLost", 0);
     charutils::HomePoint(this, true);
 }
@@ -2431,6 +2433,7 @@ void CCharEntity::OnDeathTimer()
 void CCharEntity::OnRaise()
 {
     TracyZoneScoped;
+
     // TODO: Moghancement Experience needs to be factored in here somewhere.
     if (m_hasRaise > 0)
     {
@@ -2529,6 +2532,7 @@ void CCharEntity::OnRaise()
 void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
 {
     TracyZoneScoped;
+
     auto* PTarget = static_cast<CBattleEntity*>(state.GetTarget());
     auto* PItem   = state.GetItem();
 
@@ -2598,6 +2602,7 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
 CBattleEntity* CCharEntity::IsValidTarget(uint16 targid, uint16 validTargetFlags, std::unique_ptr<CBasicPacket>& errMsg)
 {
     TracyZoneScoped;
+
     auto* PTarget = CBattleEntity::IsValidTarget(targid, validTargetFlags, errMsg);
     if (PTarget)
     {
@@ -2634,6 +2639,7 @@ CBattleEntity* CCharEntity::IsValidTarget(uint16 targid, uint16 validTargetFlags
 void CCharEntity::Die()
 {
     TracyZoneScoped;
+
     if (PLastAttacker)
     {
         loc.zone->PushPacket(this, CHAR_INRANGE_SELF, std::make_unique<CMessageBasicPacket>(PLastAttacker, this, 0, 0, MSGBASIC_PLAYER_DEFEATED_BY));
@@ -2672,6 +2678,7 @@ void CCharEntity::Die()
 void CCharEntity::Die(duration _duration)
 {
     TracyZoneScoped;
+
     this->ClearTrusts();
 
     if (StatusEffectContainer->HasStatusEffect(EFFECT_WEAKNESS))
@@ -2723,6 +2730,7 @@ void CCharEntity::Die(duration _duration)
 void CCharEntity::Raise()
 {
     TracyZoneScoped;
+
     PAI->Internal_Raise();
     SetDeathTimestamp(0);
 }
@@ -2749,13 +2757,12 @@ int32 CCharEntity::GetTimeRemainingUntilDeathHomepoint() const
 int32 CCharEntity::GetTimeCreated()
 {
     TracyZoneScoped;
-    const char* fmtQuery = "SELECT UNIX_TIMESTAMP(timecreated) FROM chars WHERE charid = %u";
 
-    int32 ret = _sql->Query(fmtQuery, id);
+    const auto rset = db::preparedStmt("SELECT UNIX_TIMESTAMP(timecreated) FROM chars WHERE charid = ? LIMIT 1", id);
 
-    if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
+    if (rset && rset->rowsCount() && rset->next())
     {
-        return _sql->GetIntData(0);
+        return rset->get<int32>(0);
     }
 
     return 0;
@@ -3388,7 +3395,7 @@ void CCharEntity::clearCharVarsWithPrefix(std::string const& prefix)
         ++iter;
     }
 
-    _sql->Query("DELETE FROM char_vars WHERE charid = %u AND varname LIKE '%s%%'", this->id, prefix.c_str());
+    db::preparedStmt("DELETE FROM char_vars WHERE charid = ? AND varname LIKE CONCAT(?, '%')", this->id, prefix);
 }
 
 bool CCharEntity::startSynth(SKILLTYPE synthSkill)

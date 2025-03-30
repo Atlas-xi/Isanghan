@@ -214,6 +214,7 @@ namespace db
         };
 
         auto validateQueryLeadingKeyword(std::string const& query) -> ResultSetType;
+        auto validateQueryContent(std::string const& query) -> bool;
 
         class ResultSetWrapper final
         {
@@ -613,6 +614,12 @@ namespace db
         if (queryType == detail::ResultSetType::Invalid)
         {
             ShowErrorFmt("Invalid query: {}", rawQuery);
+            return nullptr;
+        }
+
+        if (!detail::validateQueryContent(rawQuery))
+        {
+            ShowErrorFmt("Invalid query content: {}", rawQuery);
             return nullptr;
         }
 
