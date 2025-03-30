@@ -6426,12 +6426,13 @@ namespace charutils
         return false;
     }
 
-    // char_points manipulation
     void AddPoints(CCharEntity* PChar, const char* type, int32 amount, int32 max)
     {
         TracyZoneScoped;
 
-        db::preparedStmt("UPDATE char_points SET ? = GREATEST(LEAST(? + ?, ?), 0) WHERE charid = ?", type, type, amount, max, PChar->id);
+        const auto currentPointsValue = GetPoints(PChar, type);
+        const auto newPointsValue     = std::clamp(currentPointsValue + amount, 0, max);
+        SetPoints(PChar, type, newPointsValue);
 
         if (strcmp(type, "unity_accolades") == 0 && amount > 0)
         {
@@ -6445,17 +6446,15 @@ namespace charutils
 
             PChar->pushPacket<CCharStatsPacket>(PChar);
         }
-        else if (strcmp(type, "spark_of_eminence") == 0)
-        {
-            PChar->pushPacket<CRoeSparkUpdatePacket>(PChar);
-        }
     }
 
     void SetPoints(CCharEntity* PChar, const char* type, int32 amount)
     {
         TracyZoneScoped;
 
-        db::preparedStmt("UPDATE char_points SET ? = ? WHERE charid = ?", type, amount, PChar->id);
+        // TODO: Build a lookup to validate the incoming type
+        const auto query = fmt::format("UPDATE char_points SET {} = ? WHERE charid = ?", type);
+        db::preparedStmt(query, amount, PChar->id);
 
         if (strcmp(type, "spark_of_eminence") == 0)
         {
@@ -6467,7 +6466,7 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const auto rset = db::preparedStmt("SELECT * FROM char_points WHERE charid = ? LIMIT 1", type, PChar->id);
+        const auto rset = db::preparedStmt("SELECT * FROM char_points WHERE charid = ? LIMIT 1", PChar->id);
         if (rset && rset->rowsCount() && rset->next())
         {
             return rset->get<int32>(type);
@@ -6480,8 +6479,6 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* leaderQuery = "UPDATE char_profile SET unity_leader=%d WHERE charid = %u";
-
         if (leaderID < 1 || leaderID > 11)
         {
             return;
@@ -6493,7 +6490,8 @@ namespace charutils
             unitychat::DelOnlineMember(PChar, PChar->PUnityChat->getLeader());
         }
         unitychat::AddOnlineMember(PChar, PChar->profile.unity_leader);
-        _sql->Query(leaderQuery, PChar->profile.unity_leader, PChar->id);
+
+        db::preparedStmt("UPDATE char_profile SET unity_leader = ? WHERE charid = ?", PChar->profile.unity_leader, PChar->id);
     }
 
     std::string GetConquestPointsName(CCharEntity* PChar)
@@ -6507,8 +6505,8 @@ namespace charutils
             case 2:
                 return "windurst_cp";
             default:
-                ShowError("Invalid nation received, returning nullptr.");
-                return nullptr;
+                ShowError("Invalid nation received, returning nothing.");
+                return "";
         }
     }
 
