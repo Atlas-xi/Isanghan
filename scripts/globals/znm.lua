@@ -185,7 +185,7 @@ xi.znm.soultrapper = xi.znm.soultrapper or {}
 -- onItemCheck
 -----------------------------------
 
-xi.znm.soultrapper.onItemCheck = function(target, item, player)
+xi.znm.soultrapper.onItemCheck = function(target, item, player, caster)
     -- can not be used on non mobs or Structure type mobs
     if
         not target:isMob() or
@@ -381,7 +381,7 @@ end
 -- onEventUpdate
 -----------------------------------
 
-xi.znm.ryo.onEventUpdate = function(player, csid, option)
+xi.znm.ryo.onEventUpdate = function(player, csid, option, npc)
     if csid == 914 then  -- Get approximate value of traded soulplate
         local zeniValue = xi.znm.ryo.tradedPlateValue(player)
 
@@ -423,7 +423,7 @@ xi.znm.ryo.onEventUpdate = function(player, csid, option)
     end
 end
 
-xi.znm.ryo.onEventFinish = function(player, csid, option)
+xi.znm.ryo.onEventFinish = function(player, csid, option, npc)
 end
 
 -----------------------------------
@@ -561,7 +561,7 @@ end
 -- onEventUpdate
 -----------------------------------
 
-xi.znm.sanraku.onEventUpdate = function(player, csid, option)
+xi.znm.sanraku.onEventUpdate = function(player, csid, option, npc)
     if csid == 909 then
         if option == 1 or option == 500 then -- adding islets menu
             local param = player:getVar('ZeniStatus') >= 3 and 1 or 0
@@ -592,7 +592,7 @@ xi.znm.sanraku.handleGainingAccessToIslets = function(player, option)
     if player:getCurrency('zeni_point') < zeniCost then -- Not enough zeni
         player:updateEvent(2)
     elseif player:hasKeyItem(keyItem) then -- Already have the salt
-        player:showText(GetNPCByID(ID.npc.SANRAKU), ID.text.APPRECIATE_MORE - 1)
+        player:showText(GetNPCByID(ID.npc.SANRAKU), ID.text.ALREADY_IN_POSSESSION)
     else
         player:addKeyItem(keyItem)
         player:delCurrency('zeni_point', zeniCost)
@@ -650,7 +650,7 @@ end
 -- onEventFinish
 -----------------------------------
 
-xi.znm.sanraku.onEventFinish = function(player, csid, option)
+xi.znm.sanraku.onEventFinish = function(player, csid, option, npc)
     if csid == 910 then
         xi.znm.sanraku.handleCompletedTradeWithPlate(player)
     elseif csid == 908 then
