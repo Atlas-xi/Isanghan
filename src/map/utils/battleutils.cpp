@@ -6024,6 +6024,12 @@ namespace battleutils
 
     bool HasClaim(CBattleEntity* PEntity, CBattleEntity* PTarget)
     {
+        if (PEntity == nullptr)
+        {
+            ShowWarning("PEntity is null.");
+            return false;
+        }
+
         if (PTarget == nullptr)
         {
             ShowWarning("PTarget is null.");

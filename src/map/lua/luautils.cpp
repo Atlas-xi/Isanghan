@@ -1407,6 +1407,32 @@ namespace luautils
         });
     }
 
+    void UpdateSanrakusMobs()
+    {
+        auto UpdateSanrakusMobs = lua["xi"]["znm"]["UpdateSanrakusMobs"];
+
+        if (!UpdateSanrakusMobs.valid())
+        {
+            ShowError("luautils::UpdateSanrakusMobs: UpdateSanrakusMobs call into Lua failed because it was invalid.");
+            return;
+        }
+
+        UpdateSanrakusMobs();
+    }
+
+    void ZNMPopPriceDecay()
+    {
+        auto ZNMPopPriceDecay = lua["xi"]["znm"]["ZNMPopPriceDecay"];
+
+        if (!ZNMPopPriceDecay.valid())
+        {
+            ShowError("luautils::ZNMPopPriceDecay: ZNMPopPriceDecay call into Lua failed because it was invalid.");
+            return;
+        }
+
+        ZNMPopPriceDecay();
+    }
+
     uint32 VanadielTime()
     {
         TracyZoneScoped;
