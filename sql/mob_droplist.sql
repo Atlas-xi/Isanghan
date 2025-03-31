@@ -1389,11 +1389,11 @@ INSERT INTO `mob_droplist` VALUES (151,0,0,1000,15718,@UNCOMMON); -- Freyas Lede
 -- ZoneID:  75 - Troll_Lapidarist
 -- ZoneID:  75 - Troll Ironworker
 -- ZoneID:  75 - Black Pudding
-INSERT INTO `mob_droplist` VALUES (152,1,1,200,14970,@URARE); -- Hoshikazu Tekko (Ultra Rare, 0.1%)
-INSERT INTO `mob_droplist` VALUES (152,1,1,200,15712,@URARE); -- Enyo's Leggings (Ultra Rare, 0.1%)
-INSERT INTO `mob_droplist` VALUES (152,1,1,200,15728,@URARE); -- Nemain's Sabots (Ultra Rare, 0.1%)
-INSERT INTO `mob_droplist` VALUES (152,1,1,200,15630,@URARE); -- Njord's Trousers (Ultra Rare, 0.1%)
-INSERT INTO `mob_droplist` VALUES (152,1,1,200,16097,@URARE); -- Anu's Tiara (Ultra Rare, 0.1%)
+INSERT INTO `mob_droplist` VALUES (152,1,1,@URARE,14970,200); -- Hoshikazu Tekko (Group 1, Ultra Rare, 0.1%)
+INSERT INTO `mob_droplist` VALUES (152,1,1,@URARE,15712,200); -- Enyo's Leggings (Group 1, Ultra Rare, 0.1%)
+INSERT INTO `mob_droplist` VALUES (152,1,1,@URARE,15728,200); -- Nemain's Sabots (Group 1, Ultra Rare, 0.1%)
+INSERT INTO `mob_droplist` VALUES (152,1,1,@URARE,15630,200); -- Njord's Trousers (Group 1, Ultra Rare, 0.1%)
+INSERT INTO `mob_droplist` VALUES (152,1,1,@URARE,16097,200); -- Anu's Tiara (Group 1, Ultra Rare, 0.1%)
 
 -- ZoneID:   9 - Archaic Chest
 INSERT INTO `mob_droplist` VALUES (153,0,0,1000,1693,@VCOMMON); -- Cyan Chip (Very Common, 24%)
@@ -1442,11 +1442,11 @@ INSERT INTO `mob_droplist` VALUES (159,0,0,1000,2488,@UNCOMMON); -- Piece Of Ale
 INSERT INTO `mob_droplist` VALUES (159,0,0,1000,2488,@SRARE);    -- Piece Of Alexandrite (Super Rare, 0.5%)
 INSERT INTO `mob_droplist` VALUES (159,0,0,1000,5374,@RARE);     -- Opacus Cell (Rare, 5%)
 INSERT INTO `mob_droplist` VALUES (159,0,0,1000,5375,@RARE);     -- Praecipitatio Cell (Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (159,1,1,200,14970,@RARE);     -- Hoshikazu Tekko (Very Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (159,1,1,200,15712,@RARE);     -- Enyo's Leggings (Very Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (159,1,1,200,15728,@RARE);     -- Nemain's Sabots (Very Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (159,1,1,200,15630,@RARE);     -- Njord's Trousers (Very Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (159,1,1,200,16097,@RARE);     -- Anu's Tiara (Very Rare, 5%)
+INSERT INTO `mob_droplist` VALUES (159,1,1,@VRARE,14970,200);    -- Hoshikazu Tekko (Group 1, Very Rare, 1%)
+INSERT INTO `mob_droplist` VALUES (159,1,1,@VRARE,15712,200);    -- Enyo's Leggings (Group 1, Very Rare, 1%)
+INSERT INTO `mob_droplist` VALUES (159,1,1,@VRARE,15728,200);    -- Nemain's Sabots (Group 1, Very Rare, 1%)
+INSERT INTO `mob_droplist` VALUES (159,1,1,@VRARE,15630,200);    -- Njord's Trousers (Group 1, Very Rare, 1%)
+INSERT INTO `mob_droplist` VALUES (159,1,1,@VRARE,16097,200);    -- Anu's Tiara (Group 1, Very Rare, 1%)
 
 -- ZoneID:  54 - Archaic Mirror
 -- ZoneID:  62 - Archaic Mirror
@@ -2563,17 +2563,17 @@ INSERT INTO `mob_droplist` VALUES (268,2,0,1000,17316,0);       -- Bomb Arm (Ste
 INSERT INTO `mob_droplist` VALUES (268,4,0,1000,928,0);         -- Pinch Of Bomb Ash (Despoil)
 
 -- ZoneID:  75 - Archaic Gear
-INSERT INTO `mob_droplist` VALUES (269,0,0,1000,2377,@URARE);  -- Bhaflau Card (Ultra Rare, .1%)
-INSERT INTO `mob_droplist` VALUES (269,0,0,1000,2488,@COMMON); -- Alexandrite (Common, 10%)
-INSERT INTO `mob_droplist` VALUES (269,0,0,1000,2488,@SRARE);  -- Alexandrite (Super Rare, 0.5%)
-INSERT INTO `mob_droplist` VALUES (269,1,1,334,5374,@RARE);    -- Opacus Cell (Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (269,1,1,333,5375,@RARE);    -- Praecipitatio cell (Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (269,1,1,333,5382,@RARE);    -- Mediocris cell (Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (269,1,2,200,16097,@SRARE);  -- Anu's Tiara (Super Rare 0.5%)
-INSERT INTO `mob_droplist` VALUES (269,1,2,200,15712,@SRARE);  -- Enyo's Leggings (Super Rare 0.5%)
-INSERT INTO `mob_droplist` VALUES (269,1,2,200,14970,@SRARE);  -- Hoshikazu Tekko (Super Rare 0.5%)
-INSERT INTO `mob_droplist` VALUES (269,1,2,200,15728,@SRARE);  -- Nemain's Sabots (Super Rare 0.5%)
-INSERT INTO `mob_droplist` VALUES (269,1,2,200,15630,@SRARE);  -- Njord's Trousers (Super Rare 0.5%)
+INSERT INTO `mob_droplist` VALUES (269,0,0,1000,2377,@URARE);  -- Bhaflau Card (Ultra Rare, 0.1%)
+INSERT INTO `mob_droplist` VALUES (269,0,0,1000,2488,@COMMON); -- Piece Of Alexandrite (Common, 15%)
+INSERT INTO `mob_droplist` VALUES (269,0,0,1000,2488,@SRARE);  -- Piece Of Alexandrite (Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (269,1,1,@RARE,5374,333);    -- Opacus Cell (Group 1, Rare, 5%)
+INSERT INTO `mob_droplist` VALUES (269,1,1,@RARE,5375,333);    -- Praecipitatio Cell (Group 1, Rare, 5%)
+INSERT INTO `mob_droplist` VALUES (269,1,1,@RARE,5382,333);    -- Mediocris Cell (Group 1, Rare, 5%)
+INSERT INTO `mob_droplist` VALUES (269,1,2,@SRARE,16097,200);  -- Anu's Tiara (Group 2, Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (269,1,2,@SRARE,15712,200);  -- Enyo's Leggings (Group 2, Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (269,1,2,@SRARE,14970,200);  -- Hoshikazu Tekko (Group 2, Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (269,1,2,@SRARE,15728,200);  -- Nemain's Sabots (Group 2, Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (269,1,2,@SRARE,15630,200);  -- Njord's Trousers (Group 2, Super Rare, 0.5%)
 
 -- ZoneID: 160 - Bifrons
 INSERT INTO `mob_droplist` VALUES (270,0,0,1000,928,@COMMON);     -- Pinch Of Bomb Ash (Common, 15%)
@@ -3788,11 +3788,11 @@ INSERT INTO `mob_droplist` VALUES (419,4,0,1000,839,0);         -- Piece Of Craw
 INSERT INTO `mob_droplist` VALUES (419,4,0,1000,4357,0);        -- Crawler Egg (Despoil)
 
 -- ZoneID:  75 - Common Bhafalu Remnants Drops
-INSERT INTO `mob_droplist` VALUES (420,1,1,200,14970,@SRARE); -- Hoshikazu Tekko (Super Rare, 0.5%)
-INSERT INTO `mob_droplist` VALUES (420,1,1,200,15712,@SRARE); -- Enyo's Leggings (Super Rare, 0.5%)
-INSERT INTO `mob_droplist` VALUES (420,1,1,200,15728,@SRARE); -- Nemain's Sabots (Super Rare, 0.5%)
-INSERT INTO `mob_droplist` VALUES (420,1,1,200,15630,@SRARE); -- Njord's Trousers (Super Rare, 0.5%)
-INSERT INTO `mob_droplist` VALUES (420,1,1,200,16097,@SRARE); -- Anu's Tiara (Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (420,1,1,@SRARE,14970,200); -- Hoshikazu Tekko (Group 1, Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (420,1,1,@SRARE,15712,200); -- Enyo's Leggings (Group 1, Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (420,1,1,@SRARE,15728,200); -- Nemain's Sabots (Group 1, Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (420,1,1,@SRARE,15630,200); -- Njord's Trousers (Group 1, Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (420,1,1,@SRARE,16097,200); -- Anu's Tiara (Group 1, Super Rare, 0.5%)
 
 -- ZoneID: 107 - Carnero
 INSERT INTO `mob_droplist` VALUES (421,0,0,1000,17811,@ALWAYS);  -- Katayama Ichimonji (Always, 100%)
@@ -6458,11 +6458,11 @@ INSERT INTO `mob_droplist` VALUES (765,0,0,1000,5374,@UNCOMMON); -- Opacus Cell 
 INSERT INTO `mob_droplist` VALUES (765,0,0,1000,5374,@UNCOMMON); -- Opacus Cell (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (765,0,0,1000,5375,@UNCOMMON); -- Praecipitatio Cell (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (765,0,0,1000,5375,@UNCOMMON); -- Praecipitatio Cell (Uncommon, 10%)
-INSERT INTO `mob_droplist` VALUES (765,1,1,200,14970,@SRARE);    -- Hoshikazu Tekko (Super Rare, .5%)
-INSERT INTO `mob_droplist` VALUES (765,1,1,200,15712,@SRARE);    -- Enyo's Leggings (Super Rare, .5%)
-INSERT INTO `mob_droplist` VALUES (765,1,1,200,15728,@SRARE);    -- Nemain's Sabots (Super Rare, .5%)
-INSERT INTO `mob_droplist` VALUES (765,1,1,200,15630,@SRARE);    -- Njord's Trousers (Super Rare, .5%)
-INSERT INTO `mob_droplist` VALUES (765,1,1,200,16097,@SRARE);    -- Anu's Tiara (Super Rare, .5%)
+INSERT INTO `mob_droplist` VALUES (765,1,1,@SRARE,14970,200);    -- Hoshikazu Tekko (Group 1, Super Rare, .5%)
+INSERT INTO `mob_droplist` VALUES (765,1,1,@SRARE,15712,200);    -- Enyo's Leggings (Group 1, Super Rare, .5%)
+INSERT INTO `mob_droplist` VALUES (765,1,1,@SRARE,15728,200);    -- Nemain's Sabots (Group 1, Super Rare, .5%)
+INSERT INTO `mob_droplist` VALUES (765,1,1,@SRARE,15630,200);    -- Njord's Trousers (Group 1, Super Rare, .5%)
+INSERT INTO `mob_droplist` VALUES (765,1,1,@SRARE,16097,200);    -- Anu's Tiara (Group 1, Super Rare, .5%)
 
 -- ZoneID: 218 - Emperador De Altepa
 INSERT INTO `mob_droplist` VALUES (766,0,0,1000,11902,@UNCOMMON); -- Strand Gages (Uncommon, 10%)
@@ -16590,7 +16590,7 @@ INSERT INTO `mob_droplist` VALUES (2080,2,0,1000,864,0);         -- Handful Of F
 INSERT INTO `mob_droplist` VALUES (2080,4,0,1000,868,0);         -- Handful Of Pugil Scales (Despoil)
 INSERT INTO `mob_droplist` VALUES (2080,4,0,1000,864,0);         -- Handful Of Fish Scales (Despoil)
 
--- ZoneID:  75 - Reactionary Rampart
+-- ZoneID:  75 - Reactionary Rampart -- TODO: Salvage
 INSERT INTO `mob_droplist` VALUES (2081,0,0,1000,2377,@UNCOMMON); -- Bhaflau Card (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (2081,0,0,1000,2488,@UNCOMMON); -- Piece Of Alexandrite (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (2081,0,0,1000,2488,@RARE);     -- Piece Of Alexandrite (Rare, 5%)
@@ -18442,11 +18442,11 @@ INSERT INTO `mob_droplist` VALUES (2359,4,0,1000,868,0);         -- Handful Of P
 INSERT INTO `mob_droplist` VALUES (2359,4,0,1000,864,0);         -- Handful Of Fish Scales (Despoil)
 
 -- ZoneID:  75 - Sulfur Scorpion
-INSERT INTO `mob_droplist` VALUES (2360,1,1,200,14970,@VRARE); -- Hoshikazu Tekko (Very Rare, 1%)
-INSERT INTO `mob_droplist` VALUES (2360,1,1,200,15712,@VRARE); -- Enyo's Leggings (Very Rare, 1%)
-INSERT INTO `mob_droplist` VALUES (2360,1,1,200,15728,@VRARE); -- Nemain's Sabots (Very Rare, 1%)
-INSERT INTO `mob_droplist` VALUES (2360,1,1,200,15630,@VRARE); -- Njord's Trousers (Very Rare, 1%)
-INSERT INTO `mob_droplist` VALUES (2360,1,1,200,16097,@VRARE); -- Anu's Tiara (Very Rare, 1%)
+INSERT INTO `mob_droplist` VALUES (2360,1,1,@VRARE,14970,200); -- Hoshikazu Tekko (Group 1, Very Rare, 1%)
+INSERT INTO `mob_droplist` VALUES (2360,1,1,@VRARE,15712,200); -- Enyo's Leggings (Group 1, Very Rare, 1%)
+INSERT INTO `mob_droplist` VALUES (2360,1,1,@VRARE,15728,200); -- Nemain's Sabots (Group 1, Very Rare, 1%)
+INSERT INTO `mob_droplist` VALUES (2360,1,1,@VRARE,15630,200); -- Njord's Trousers (Group 1, Very Rare, 1%)
+INSERT INTO `mob_droplist` VALUES (2360,1,1,@VRARE,16097,200); -- Anu's Tiara (Group 1, Very Rare, 1%)
 
 -- ZoneID:  99 - Suu Xicu The Cantabile
 INSERT INTO `mob_droplist` VALUES (2361,0,0,1000,2701,@ALWAYS);    -- Bamboo Snakecage (Always, 100%)
@@ -19398,15 +19398,15 @@ INSERT INTO `mob_droplist` VALUES (2480,4,0,1000,18409,0);        -- Jadagna -1 
 
 -- ZoneID:  75 Archain Chariot
 INSERT INTO `mob_droplist` VALUES (2481,0,0,1000,2377,@URARE);  -- Bhaflau Card (Ultra Rare, .1%)
-INSERT INTO `mob_droplist` VALUES (2481,0,0,1000,2488,@COMMON); -- Alexandrite (Common, 10%)
-INSERT INTO `mob_droplist` VALUES (2481,0,0,1000,2488,@SRARE);  -- Alexandrite (Super Rare, 0.5%)
-INSERT INTO `mob_droplist` VALUES (2481,1,1,500,5374,@RARE);    -- Opacus Cell (Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (2481,1,1,500,5375,@RARE);    -- Praecipitatio Cell (Rare, 5%)
-INSERT INTO `mob_droplist` VALUES (2481,1,2,200,16097,@SRARE);  -- Anu's Tiara (Super Rare 0.5%)
-INSERT INTO `mob_droplist` VALUES (2481,1,2,200,15712,@SRARE);  -- Enyo's Leggings (Super Rare 0.5%)
-INSERT INTO `mob_droplist` VALUES (2481,1,2,200,14970,@SRARE);  -- Hoshikazu Tekko (Super Rare 0.5%)
-INSERT INTO `mob_droplist` VALUES (2481,1,2,200,15728,@SRARE);  -- Nemain's Sabots (Super Rare 0.5%)
-INSERT INTO `mob_droplist` VALUES (2481,1,2,200,15630,@SRARE);  -- Njord's Trousers (Super Rare 0.5%)
+INSERT INTO `mob_droplist` VALUES (2481,0,0,1000,2488,@COMMON); -- Piece Of Alexandrite (Common, 10%)
+INSERT INTO `mob_droplist` VALUES (2481,0,0,1000,2488,@SRARE);  -- Piece Of Alexandrite (Super Rare, 0.5%)
+INSERT INTO `mob_droplist` VALUES (2481,1,1,@RARE,5374,500);    -- Opacus Cell (Group 1, Rare, 5%)
+INSERT INTO `mob_droplist` VALUES (2481,1,1,@RARE,5375,500);    -- Praecipitatio Cell (Group 1, Rare, 5%)
+INSERT INTO `mob_droplist` VALUES (2481,1,2,@SRARE,16097,200);  -- Anu's Tiara (Group 2, Super Rare 0.5%)
+INSERT INTO `mob_droplist` VALUES (2481,1,2,@SRARE,15712,200);  -- Enyo's Leggings (Group 2, Super Rare 0.5%)
+INSERT INTO `mob_droplist` VALUES (2481,1,2,@SRARE,14970,200);  -- Hoshikazu Tekko (Group 2, Super Rare 0.5%)
+INSERT INTO `mob_droplist` VALUES (2481,1,2,@SRARE,15728,200);  -- Nemain's Sabots (Group 2, Super Rare 0.5%)
+INSERT INTO `mob_droplist` VALUES (2481,1,2,@SRARE,15630,200);  -- Njord's Trousers (Group 2, Super Rare 0.5%)
 
 -- 2482-2483 Available
 
@@ -27334,215 +27334,215 @@ INSERT INTO `mob_droplist` VALUES (3373,0,0,1000,930,@VRARE);  -- Vial Of Beastm
 INSERT INTO `mob_droplist` VALUES (3373,4,0,1000,922,0);       -- Bat Wing (Despoil)
 
 -- ZoneID:  73 - Puk
-INSERT INTO `mob_droplist` VALUES (3374,0,0,1000,5365,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3374,0,0,1000,5365,@ALWAYS); -- Incus Cell (Always, 100%)
 
 -- ZoneID:  73 - Ziz
-INSERT INTO `mob_droplist` VALUES (3375,0,0,1000,5375,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3375,0,0,1000,5375,@ALWAYS); -- Praecipitatio Cell (Always, 100%)
 
 -- ZoneID: 73 - Poroggo Gent
-INSERT INTO `mob_droplist` VALUES (3376,0,0,1000,5365,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3376,0,0,1000,5365,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3377,0,0,1000,5373,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3377,0,0,1000,5373,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3378,0,0,1000,5374,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3378,0,0,1000,5374,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3376,0,0,1000,5365,@ALWAYS); -- Incus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3376,0,0,1000,5365,@ALWAYS); -- Incus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3377,0,0,1000,5373,@ALWAYS); -- Duplicatus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3377,0,0,1000,5373,@ALWAYS); -- Duplicatus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3378,0,0,1000,5374,@ALWAYS); -- Opacus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3378,0,0,1000,5374,@ALWAYS); -- Opacus Cell (Always, 100%)
 
 -- ZoneID: 73 - Poroggo Madame
-INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,14962,200);
-INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,14978,200);
-INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,15638,200);
-INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,15720,200);
-INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,16089,200);
+INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,14962,200); -- Enyo's Gauntlets (Group 1, Common, 15%)
+INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,14978,200); -- Nemain's Cuffs (Group 1, Common, 15%)
+INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,15638,200); -- Anu's Brais (Group 1, Common, 15%)
+INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,15720,200); -- Hoshikazu Kyahan (Group 1, Common, 15%)
+INSERT INTO `mob_droplist` VALUES (3379,1,1,@COMMON,16089,200); -- Njord's Mask (Group 1, Common, 15%)
 
 -- ZoneID:  73 - Draco Lizard
-INSERT INTO `mob_droplist` VALUES (3380,0,0,1000,5370,0);
+INSERT INTO `mob_droplist` VALUES (3380,0,0,1000,5370,0); -- TODO: Listener to adjust drop conditionally.
 
 -- ZoneID:  73 - Wyvern
-INSERT INTO `mob_droplist` VALUES (3381,0,0,1000,5366,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3381,0,0,1000,5366,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3381,0,0,1000,5367,@VCOMMON); -- Cumulus Cell (Vert Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3381,0,0,1000,5366,@ALWAYS);  -- Castellanus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3381,0,0,1000,5366,@ALWAYS);  -- Castellanus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3381,0,0,1000,5367,@VCOMMON); -- Cumulus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Zenist
-INSERT INTO `mob_droplist` VALUES (3382,0,0,1000,5366,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3382,0,0,1000,5370,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3382,0,0,1000,5366,@VCOMMON); -- Castellanus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3382,0,0,1000,5370,@VCOMMON); -- Cirrocumulus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Spearman
-INSERT INTO `mob_droplist` VALUES (3383,0,0,1000,5369,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3383,0,0,1000,5367,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3383,0,0,1000,5369,@ALWAYS);  -- Stratus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3383,0,0,1000,5367,@VCOMMON); -- Cumulus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Zenist
-INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5377,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5377,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5377,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5383,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5384,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5377,@ALWAYS);  -- Fractus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5377,@ALWAYS);  -- Fractus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5377,@ALWAYS);  -- Fractus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5383,@VCOMMON); -- Humilus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3384,0,0,1000,5384,@VCOMMON); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Savant
-INSERT INTO `mob_droplist` VALUES (3385,0,0,1000,5370,0);
+INSERT INTO `mob_droplist` VALUES (3385,0,0,1000,5370,0); -- TODO: Listener to adjust drop conditionally.
 
 -- ZoneID:  73 - Mamool Ja Zenist
-INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5383,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5384,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5379,@ALWAYS);  -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5379,@ALWAYS);  -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5379,@ALWAYS);  -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5383,@VCOMMON); -- Humilus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3386,0,0,1000,5384,@VCOMMON); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Zenist
 -- ZoneID:  73 - Mamool Ja Spearman
-INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5380,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5380,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5380,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5383,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5384,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5380,@ALWAYS);  -- Velum Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5380,@ALWAYS);  -- Velum Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5380,@ALWAYS);  -- Velum Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5383,@VCOMMON); -- Humilus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3387,0,0,1000,5384,@VCOMMON); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Spearman
 -- ZoneID:  73 - Mamool Ja Stapper
-INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5376,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5376,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5376,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5383,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5384,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5376,@ALWAYS);  -- Pannus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5376,@ALWAYS);  -- Pannus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5376,@ALWAYS);  -- Pannus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5383,@VCOMMON); -- Humilus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3388,0,0,1000,5384,@VCOMMON); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Spearman
-INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5383,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5384,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5379,@ALWAYS);  -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5379,@ALWAYS);  -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5379,@ALWAYS);  -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5383,@VCOMMON); -- Humilus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3389,0,0,1000,5384,@VCOMMON); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Spearman
-INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5382,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5382,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5382,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5383,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5384,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5382,@ALWAYS);  -- Mediocris Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5382,@ALWAYS);  -- Mediocris Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5382,@ALWAYS);  -- Mediocris Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5383,@VCOMMON); -- Humilus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3390,0,0,1000,5384,@VCOMMON); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Strapper, Mamool Ja Spearman
-INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5378,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5378,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5378,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5383,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5384,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5378,@ALWAYS);  -- Congestus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5378,@ALWAYS);  -- Congestus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5378,@ALWAYS);  -- Congestus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5383,@VCOMMON); -- Humilus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3391,0,0,1000,5384,@VCOMMON); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Mamool Ja Strapper, Mamool Ja Bounder
-INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5381,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5381,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5381,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5383,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5384,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5381,@ALWAYS);  -- Pileus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5381,@ALWAYS);  -- Pileus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5381,@ALWAYS);  -- Pileus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5383,@VCOMMON); -- Humilus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3392,0,0,1000,5384,@VCOMMON); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Archaic Gear, Archaic_Gears, Archaic Chariot
-INSERT INTO `mob_droplist` VALUES (3393,0,0,1000,2375,@COMMON);
-INSERT INTO `mob_droplist` VALUES (3393,0,0,1000,2488,@UNCOMMON);
+INSERT INTO `mob_droplist` VALUES (3393,0,0,1000,2375,@COMMON);   -- Zhayolm Card (Common, 15%)
+INSERT INTO `mob_droplist` VALUES (3393,0,0,1000,2488,@UNCOMMON); -- Piece Of Alexandrite (Uncommon, 10%)
 
 -- ZoneID:  73 - Mamool Ja
-INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5380,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5380,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5381,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5381,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5382,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5382,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3394,1,1,@ALWAYS,5383,500);
-INSERT INTO `mob_droplist` VALUES (3394,1,1,@ALWAYS,5384,500);
-INSERT INTO `mob_droplist` VALUES (3394,1,2,@ALWAYS,5383,500);
-INSERT INTO `mob_droplist` VALUES (3394,1,2,@ALWAYS,5384,500);
+INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5380,@ALWAYS); -- Velum Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5380,@ALWAYS); -- Velum Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5381,@ALWAYS); -- Pileus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5381,@ALWAYS); -- Pileus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5382,@ALWAYS); -- Mediocris Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3394,0,0,1000,5382,@ALWAYS); -- Mediocris Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3394,1,1,@ALWAYS,5383,500);  -- Humilus Cell (Group 1, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3394,1,1,@ALWAYS,5384,500);  -- Spissatus Cell (Group 1, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3394,1,2,@ALWAYS,5383,500);  -- Humilus Cell (Group 2, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3394,1,2,@ALWAYS,5384,500);  -- Spissatus Cell (Group 2, Always, 100%)
 
 -- ZoneID:  73 - Mamool Ja
-INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5376,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5376,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5378,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5378,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3395,1,1,@ALWAYS,5383,500);
-INSERT INTO `mob_droplist` VALUES (3395,1,1,@ALWAYS,5384,500);
-INSERT INTO `mob_droplist` VALUES (3395,1,2,@ALWAYS,5383,500);
-INSERT INTO `mob_droplist` VALUES (3395,1,2,@ALWAYS,5384,500);
+INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5376,@ALWAYS); -- Pannus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5376,@ALWAYS); -- Pannus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5378,@ALWAYS); -- Congestus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5378,@ALWAYS); -- Congestus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5379,@ALWAYS); -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3395,0,0,1000,5379,@ALWAYS); -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3395,1,1,@ALWAYS,5383,500);  -- Humilus Cell (Group 1, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3395,1,1,@ALWAYS,5384,500);  -- Spissatus Cell (Group 1, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3395,1,2,@ALWAYS,5383,500);  -- Humilus Cell (Group 2, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3395,1,2,@ALWAYS,5384,500);  -- Spissatus Cell (Group 2, Always, 100%)
 
 -- ZoneID:  73 - Mamool Ja
-INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5377,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5377,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5379,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5380,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5380,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3396,1,1,@ALWAYS,5383,500);
-INSERT INTO `mob_droplist` VALUES (3396,1,1,@ALWAYS,5384,500);
-INSERT INTO `mob_droplist` VALUES (3396,1,2,@ALWAYS,5383,500);
-INSERT INTO `mob_droplist` VALUES (3396,1,2,@ALWAYS,5384,500);
+INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5377,@ALWAYS); -- Fractus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5377,@ALWAYS); -- Fractus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5379,@ALWAYS); -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5379,@ALWAYS); -- Nimbus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5380,@ALWAYS); -- Velum Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3396,0,0,1000,5380,@ALWAYS); -- Velum Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3396,1,1,@ALWAYS,5383,500);  -- Humilus Cell (Group 1, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3396,1,1,@ALWAYS,5384,500);  -- Spissatus Cell (Group 1, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3396,1,2,@ALWAYS,5383,500);  -- Humilus Cell (Group 2, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3396,1,2,@ALWAYS,5384,500);  -- Spissatus Cell (Group 2, Always, 100%)
 
 -- ZoneID:  73 - Mamool Ja
-INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5376,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5376,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5381,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5381,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5382,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5382,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3397,1,1,@ALWAYS,5383,500);
-INSERT INTO `mob_droplist` VALUES (3397,1,1,@ALWAYS,5384,500);
-INSERT INTO `mob_droplist` VALUES (3397,1,2,@ALWAYS,5383,500);
-INSERT INTO `mob_droplist` VALUES (3397,1,2,@ALWAYS,5384,500);
+INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5376,@ALWAYS); -- Pannus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5376,@ALWAYS); -- Pannus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5381,@ALWAYS); -- Pileus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5381,@ALWAYS); -- Pileus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5382,@ALWAYS); -- Mediocris Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3397,0,0,1000,5382,@ALWAYS); -- Mediocris Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3397,1,1,@ALWAYS,5383,500);  -- Humilus Cell (Group 1, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3397,1,1,@ALWAYS,5384,500);  -- Spissatus Cell (Group 1, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3397,1,2,@ALWAYS,5383,500);  -- Humilus Cell (Group 2, Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3397,1,2,@ALWAYS,5384,500);  -- Spissatus Cell (Group 2, Always, 100%)
 
 -- ZoneID:  73 - Mamool Ja Savant
-INSERT INTO `mob_droplist` VALUES (3398,0,0,1000,5376,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3398,0,0,1000,5383,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3398,0,0,1000,5376,@ALWAYS); -- Pannus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3398,0,0,1000,5383,@ALWAYS); -- Humilus Cell (Always, 100%)
 
 -- ZoneID:  73 - Mamool Ja Savant
-INSERT INTO `mob_droplist` VALUES (3399,0,0,1000,5378,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3399,0,0,1000,5379,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3399,0,0,1000,5378,@ALWAYS); -- Congestus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3399,0,0,1000,5379,@ALWAYS); -- Congestus Cell (Always, 100%)
 
 -- ZoneID:  73 - Mamool Ja Sophist
-INSERT INTO `mob_droplist` VALUES (3400,0,0,1000,5380,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3400,0,0,1000,5382,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3400,0,0,1000,5380,@ALWAYS); -- Velum Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3400,0,0,1000,5382,@ALWAYS); -- Mediocris Cell (Always, 100%)
 
 -- ZoneID:  73 - Mamool Ja Sophist, Mamool Ja Mimiker
-INSERT INTO `mob_droplist` VALUES (3401,0,0,1000,5377,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3401,0,0,1000,5381,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3401,0,0,1000,5377,@ALWAYS); -- Fractus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3401,0,0,1000,5381,@ALWAYS); -- Pileus Cell (Always, 100%)
 
 -- ZoneID:  73 - Poroggo Gent
-INSERT INTO `mob_droplist` VALUES (3402,0,0,1000,5371,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3402,0,0,1000,5384,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3402,0,0,1000,5371,@VCOMMON); -- Undulatus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3402,0,0,1000,5384,@VCOMMON); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Poroggo Madame
-INSERT INTO `mob_droplist` VALUES (3403,0,0,1000,15638,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3403,0,0,1000,15720,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3403,0,0,1000,16089,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3403,0,0,1000,5735,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3403,0,0,1000,15638,@ALWAYS); -- Anu's Brais (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3403,0,0,1000,15720,@ALWAYS); -- Hoshikazu Kyahan (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3403,0,0,1000,16089,@ALWAYS); -- Njord's Mask (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3403,0,0,1000,5735,@ALWAYS);  -- Cotton Coin Purse (Always, 100%)
 
 -- ZoneID:  73 - Poroggo Madame
-INSERT INTO `mob_droplist` VALUES (3404,0,0,1000,14561,@UNCOMMON);
-INSERT INTO `mob_droplist` VALUES (3404,0,0,1000,14972,@UNCOMMON);
-INSERT INTO `mob_droplist` VALUES (3404,0,0,1000,15632,@UNCOMMON);
-INSERT INTO `mob_droplist` VALUES (3404,0,0,1000,5735,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3404,0,0,1000,14561,@UNCOMMON); -- Enlil's Gambison (Uncommon, 10%)
+INSERT INTO `mob_droplist` VALUES (3404,0,0,1000,14972,@UNCOMMON); -- Hikazu Gote (Uncommon, 10%)
+INSERT INTO `mob_droplist` VALUES (3404,0,0,1000,15632,@UNCOMMON); -- Freya's Trousers (Uncommon, 10%)
+INSERT INTO `mob_droplist` VALUES (3404,0,0,1000,5735,@ALWAYS);    -- Cotton Coin Purse (Always, 100%)
 
 -- ZoneID:  73 - Poroggo Madame
-INSERT INTO `mob_droplist` VALUES (3405,0,0,1000,15714,@UNCOMMON);
-INSERT INTO `mob_droplist` VALUES (3405,0,0,1000,15730,@UNCOMMON);
-INSERT INTO `mob_droplist` VALUES (3405,0,0,1000,16099,@UNCOMMON);
+INSERT INTO `mob_droplist` VALUES (3405,0,0,1000,15714,@UNCOMMON); -- Deimos's Leggings (Uncommon, 10%)
+INSERT INTO `mob_droplist` VALUES (3405,0,0,1000,15730,@UNCOMMON); -- Macha's Pigaches (Uncommon, 10%)
+INSERT INTO `mob_droplist` VALUES (3405,0,0,1000,16099,@UNCOMMON); -- Enlil's Tiara (Uncommon, 10%)
 
 -- ZoneID:  73 - Poroggo Gent
-INSERT INTO `mob_droplist` VALUES (3406,0,0,1000,5367,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3406,0,0,1000,5372,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3406,0,0,1000,5367,@VCOMMON); -- Cumulus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3406,0,0,1000,5372,@VCOMMON); -- Virga Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Poroggo Gent
-INSERT INTO `mob_droplist` VALUES (3407,0,0,1000,5366,@VCOMMON);
-INSERT INTO `mob_droplist` VALUES (3407,0,0,1000,5370,@VCOMMON);
+INSERT INTO `mob_droplist` VALUES (3407,0,0,1000,5366,@VCOMMON); -- Castellanus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3407,0,0,1000,5370,@VCOMMON); -- Cirrocumulus Cell (Very Common, 24%)
 
 -- ZoneID:  73 - Archaic Rampart, Poroggo Madame
-INSERT INTO `mob_droplist` VALUES (3408,0,0,1000,14962,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3408,0,0,1000,14978,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3408,0,0,1000,14962,@ALWAYS); -- Enyo's Gauntlets (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3408,0,0,1000,14978,@ALWAYS); -- Nemain's Cuffs (Always, 100%)
 
 -- ZoneID:  73 - Archaic Rampart, Poroggo Madame
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS);
-INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS);
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS); -- Humilus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS); -- Humilus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS); -- Humilus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS); -- Humilus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5383,@ALWAYS); -- Humilus Cell (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS); -- Spissatus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS); -- Spissatus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS); -- Spissatus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS); -- Spissatus Cell (Very Common, 24%)
+INSERT INTO `mob_droplist` VALUES (3409,0,0,1000,5384,@ALWAYS); -- Spissatus Cell (Very Common, 24%)
 
 -- ZoneID:  78 - Dark Elemental
 -- ZoneID:  78 - Rotting Huskarl
