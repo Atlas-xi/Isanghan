@@ -580,3 +580,22 @@ bool db::transaction(const std::function<void()>& transactionFn)
     db::setAutoCommit(wasAutoCommitOn);
     return true;
 }
+
+auto db::getTableColumnNames(std::string const& tableName) -> std::vector<std::string>
+{
+    TracyZoneScoped;
+
+    const auto rset = db::preparedStmt("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?", tableName, db::getDatabaseSchema());
+    if (rset && rset->rowsCount())
+    {
+        std::vector<std::string> columnNames;
+        while (rset->next())
+        {
+            columnNames.emplace_back(rset->get<std::string>(0));
+        }
+
+        return columnNames;
+    }
+
+    return {};
+}
