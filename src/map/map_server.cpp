@@ -401,7 +401,6 @@ void MapServer::do_final()
     traits::ClearTraitsList();
 
     petutils::FreePetList();
-    trustutils::FreeTrustList();
     zoneutils::FreeZoneList();
 
     CTaskManager::delInstance();
