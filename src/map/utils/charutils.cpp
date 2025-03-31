@@ -887,6 +887,9 @@ namespace charutils
         }
 
         // Select all player spells from enabled expansions
+        //
+        // NOTE: We normally don't want to build a prepared statement with fmt::format,
+        //     : but this query is entirely internal, so it's OK.
         auto query = fmt::format("SELECT char_spells.spellid "
                                  "FROM char_spells "
                                  "JOIN spell_list "
@@ -6452,7 +6455,27 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        // TODO: Build a lookup to validate the incoming type
+        // TODO: Extract this into some sort of database metadata system
+        //     : that's populated on startup.
+        static std::unordered_set<std::string> charPointsColumnNames;
+        if (charPointsColumnNames.empty())
+        {
+            const auto names = db::getTableColumnNames("char_points");
+            for (const auto& name : names)
+            {
+                charPointsColumnNames.insert(name);
+            }
+        }
+
+        if (charPointsColumnNames.find(type) == charPointsColumnNames.end())
+        {
+            ShowErrorFmt("charutils::SetPoints: Invalid type {} for {}", type, PChar->getName());
+            return;
+        }
+
+        // NOTE: We normally don't want to build a prepared statement with fmt::format,
+        //     : but this query is entirely internal and we've just validated the incoming
+        //     : column name, so it's OK.
         const auto query = fmt::format("UPDATE char_points SET {} = ? WHERE charid = ?", type);
         db::preparedStmt(query, amount, PChar->id);
 

@@ -200,12 +200,33 @@ namespace fishingcontest
                 // Set the rank value
                 if (rankGroup > 0)
                 {
-                    // TODO: Don't do this fmt::format pre-pass, use the prepared statement
-                    const auto query = fmt::format("INSERT INTO char_fishing_contest_history (charid, contest_rank_{}) "
-                                                   "VALUES ({}, 1) ON DUPLICATE KEY UPDATE contest_rank_{} = contest_rank_{} + 1",
-                                                   rankGroup, charID, rankGroup, rankGroup);
+                    const auto getQuery = [&]() -> std::string
+                    {
+                        switch (rankGroup)
+                        {
+                            case 1:
+                                return ("INSERT INTO char_fishing_contest_history (charid, contest_rank_1) "
+                                        "VALUES (?, 1) ON DUPLICATE KEY UPDATE contest_rank_1 = contest_rank_1 + 1");
+                                break;
+                            case 2:
+                                return "INSERT INTO char_fishing_contest_history (charid, contest_rank_2) "
+                                       "VALUES (?, 1) ON DUPLICATE KEY UPDATE contest_rank_2 = contest_rank_2 + 1";
+                                break;
+                            case 3:
+                                return "INSERT INTO char_fishing_contest_history (charid, contest_rank_3) "
+                                       "VALUES (?, 1) ON DUPLICATE KEY UPDATE contest_rank_3 = contest_rank_3 + 1";
+                                break;
+                            case 4:
+                                return "INSERT INTO char_fishing_contest_history (charid, contest_rank_4) "
+                                       "VALUES (?, 1) ON DUPLICATE KEY UPDATE contest_rank_4 = contest_rank_4 + 1";
+                                break;
+                            default:
+                                return "";
+                                break;
+                        }
+                    };
 
-                    const auto rset = db::preparedStmt(query);
+                    const auto rset = db::preparedStmt(getQuery(), charID);
                     if (!rset)
                     {
                         ShowWarning("Unable to update player [%s] fishing reward history.", entry.name);

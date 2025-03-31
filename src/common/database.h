@@ -779,4 +779,6 @@ namespace db
     //
     // Returns true if the transaction was successful and committed or false if the transaction was rolled back.
     bool transaction(const std::function<void()>& transactionFn);
+
+    auto getTableColumnNames(std::string const& tableName) -> std::vector<std::string>;
 } // namespace db
