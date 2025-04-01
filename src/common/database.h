@@ -194,6 +194,21 @@ namespace db
         template <typename T>
         inline constexpr bool is_blob_v = is_blob<T>;
 
+        template <typename T, bool = std::is_enum_v<T>>
+        struct enum_decay_impl
+        {
+            using type = std::decay_t<T>;
+        };
+
+        template <typename T>
+        struct enum_decay_impl<T, true>
+        {
+            using type = std::underlying_type_t<T>;
+        };
+
+        template <typename T>
+        using enum_decay_t = typename enum_decay_impl<T>::type;
+
         struct State final
         {
             void reset()
@@ -290,7 +305,8 @@ namespace db
                     return T{};
                 }
 
-                using UnderlyingT = std::decay_t<T>;
+                // TODO: First-class support for enum types
+                using UnderlyingT = enum_decay_t<T>;
 
                 UnderlyingT value{};
 
@@ -463,7 +479,8 @@ namespace db
         {
             TracyZoneScoped;
 
-            using UnderlyingT = std::decay_t<T>;
+            // TODO: First-class support for enum types
+            using UnderlyingT = enum_decay_t<T>;
 
             if constexpr (!is_blob_v<UnderlyingT>)
             {
