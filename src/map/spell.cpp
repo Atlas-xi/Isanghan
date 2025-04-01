@@ -352,12 +352,12 @@ void CSpell::setElement(uint16 element)
     m_element = element;
 }
 
-void CSpell::setCE(uint16 ce)
+void CSpell::setCE(int32 ce)
 {
     m_CE = ce;
 }
 
-uint16 CSpell::getCE() const
+int32 CSpell::getCE() const
 {
     return m_CE;
 }
@@ -367,12 +367,12 @@ void CSpell::setRadius(float radius)
     m_radius = radius;
 }
 
-void CSpell::setVE(uint16 ve)
+void CSpell::setVE(int32 ve)
 {
     m_VE = ve;
 }
 
-uint16 CSpell::getVE() const
+int32 CSpell::getVE() const
 {
     return m_VE;
 }

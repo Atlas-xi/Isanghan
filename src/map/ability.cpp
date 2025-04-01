@@ -233,22 +233,22 @@ void CAbility::setRecastId(uint16 recastId)
     m_recastId = recastId;
 }
 
-void CAbility::setCE(uint16 CE)
+void CAbility::setCE(int32 CE)
 {
     m_CE = CE;
 }
 
-uint16 CAbility::getCE() const
+int32 CAbility::getCE() const
 {
     return m_CE;
 }
 
-void CAbility::setVE(uint16 VE)
+void CAbility::setVE(int32 VE)
 {
     m_VE = VE;
 }
 
-uint16 CAbility::getVE() const
+int32 CAbility::getVE() const
 {
     return m_VE;
 }
@@ -408,8 +408,8 @@ namespace ability
                 PAbility->setRange(rset->get<float>("range"));
                 PAbility->setAOE(rset->get<uint8>("isAOE"));
                 PAbility->setRecastId(rset->get<uint16>("recastId"));
-                PAbility->setCE(rset->get<uint16>("CE"));
-                PAbility->setVE(rset->get<uint16>("VE"));
+                PAbility->setCE(rset->get<int32>("CE"));
+                PAbility->setVE(rset->get<int32>("VE"));
                 PAbility->setMeritModID(rset->get<uint16>("meritModID"));
                 PAbility->setAddType(rset->get<uint16>("addType"));
 
