@@ -74277,6 +74277,13 @@ INSERT INTO `item_mods` VALUES (27725,68,36);   -- EVA: 36
 INSERT INTO `item_mods` VALUES (27725,296,3);   -- CONSERVE_MP: 3
 INSERT INTO `item_mods` VALUES (27725,384,600); -- HASTE_GEAR: 600
 
+-- She-Slime Hat
+INSERT INTO `item_mods` VALUES (27726,1,1);    -- DEF: 1
+
+-- Metal Slime Hat
+INSERT INTO `item_mods` VALUES (27727,1,2);    -- DEF: 2
+INSERT INTO `item_mods` VALUES (27727,382,1);    -- EXP_BONUS: 1
+
 -- Cizin Helm +1
 INSERT INTO `item_mods` VALUES (27728,1,111);   -- DEF: 111
 INSERT INTO `item_mods` VALUES (27728,2,41);    -- HP: 41
