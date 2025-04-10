@@ -5907,7 +5907,6 @@ namespace charutils
             }
             break;
             case TELEPORT_TYPE::PAST_MAW:
-
             {
                 db::preparedStmt("UPDATE char_unlocks SET maw = ? WHERE charid = ? LIMIT 1",
                                  PChar->teleport.pastMaw, PChar->id);
