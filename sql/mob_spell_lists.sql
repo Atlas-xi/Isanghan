@@ -1429,10 +1429,10 @@ INSERT INTO `mob_spell_lists` VALUES ('Diabolos_Club',108,360,1,255); -- dispelg
 INSERT INTO `mob_spell_lists` VALUES ('Diabolos_Club',108,361,1,255); -- blindga (1~255)
 INSERT INTO `mob_spell_lists` VALUES ('Diabolos_Club',108,367,1,255); -- death (1~255)
 
--- Ouryu (109)
-INSERT INTO `mob_spell_lists` VALUES ('Ouryu',109,54,1,255);  -- stoneskin (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Ouryu',109,190,1,255); -- stonega_ii (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Ouryu',109,357,1,255); -- slowga (1~255)
+-- Ouryu (Ouryu from CoP 4-3 The Savage) (109)
+INSERT INTO `mob_spell_lists` VALUES ('Ouryu_The_Savage',109,54,1,255);  -- stoneskin (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('Ouryu_The_Savage',109,190,1,255); -- stonega_ii (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('Ouryu_The_Savage',109,357,1,255); -- slowga (1~255)
 
 -- Pasuk (110)
 INSERT INTO `mob_spell_lists` VALUES ('Pasuk',110,245,1,255); -- drain (1~255)
@@ -5599,7 +5599,13 @@ INSERT INTO `mob_spell_lists` VALUES ('Alexander_Image',547,34,1,255);  -- Diaga
 INSERT INTO `mob_spell_lists` VALUES ('Alexander_Image',547,40,1,255);  -- Banishga III (1~255)
 INSERT INTO `mob_spell_lists` VALUES ('Alexander_Image',547,112,1,255); -- Flash (1~255)
 
--- Next Available: 548
+-- Ouryu (Ouryu from Ouryu Cometh) (548)
+INSERT INTO `mob_spell_lists` VALUES ('Ouryu_Ouryu_Cometh',548,54,1,255);  -- stoneskin (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('Ouryu_Ouryu_Cometh',548,191,1,255); -- stonega_iii (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('Ouryu_Ouryu_Cometh',548,365,1,255); -- breakga (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('Ouryu_Ouryu_Cometh',548,255,1,255); -- break (1~255)
+
+-- Next Available: 549
 
 /*!40000 ALTER TABLE `mob_spell_lists` ENABLE KEYS */;
 UNLOCK TABLES;
