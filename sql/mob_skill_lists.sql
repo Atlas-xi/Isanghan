@@ -1087,12 +1087,12 @@ INSERT INTO `mob_skill_lists` VALUES ('Uragnite_shell',250,1572); -- venom_shell
 INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,1573); -- palsynyxis
 INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,1574); -- painful_whip
 INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,1575); -- suctorial_tentacle
-INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2106);
-INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2107);
-INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2108);
-INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2109);
-INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2110);
-INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2111);
+INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2106); -- bloodrake
+INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2107); -- decollation
+INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2108); -- nosferatus_kiss
+INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2109); -- heliovoid
+INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2110); -- wings_of_gehenna
+INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2111); -- eternal_damnation
 -- INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2112);
 -- INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2388);
 -- INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2534);
