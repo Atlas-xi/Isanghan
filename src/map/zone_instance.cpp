@@ -382,7 +382,7 @@ void CZoneInstance::WideScan(CCharEntity* PChar, uint16 radius)
     }
 }
 
-void CZoneInstance::ZoneServer(time_point tick)
+void CZoneInstance::ZoneServer(timing_clock::time_point tick)
 {
     TracyZoneScoped;
 

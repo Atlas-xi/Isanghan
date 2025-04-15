@@ -4669,7 +4669,7 @@ namespace battleutils
         return shotCount;
     }
 
-    void applyCharm(CBattleEntity* PCharmer, CBattleEntity* PVictim, duration charmTime)
+    void applyCharm(CBattleEntity* PCharmer, CBattleEntity* PVictim, timing_clock::duration charmTime)
     {
         PVictim->isCharmed = true;
 

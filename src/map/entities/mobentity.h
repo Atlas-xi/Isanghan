@@ -126,8 +126,8 @@ public:
     uint16 TPUseChance(); // return % chance to use TP move per 400ms tick
 
     bool       CanDeaggro() const;
-    time_point GetDespawnTime();
-    void       SetDespawnTime(duration _duration);
+    timing_clock::time_point GetDespawnTime();
+    void       SetDespawnTime(timing_clock::duration _duration);
     uint32     GetRandomGil();   // returns a random amount of gil
     bool       CanRoamHome();    // is it possible for me to walk back?
     bool       CanRoam();        // check if mob can walk around
@@ -275,7 +275,7 @@ protected:
     void DropItems(CCharEntity* PChar);
 
 private:
-    time_point                     m_DespawnTimer{ time_point::min() }; // Despawn Timer to despawn mob after set duration
+    timing_clock::time_point                     m_DespawnTimer{ timing_clock::time_point::min() }; // Despawn Timer to despawn mob after set duration
     std::unordered_map<int, int16> m_mobModStat;
     std::unordered_map<int, int16> m_mobModStatSave;
     static constexpr float         roam_home_distance{ 60.f };

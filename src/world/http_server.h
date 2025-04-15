@@ -40,7 +40,7 @@ public:
 
 private:
     httplib::Server         m_httpServer;
-    std::atomic<time_point> m_lastUpdate;
+    std::atomic<timing_clock::time_point> m_lastUpdate;
 
     struct APIDataCache
     {

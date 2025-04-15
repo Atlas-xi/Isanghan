@@ -30,10 +30,10 @@
 
 namespace
 {
-    static const duration TIME_TO_SEND_RERAISE_MENU = 8s;
+    static const timing_clock::duration TIME_TO_SEND_RERAISE_MENU = 8s;
 }
 
-CDeathState::CDeathState(CBattleEntity* PEntity, duration death_time)
+CDeathState::CDeathState(CBattleEntity* PEntity, timing_clock::duration death_time)
 : CState(PEntity, PEntity->targid)
 , m_PEntity(PEntity)
 , m_deathTime(death_time)
@@ -49,7 +49,7 @@ CDeathState::CDeathState(CBattleEntity* PEntity, duration death_time)
     }
 }
 
-bool CDeathState::Update(time_point tick)
+bool CDeathState::Update(timing_clock::time_point tick)
 {
     // It's completed
     if (IsCompleted() || m_PEntity->animation != ANIMATION_DEATH)

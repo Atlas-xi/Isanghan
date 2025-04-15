@@ -706,8 +706,8 @@ public:
     JOBTYPE    getJob();
     uint8      getLevel() const;
     uint16     getAnimationID() const;
-    duration   getAnimationTime();
-    duration   getCastTime();
+    timing_clock::duration   getAnimationTime();
+    timing_clock::duration   getCastTime();
     float      getRange() const;
     uint8      getAOE() const;
     uint16     getValidTarget() const;
@@ -727,8 +727,8 @@ public:
     void setJob(JOBTYPE Job);
     void setLevel(uint8 level);
     void setAnimationID(uint16 animationID);
-    void setAnimationTime(duration time);
-    void setCastTime(duration time);
+    void setAnimationTime(timing_clock::duration time);
+    void setCastTime(timing_clock::duration time);
     void setRange(float range);
     void setAOE(uint8 aoe);
     void setValidTarget(uint16 validTarget);
@@ -750,8 +750,8 @@ private:
     JOBTYPE     m_Job;
     uint8       m_level;
     uint16      m_animationID;
-    duration    m_animationTime{};
-    duration    m_castTime{};
+    timing_clock::duration    m_animationTime{};
+    timing_clock::duration    m_castTime{};
     float       m_range;
     uint8       m_aoe;
     uint16      m_validTarget;

@@ -625,7 +625,7 @@ public:
 
     weatherVector_t m_WeatherVector; // The probability of each weather type
 
-    virtual void ZoneServer(time_point tick);
+    virtual void ZoneServer(timing_clock::time_point tick);
     virtual void CheckTriggerAreas();
 
     virtual void ForEachChar(std::function<void(CCharEntity*)> const& func);
@@ -650,7 +650,7 @@ public:
     std::unique_ptr<CNavMesh> m_navMesh;
     std::unique_ptr<ZoneLos>  lineOfSight;
 
-    time_point m_LoadedAt; // The time the zone was loaded
+    timing_clock::time_point m_LoadedAt; // The time the zone was loaded
 
     void LoadNavMesh();
     void LoadZoneLos();
@@ -686,7 +686,7 @@ private:
 
     CTreasurePool* m_TreasurePool;
 
-    time_point m_timeZoneEmpty; // The time point when the last player left the zone
+    timing_clock::time_point m_timeZoneEmpty; // The time point when the last player left the zone
 
     std::unordered_map<std::string, QueryByNameResult_t> m_queryByNameResults;
 

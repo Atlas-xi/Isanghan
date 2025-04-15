@@ -86,7 +86,7 @@ namespace gambits
         gambits.clear();
     }
 
-    void CGambitsContainer::Tick(time_point tick)
+    void CGambitsContainer::Tick(timing_clock::time_point tick)
     {
         TracyZoneScoped;
 

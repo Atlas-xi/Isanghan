@@ -41,7 +41,7 @@ CPlayerController::CPlayerController(CCharEntity* _PChar)
 {
 }
 
-void CPlayerController::Tick(time_point /*tick*/)
+void CPlayerController::Tick(timing_clock::time_point /*tick*/)
 {
 }
 
@@ -260,22 +260,22 @@ bool CPlayerController::WeaponSkill(uint16 targid, uint16 wsid)
     return false;
 }
 
-time_point CPlayerController::getLastAttackTime()
+timing_clock::time_point CPlayerController::getLastAttackTime()
 {
     return m_lastAttackTime;
 }
 
-void CPlayerController::setLastAttackTime(time_point _lastAttackTime)
+void CPlayerController::setLastAttackTime(timing_clock::time_point _lastAttackTime)
 {
     m_lastAttackTime = _lastAttackTime;
 }
 
-void CPlayerController::setLastErrMsgTime(time_point _LastErrMsgTime)
+void CPlayerController::setLastErrMsgTime(timing_clock::time_point _LastErrMsgTime)
 {
     m_errMsgTime = _LastErrMsgTime;
 }
 
-time_point CPlayerController::getLastErrMsgTime()
+timing_clock::time_point CPlayerController::getLastErrMsgTime()
 {
     return m_errMsgTime;
 }

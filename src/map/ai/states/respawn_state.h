@@ -27,9 +27,9 @@
 class CRespawnState : public CState
 {
 public:
-    CRespawnState(CBaseEntity* PEntity, duration spawnTime);
-    virtual bool Update(time_point tick) override;
-    virtual void Cleanup(time_point tick) override;
+    CRespawnState(CBaseEntity* PEntity, timing_clock::duration spawnTime);
+    virtual bool Update(timing_clock::time_point tick) override;
+    virtual void Cleanup(timing_clock::time_point tick) override;
     virtual bool CanChangeState() override;
     virtual bool CanFollowPath() override
     {
@@ -41,7 +41,7 @@ public:
     }
 
 private:
-    duration m_spawnTime;
+    timing_clock::duration m_spawnTime;
 };
 
 #endif

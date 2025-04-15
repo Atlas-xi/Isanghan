@@ -38,8 +38,8 @@ class CMagicState : public CState
 {
 public:
     CMagicState(CBattleEntity* PEntity, uint16 targid, SpellID spellid, uint8 flags = 0);
-    virtual bool Update(time_point tick) override;
-    virtual void Cleanup(time_point tick) override;
+    virtual bool Update(timing_clock::time_point tick) override;
+    virtual void Cleanup(timing_clock::time_point tick) override;
     virtual bool CanChangeState() override;
     virtual bool CanFollowPath() override
     {
@@ -77,7 +77,7 @@ protected:
 
     CBattleEntity* const    m_PEntity;
     std::unique_ptr<CSpell> m_PSpell;
-    duration                m_castTime{};
+    timing_clock::duration                m_castTime{};
     position_t              m_startPos;
     bool                    m_interrupted{ false };
     bool                    m_instantCast{ false };

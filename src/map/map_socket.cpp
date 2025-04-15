@@ -73,7 +73,7 @@ void MapSocket::startReceive()
         });
 }
 
-void MapSocket::recvFor(duration duration)
+void MapSocket::recvFor(timing_clock::duration duration)
 {
     TracyZoneScoped;
 

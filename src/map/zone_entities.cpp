@@ -1671,7 +1671,7 @@ void CZoneEntities::WideScan(CCharEntity* PChar, uint16 radius)
     PChar->pushPacket<CWideScanPacket>(WIDESCAN_END);
 }
 
-void CZoneEntities::ZoneServer(time_point tick)
+void CZoneEntities::ZoneServer(timing_clock::time_point tick)
 {
     TracyZoneScoped;
     TracyZoneString(m_zone->getName());

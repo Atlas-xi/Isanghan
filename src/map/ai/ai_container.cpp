@@ -174,12 +174,12 @@ bool CAIContainer::UseItem(uint16 targid, uint8 loc, uint8 slotid)
     return false;
 }
 
-bool CAIContainer::Inactive(duration _duration, bool canChangeState)
+bool CAIContainer::Inactive(timing_clock::duration _duration, bool canChangeState)
 {
     return ForceChangeState<CInactiveState>(PEntity, _duration, canChangeState, false);
 }
 
-bool CAIContainer::Untargetable(duration _duration, bool canChangeState)
+bool CAIContainer::Untargetable(timing_clock::duration _duration, bool canChangeState)
 {
     return ForceChangeState<CInactiveState>(PEntity, _duration, canChangeState, true);
 }
@@ -335,7 +335,7 @@ bool CAIContainer::Internal_RangedAttack(uint16 targetid)
     return false;
 }
 
-bool CAIContainer::Internal_Die(duration deathTime)
+bool CAIContainer::Internal_Die(timing_clock::duration deathTime)
 {
     auto* entity = dynamic_cast<CBattleEntity*>(PEntity);
     if (entity)
@@ -412,7 +412,7 @@ void CAIContainer::Reset()
     }
 }
 
-void CAIContainer::Tick(time_point _tick)
+void CAIContainer::Tick(timing_clock::time_point _tick)
 {
     TracyZoneScoped;
     m_PrevTick = m_Tick;
@@ -498,12 +498,12 @@ bool CAIContainer::IsUntargetable()
     return (PEntity->PAI->IsCurrentState<CInactiveState>() && static_cast<CInactiveState*>(PEntity->PAI->GetCurrentState())->GetUntargetable()) || PEntity->GetUntargetable();
 }
 
-time_point CAIContainer::getTick()
+timing_clock::time_point CAIContainer::getTick()
 {
     return m_Tick;
 }
 
-time_point CAIContainer::getPrevTick()
+timing_clock::time_point CAIContainer::getPrevTick()
 {
     return m_PrevTick;
 }
@@ -554,7 +554,7 @@ bool CAIContainer::Internal_Despawn(bool instantDespawn)
     return false;
 }
 
-bool CAIContainer::Internal_Respawn(duration _duration)
+bool CAIContainer::Internal_Respawn(timing_clock::duration _duration)
 {
     if (!IsCurrentState<CRespawnState>())
     {

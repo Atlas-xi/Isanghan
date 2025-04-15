@@ -65,7 +65,7 @@ public:
     virtual bool Disengage() override;
 
 protected:
-    virtual void DoCombatTick(time_point tick) override;
+    virtual void DoCombatTick(timing_clock::time_point tick) override;
     virtual void Move() override;
 
     void         setCooldowns();
@@ -92,27 +92,27 @@ private:
 
     CAutomatonEntity* PAutomaton;
 
-    duration             m_actionCooldown{ 3s };
-    duration             m_rangedCooldown{};
+    timing_clock::duration             m_actionCooldown{ 3s };
+    timing_clock::duration             m_rangedCooldown{};
     static constexpr int m_RangedAbility{ 1949 };
-    duration             m_magicCooldown{};
-    duration             m_enfeebleCooldown{};
-    duration             m_elementalCooldown{};
-    duration             m_healCooldown{};
-    duration             m_enhanceCooldown{};
-    duration             m_statusCooldown{};
-    duration             m_shieldbashCooldown{};
+    timing_clock::duration             m_magicCooldown{};
+    timing_clock::duration             m_enfeebleCooldown{};
+    timing_clock::duration             m_elementalCooldown{};
+    timing_clock::duration             m_healCooldown{};
+    timing_clock::duration             m_enhanceCooldown{};
+    timing_clock::duration             m_statusCooldown{};
+    timing_clock::duration             m_shieldbashCooldown{};
     static constexpr int m_ShieldBashAbility{ 1944 };
 
-    time_point m_LastActionTime;
-    time_point m_LastMagicTime;
-    time_point m_LastEnfeebleTime;
-    time_point m_LastElementalTime;
-    time_point m_LastHealTime;
-    time_point m_LastEnhanceTime;
-    time_point m_LastStatusTime;
-    time_point m_LastRangedTime;
-    time_point m_LastShieldBashTime;
+    timing_clock::time_point m_LastActionTime;
+    timing_clock::time_point m_LastMagicTime;
+    timing_clock::time_point m_LastEnfeebleTime;
+    timing_clock::time_point m_LastElementalTime;
+    timing_clock::time_point m_LastHealTime;
+    timing_clock::time_point m_LastEnhanceTime;
+    timing_clock::time_point m_LastStatusTime;
+    timing_clock::time_point m_LastRangedTime;
+    timing_clock::time_point m_LastShieldBashTime;
 };
 
 namespace automaton

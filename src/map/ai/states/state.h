@@ -54,14 +54,14 @@ public:
 
     auto GetErrorMsg() -> std::unique_ptr<CBasicPacket>;
 
-    bool DoUpdate(time_point tick);
+    bool DoUpdate(timing_clock::time_point tick);
     // try interrupt (on hit)
     virtual void TryInterrupt(CBattleEntity* PAttacker)
     {
     }
 
     // called when state completes
-    virtual void Cleanup(time_point tick) = 0;
+    virtual void Cleanup(timing_clock::time_point tick) = 0;
     // whether the state can be changed by normal means
     virtual bool CanChangeState() = 0;
     virtual bool CanFollowPath()  = 0;
@@ -72,13 +72,13 @@ public:
 
 protected:
     // state logic done per tick - returns whether to exit the state or not
-    virtual bool Update(time_point tick) = 0;
+    virtual bool Update(timing_clock::time_point tick) = 0;
     virtual void UpdateTarget(uint16 targid);
     virtual void UpdateTarget(CBaseEntity* target);
 
     uint16     GetTargetID() const;
     void       Complete();
-    time_point GetEntryTime() const;
+    timing_clock::time_point GetEntryTime() const;
 
     std::unique_ptr<CBasicPacket> m_errorMsg;
 
@@ -88,7 +88,7 @@ protected:
 private:
     CBaseEntity* m_PTarget{ nullptr };
     bool         m_completed{ false };
-    time_point   m_entryTime{ timing_clock::now() };
+    timing_clock::time_point   m_entryTime{ timing_clock::now() };
 };
 
 #endif

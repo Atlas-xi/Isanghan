@@ -32,8 +32,8 @@
 #include "utils/charutils.h"
 #include "utils/itemutils.h"
 
-static constexpr duration treasure_checktime = 3s;
-static constexpr duration treasure_livetime  = 5min;
+static constexpr timing_clock::duration treasure_checktime = 3s;
+static constexpr timing_clock::duration treasure_livetime  = 5min;
 
 CTreasurePool::CTreasurePool(const TreasurePoolType PoolType)
 : m_count(0)
@@ -167,7 +167,7 @@ uint8 CTreasurePool::addItem(uint16 ItemID, CBaseEntity* PEntity)
 {
     uint8      SlotID     = 0;
     uint8      FreeSlotID = -1;
-    time_point oldest     = time_point::max();
+    timing_clock::time_point oldest     = timing_clock::time_point::max();
     CItem*     PNewItem   = itemutils::GetItemPointer(ItemID);
 
     if (!PNewItem)
@@ -472,7 +472,7 @@ bool CTreasurePool::hasPassedItem(CCharEntity* PChar, uint8 SlotID)
     return false;
 }
 
-void CTreasurePool::checkItems(time_point tick)
+void CTreasurePool::checkItems(timing_clock::time_point tick)
 {
     if (m_count != 0)
     {
@@ -487,7 +487,7 @@ void CTreasurePool::checkItems(time_point tick)
     }
 }
 
-void CTreasurePool::checkTreasureItem(time_point tick, uint8 SlotID)
+void CTreasurePool::checkTreasureItem(timing_clock::time_point tick, uint8 SlotID)
 {
     if (m_PoolItems[SlotID].ID == 0)
     {

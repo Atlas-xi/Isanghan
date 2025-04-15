@@ -55,7 +55,7 @@ void CState::Complete()
     m_completed = true;
 }
 
-time_point CState::GetEntryTime() const
+timing_clock::time_point CState::GetEntryTime() const
 {
     return m_entryTime;
 }
@@ -91,7 +91,7 @@ auto CState::GetErrorMsg() -> std::unique_ptr<CBasicPacket>
     return std::unique_ptr<CBasicPacket>();
 }
 
-bool CState::DoUpdate(time_point tick)
+bool CState::DoUpdate(timing_clock::time_point tick)
 {
     UpdateTarget(m_targid);
     return Update(tick);

@@ -54,7 +54,7 @@ CBattlefieldHandler::CBattlefieldHandler(CZone* PZone)
 {
 }
 
-void CBattlefieldHandler::HandleBattlefields(time_point tick)
+void CBattlefieldHandler::HandleBattlefields(timing_clock::time_point tick)
 {
     TracyZoneScoped;
     // todo: use raw pointers otherwise might be harming lua

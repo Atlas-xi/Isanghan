@@ -148,27 +148,27 @@ position_t CInstance::GetEntryLoc()
     return m_entryloc;
 }
 
-duration CInstance::GetTimeLimit()
+timing_clock::duration CInstance::GetTimeLimit()
 {
     return m_timeLimit;
 }
 
-void CInstance::SetTimeLimit(duration time)
+void CInstance::SetTimeLimit(timing_clock::duration time)
 {
     m_timeLimit = time;
 }
 
-duration CInstance::GetLastTimeUpdate()
+timing_clock::duration CInstance::GetLastTimeUpdate()
 {
     return m_lastTimeUpdate;
 }
 
-duration CInstance::GetWipeTime()
+timing_clock::duration CInstance::GetWipeTime()
 {
     return m_wipeTimer - m_startTime;
 }
 
-duration CInstance::GetElapsedTime(time_point tick)
+timing_clock::duration CInstance::GetElapsedTime(timing_clock::time_point tick)
 {
     return tick - m_startTime;
 }
@@ -192,7 +192,7 @@ void CInstance::SetEntryLoc(float x, float y, float z, float rot)
     m_entryloc.rotation = (uint8)rot;
 }
 
-void CInstance::SetLastTimeUpdate(duration lastTime)
+void CInstance::SetLastTimeUpdate(timing_clock::duration lastTime)
 {
     m_lastTimeUpdate = lastTime;
 }
@@ -208,7 +208,7 @@ void CInstance::SetStage(uint32 stage)
     m_stage = stage;
 }
 
-void CInstance::SetWipeTime(duration time)
+void CInstance::SetWipeTime(timing_clock::duration time)
 {
     m_wipeTimer = time + m_startTime;
 }
@@ -224,7 +224,7 @@ void CInstance::SetLocalVar(std::string const& name, uint64_t value)
  *                                                                       *
  ************************************************************************/
 
-void CInstance::CheckTime(time_point tick)
+void CInstance::CheckTime(timing_clock::time_point tick)
 {
     if (m_lastTimeCheck + 1s <= tick && !Failed())
     {

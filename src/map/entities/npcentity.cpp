@@ -109,7 +109,7 @@ bool CNpcEntity::isWideScannable()
 
 void CNpcEntity::PostTick()
 {
-    time_point now = timing_clock::now();
+    timing_clock::time_point now = timing_clock::now();
     if (loc.zone && updatemask && status != STATUS_TYPE::DISAPPEAR && now > m_nextUpdateTimer)
     {
         m_nextUpdateTimer = now + 250ms;

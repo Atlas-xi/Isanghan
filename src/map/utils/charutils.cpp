@@ -6885,7 +6885,7 @@ namespace charutils
         PChar->pushPacket<CObjectiveUtilityPacket>(seconds);
     }
 
-    void SendTimerPacket(CCharEntity* PChar, duration dur)
+    void SendTimerPacket(CCharEntity* PChar, timing_clock::duration dur)
     {
         auto timeLimitSeconds = static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(dur).count());
         SendTimerPacket(PChar, timeLimitSeconds);

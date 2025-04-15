@@ -36,8 +36,8 @@ struct queueAction_t
 {
     using EntityFunc_t = std::function<void(CBaseEntity*)>;
 
-    time_point    start_time{ timing_clock::now() };
-    duration      delay{ 0ms };
+    timing_clock::time_point    start_time{ timing_clock::now() };
+    timing_clock::duration      delay{ 0ms };
     bool          checkState{ false };
     sol::function lua_func{};
     EntityFunc_t  func{};
@@ -49,7 +49,7 @@ struct queueAction_t
     {
     }
 
-    queueAction_t(duration _ms, bool _checkstate, std::function<void(CBaseEntity*)> _func)
+    queueAction_t(timing_clock::duration _ms, bool _checkstate, std::function<void(CBaseEntity*)> _func)
     : delay(_ms)
     , checkState(_checkstate)
     , func(_func)
@@ -80,7 +80,7 @@ public:
     CAIActionQueue(CBaseEntity*);
 
     void pushAction(queueAction_t&&);
-    void checkAction(time_point tick);
+    void checkAction(timing_clock::time_point tick);
 
     void handleAction(queueAction_t& action);
 

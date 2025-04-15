@@ -219,9 +219,9 @@ void MapServer::run()
 
     while (Application::isRunning())
     {
-        duration tasksDuration;
-        duration networkDuration;
-        duration tickDuration;
+        timing_clock::duration tasksDuration;
+        timing_clock::duration networkDuration;
+        timing_clock::duration tickDuration;
 
         const auto tickStart = timing_clock::now();
         {
@@ -422,7 +422,7 @@ void MapServer::do_final()
     logging::ShutDown();
 }
 
-int32 MapServer::map_cleanup(time_point tick, CTaskManager::CTask* PTask)
+int32 MapServer::map_cleanup(timing_clock::time_point tick, CTaskManager::CTask* PTask)
 {
     TracyZoneScoped;
 
@@ -438,7 +438,7 @@ int32 MapServer::map_cleanup(time_point tick, CTaskManager::CTask* PTask)
     return 0;
 }
 
-int32 MapServer::map_garbage_collect(time_point tick, CTaskManager::CTask* PTask)
+int32 MapServer::map_garbage_collect(timing_clock::time_point tick, CTaskManager::CTask* PTask)
 {
     TracyZoneScoped;
 

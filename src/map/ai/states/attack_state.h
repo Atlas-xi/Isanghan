@@ -30,9 +30,9 @@ public:
     CAttackState(CBattleEntity* PEntity, uint16 targid);
 
     // state logic done per tick - returns whether to exit the state or not
-    virtual bool Update(time_point tick) override;
+    virtual bool Update(timing_clock::time_point tick) override;
 
-    virtual void Cleanup(time_point tick) override;
+    virtual void Cleanup(timing_clock::time_point tick) override;
     // whether the state can be changed by normal means
     virtual bool CanChangeState() override
     {
@@ -58,7 +58,7 @@ protected:
 
 private:
     CBattleEntity* const m_PEntity;
-    duration             m_attackTime{ 2s };
+    timing_clock::duration             m_attackTime{ 2s };
 };
 
 #endif

@@ -79,7 +79,7 @@ public:
 
     void PushPacket(CBaseEntity*, GLOBAL_MESSAGE_TYPE, const std::unique_ptr<CBasicPacket>&); // send a global package within the zone
 
-    void ZoneServer(time_point tick);
+    void ZoneServer(timing_clock::time_point tick);
 
     CZone* GetZone();
 
@@ -115,14 +115,14 @@ private:
     std::set<uint16> m_charTargIds;       // sorted set of targids for characters
     std::set<uint16> m_dynamicTargIds;    // sorted set of targids for dynamic entities
 
-    std::vector<std::pair<uint16, time_point>> m_dynamicTargIdsToDelete; // list of targids pending deletion at a later date
+    std::vector<std::pair<uint16, timing_clock::time_point>> m_dynamicTargIdsToDelete; // list of targids pending deletion at a later date
 
-    time_point m_EffectCheckTime{ timing_clock::now() };
+    timing_clock::time_point m_EffectCheckTime{ timing_clock::now() };
 
-    time_point m_computeTime{ timing_clock::now() };
+    timing_clock::time_point m_computeTime{ timing_clock::now() };
     uint16     m_lastCharComputeTargId{ 0 };
 
-    time_point m_charPersistTime{ timing_clock::now() };
+    timing_clock::time_point m_charPersistTime{ timing_clock::now() };
     uint16     m_lastCharPersistTargId{ 0 };
 
     //

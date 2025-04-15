@@ -124,42 +124,42 @@ uint16 CBattlefield::GetRuleMask() const
     return m_Rules;
 }
 
-time_point CBattlefield::GetStartTime() const
+timing_clock::time_point CBattlefield::GetStartTime() const
 {
     return m_StartTime;
 }
 
-duration CBattlefield::GetTimeInside() const
+timing_clock::duration CBattlefield::GetTimeInside() const
 {
     return m_Tick - m_StartTime;
 }
 
-time_point CBattlefield::GetFightTime() const
+timing_clock::time_point CBattlefield::GetFightTime() const
 {
     return m_FightTick;
 }
 
-duration CBattlefield::GetTimeLimit() const
+timing_clock::duration CBattlefield::GetTimeLimit() const
 {
     return m_TimeLimit;
 }
 
-time_point CBattlefield::GetWipeTime() const
+timing_clock::time_point CBattlefield::GetWipeTime() const
 {
     return m_WipeTime;
 }
 
-duration CBattlefield::GetFinishTime() const
+timing_clock::duration CBattlefield::GetFinishTime() const
 {
     return m_FinishTime;
 }
 
-duration CBattlefield::GetRemainingTime() const
+timing_clock::duration CBattlefield::GetRemainingTime() const
 {
-    return GetTimeLimit() > GetTimeInside() ? GetTimeLimit() - GetTimeInside() : duration(0);
+    return GetTimeLimit() > GetTimeInside() ? GetTimeLimit() - GetTimeInside() : timing_clock::duration(0);
 }
 
-duration CBattlefield::GetLastTimeUpdate() const
+timing_clock::duration CBattlefield::GetLastTimeUpdate() const
 {
     return m_LastPromptTime;
 }
@@ -200,7 +200,7 @@ void CBattlefield::SetInitiator(std::string const& name)
     m_Initiator.name = name;
 }
 
-void CBattlefield::SetTimeLimit(duration time)
+void CBattlefield::SetTimeLimit(timing_clock::duration time)
 {
     m_TimeLimit      = time;
     m_LastPromptTime = time;
@@ -214,7 +214,7 @@ void CBattlefield::SetTimeLimit(duration time)
     }
 }
 
-void CBattlefield::SetWipeTime(time_point time)
+void CBattlefield::SetWipeTime(timing_clock::time_point time)
 {
     m_WipeTime = time;
 }
@@ -224,7 +224,7 @@ void CBattlefield::SetArea(uint8 area)
     m_Area = area;
 }
 
-void CBattlefield::SetRecord(std::string const& name, duration time, size_t partySize)
+void CBattlefield::SetRecord(std::string const& name, timing_clock::duration time, size_t partySize)
 {
     m_Record.name      = !name.empty() ? name : m_Initiator.name;
     m_Record.time      = time;
@@ -257,7 +257,7 @@ void CBattlefield::SetLocalVar(std::string const& name, uint64_t value)
     m_LocalVars[name] = value;
 }
 
-void CBattlefield::SetLastTimeUpdate(duration time)
+void CBattlefield::SetLastTimeUpdate(timing_clock::duration time)
 {
     m_LastPromptTime = time;
 }
@@ -672,7 +672,7 @@ bool CBattlefield::RemoveEntity(CBaseEntity* PEntity, uint8 leavecode)
     return found;
 }
 
-void CBattlefield::onTick(time_point time)
+void CBattlefield::onTick(timing_clock::time_point time)
 {
     TracyZoneScoped;
     if (!m_Attacked)
@@ -701,7 +701,7 @@ bool CBattlefield::CanCleanup(bool cleanup)
     return m_Cleanup || m_EnteredPlayers.empty();
 }
 
-bool CBattlefield::Cleanup(time_point time, bool force)
+bool CBattlefield::Cleanup(timing_clock::time_point time, bool force)
 {
     // Wait until
     if (!force && !m_EnteredPlayers.empty() && m_cleanupTime > time)

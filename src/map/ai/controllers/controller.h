@@ -35,7 +35,7 @@ public:
     virtual ~CController()
     {
     }
-    virtual void Tick(time_point tick) = 0;
+    virtual void Tick(timing_clock::time_point tick) = 0;
     virtual void Despawn();
     virtual void Reset();
     virtual bool Cast(uint16 targid, SpellID spellid);
@@ -58,7 +58,7 @@ public:
     bool canUpdate{ true };
 
 protected:
-    time_point     m_Tick;
+    timing_clock::time_point     m_Tick;
     CBattleEntity* POwner;
     bool           m_AutoAttackEnabled{ true };
     bool           m_WeaponSkillEnabled{ true };

@@ -175,7 +175,7 @@ CurrentManeuvers CAutomatonController::GetCurrentManeuvers() const
              statuses->GetEffectsCount(EFFECT_LIGHT_MANEUVER), statuses->GetEffectsCount(EFFECT_DARK_MANEUVER) };
 }
 
-void CAutomatonController::DoCombatTick(time_point tick)
+void CAutomatonController::DoCombatTick(timing_clock::time_point tick)
 {
     if ((PAutomaton->PMaster == nullptr || PAutomaton->PMaster->isDead()) && PAutomaton->isAlive())
     {
@@ -1577,8 +1577,8 @@ bool CAutomatonController::TryRangedAttack() // TODO: Find the animation for its
 {
     if (PAutomaton->getFrame() == FRAME_SHARPSHOT)
     {
-        duration minDelay   = PAutomaton->getHead() == AUTOHEADTYPE::HEAD_SHARPSHOT ? 5s : 10s;
-        duration attackTime = m_rangedCooldown - std::chrono::seconds(PAutomaton->getMod(Mod::AUTO_RANGED_DELAY));
+        timing_clock::duration minDelay   = PAutomaton->getHead() == AUTOHEADTYPE::HEAD_SHARPSHOT ? 5s : 10s;
+        timing_clock::duration attackTime = m_rangedCooldown - std::chrono::seconds(PAutomaton->getMod(Mod::AUTO_RANGED_DELAY));
 
         if (m_rangedCooldown > 0s && m_Tick > m_LastRangedTime + std::max(attackTime, minDelay))
         {

@@ -25,6 +25,6 @@
 #include "common/cbasetypes.h"
 #include "common/task_manager.h"
 
-int32 time_server(time_point tick, CTaskManager::CTask*);
+int32 time_server(timing_clock::time_point tick, CTaskManager::CTask*);
 
 #endif

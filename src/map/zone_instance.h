@@ -60,7 +60,7 @@ public:
 
     virtual void UpdateEntityPacket(CBaseEntity* PEntity, ENTITYUPDATE type, uint8 updatemask, bool alwaysInclude = false) override;
 
-    virtual void ZoneServer(time_point tick) override;
+    virtual void ZoneServer(timing_clock::time_point tick) override;
     virtual void CheckTriggerAreas() override;
 
     void ForEachChar(std::function<void(CCharEntity*)> const& func) override;

@@ -30,7 +30,7 @@
 #include "daily_tally.h"
 #include "world_server.h"
 
-int32 time_server(time_point tick, CTaskManager::CTask* PTask)
+int32 time_server(timing_clock::time_point tick, CTaskManager::CTask* PTask)
 {
     TracyZoneScoped;
 
@@ -38,8 +38,8 @@ int32 time_server(time_point tick, CTaskManager::CTask* PTask)
     WorldServer* worldServer  = std::any_cast<WorldServer*>(PTask->m_data);
 
     // Weekly update for conquest (sunday at midnight)
-    static time_point lastConquestTally  = tick - 1h;
-    static time_point lastConquestUpdate = tick - 1h;
+    static timing_clock::time_point lastConquestTally  = tick - 1h;
+    static timing_clock::time_point lastConquestUpdate = tick - 1h;
     if (CVanaTime::getInstance()->getJstWeekDay() == 1 && CVanaTime::getInstance()->getJstHour() == 0 && CVanaTime::getInstance()->getJstMinute() == 0)
     {
         if (tick > (lastConquestTally + 1h))
@@ -59,7 +59,7 @@ int32 time_server(time_point tick, CTaskManager::CTask* PTask)
     }
 
     // Vanadiel Hour
-    static time_point lastVHourlyUpdate = tick - 4800ms;
+    static timing_clock::time_point lastVHourlyUpdate = tick - 4800ms;
     if (CVanaTime::getInstance()->getMinute() == 0)
     {
         if (tick > (lastVHourlyUpdate + 4800ms))
@@ -70,7 +70,7 @@ int32 time_server(time_point tick, CTaskManager::CTask* PTask)
     }
 
     // JST Midnight
-    static time_point lastTickedJstMidnight = tick - 1h;
+    static timing_clock::time_point lastTickedJstMidnight = tick - 1h;
     if (CVanaTime::getInstance()->getJstHour() == 0 && CVanaTime::getInstance()->getJstMinute() == 0)
     {
         if (tick > (lastTickedJstMidnight + 1h))
@@ -85,7 +85,7 @@ int32 time_server(time_point tick, CTaskManager::CTask* PTask)
     }
 
     // 4-hour RoE Timed blocks
-    static time_point lastTickedRoeBlock = tick - 1h;
+    static timing_clock::time_point lastTickedRoeBlock = tick - 1h;
     if (CVanaTime::getInstance()->getJstHour() % 4 == 0 && CVanaTime::getInstance()->getJstMinute() == 0)
     {
         if (tick > (lastTickedRoeBlock + 1h))
@@ -95,7 +95,7 @@ int32 time_server(time_point tick, CTaskManager::CTask* PTask)
     }
 
     // Vanadiel Day
-    static time_point lastVDailyUpdate = tick - 4800ms;
+    static timing_clock::time_point lastVDailyUpdate = tick - 4800ms;
     if (CVanaTime::getInstance()->getHour() == 0 && CVanaTime::getInstance()->getMinute() == 0)
     {
         if (tick > (lastVDailyUpdate + 4800ms))

@@ -84,13 +84,13 @@ void CTaskManager::RemoveTask(std::string const& TaskName)
     m_TaskList = newPq;
 }
 
-duration CTaskManager::doExpiredTasks(time_point tick) // tick is normally timing_clock::now()
+timing_clock::duration CTaskManager::doExpiredTasks(timing_clock::time_point tick) // tick is normally timing_clock::now()
 {
     TracyZoneScoped;
 
     const auto start = timing_clock::now();
 
-    duration diff = 1s;
+    timing_clock::duration diff = 1s;
     while (!m_TaskList.empty())
     {
         CTask* PTask = m_TaskList.top();
@@ -128,5 +128,5 @@ duration CTaskManager::doExpiredTasks(time_point tick) // tick is normally timin
     }
 
     // We clamp with a minimum to ensure that the network phase doesn't starve
-    return std::clamp<duration>(timing_clock::now() - start, 50ms, 1000ms);
+    return std::clamp<timing_clock::duration>(timing_clock::now() - start, 50ms, 1000ms);
 }

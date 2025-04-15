@@ -143,12 +143,12 @@ void CAbility::setAnimationID(uint16 animationID)
     m_animationID = animationID;
 }
 
-void CAbility::setAnimationTime(duration time)
+void CAbility::setAnimationTime(timing_clock::duration time)
 {
     m_animationTime = time;
 }
 
-void CAbility::setCastTime(duration time)
+void CAbility::setCastTime(timing_clock::duration time)
 {
     m_castTime = time;
 }
@@ -158,12 +158,12 @@ uint16 CAbility::getAnimationID() const
     return m_animationID;
 }
 
-duration CAbility::getAnimationTime()
+timing_clock::duration CAbility::getAnimationTime()
 {
     return m_animationTime;
 }
 
-duration CAbility::getCastTime()
+timing_clock::duration CAbility::getCastTime()
 {
     return m_castTime;
 }

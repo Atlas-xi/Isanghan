@@ -46,24 +46,24 @@ public:
     uint8              GetLevelCap() const;
     const std::string& GetName();
     position_t         GetEntryLoc();                   // Get entry location
-    duration           GetTimeLimit();                  // Get instance time limit
-    duration           GetLastTimeUpdate();             // Get last time a "Time Remaining:" message was displayed
+    timing_clock::duration           GetTimeLimit();                  // Get instance time limit
+    timing_clock::duration           GetLastTimeUpdate();             // Get last time a "Time Remaining:" message was displayed
     uint32             GetProgress() const;             // Tracks the progress through the current stage
     uint32             GetStage() const;                // Tracks the progress through the instance (eg. floor #)
-    duration           GetWipeTime();                   // Get time wipe happened (elapsed since start)
-    duration           GetElapsedTime(time_point tick); // Get elapsed time so far
+    timing_clock::duration           GetWipeTime();                   // Get time wipe happened (elapsed since start)
+    timing_clock::duration           GetElapsedTime(timing_clock::time_point tick); // Get elapsed time so far
     uint64_t           GetLocalVar(std::string const& name) const;
 
     void SetLevelCap(uint8 cap);
     void SetEntryLoc(float x, float y, float z, float rot); // Set entry location
-    void SetLastTimeUpdate(duration time);                  // Set last time a "Time Remaining:" message was displayed
-    void SetTimeLimit(duration time);                       // Set instance time limit
+    void SetLastTimeUpdate(timing_clock::duration time);                  // Set last time a "Time Remaining:" message was displayed
+    void SetTimeLimit(timing_clock::duration time);                       // Set instance time limit
     void SetProgress(uint32 progress);                      // Set progress through current stage
     void SetStage(uint32 stage);                            // Set current stage (eg. floor #)
-    void SetWipeTime(duration time);                        // Set elapsed time when a wipe is detected
+    void SetWipeTime(timing_clock::duration time);                        // Set elapsed time when a wipe is detected
     void SetLocalVar(std::string const& name, uint64_t value);
 
-    void CheckTime(time_point tick);         // Check time limit (run instance time script)
+    void CheckTime(timing_clock::time_point tick);         // Check time limit (run instance time script)
     bool CharRegistered(CCharEntity* PChar); // Check if PChar is registered to this instance
     void ClearEntities();
     void Fail();                     // Fails the instance (onInstanceFailure)
@@ -87,11 +87,11 @@ private:
     CZone*              m_zone;
     uint32              m_commander{ 0 };
     uint8               m_levelcap{ 0 };
-    duration            m_timeLimit{ duration::zero() };
-    time_point          m_startTime;
-    duration            m_lastTimeUpdate{ duration::zero() };
-    time_point          m_lastTimeCheck;
-    time_point          m_wipeTimer;
+    timing_clock::duration            m_timeLimit{ timing_clock::duration::zero() };
+    timing_clock::time_point          m_startTime;
+    timing_clock::duration            m_lastTimeUpdate{ timing_clock::duration::zero() };
+    timing_clock::time_point          m_lastTimeCheck;
+    timing_clock::time_point          m_wipeTimer;
     uint32              m_progress{ 0 };
     uint32              m_stage{ 0 };
     position_t          m_entryloc{};

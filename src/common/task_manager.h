@@ -42,7 +42,7 @@ public:
         TASK_INVALID
     };
 
-    using TaskFunc_t = std::function<int32(time_point, CTask*)>;
+    using TaskFunc_t = std::function<int32(timing_clock::time_point, CTask*)>;
 
     template <class _Ty>
     struct greater_equal
@@ -59,7 +59,7 @@ public:
     {
     public:
         template <typename F>
-        CTask(std::string const& name, time_point tick, std::any data, TASKTYPE type, duration interval, F&& func)
+        CTask(std::string const& name, timing_clock::time_point tick, std::any data, TASKTYPE type, timing_clock::duration interval, F&& func)
         : m_name(name)
         , m_type(type)
         , m_tick(tick)
@@ -71,8 +71,8 @@ public:
 
         std::string m_name;
         TASKTYPE    m_type;
-        time_point  m_tick;
-        duration    m_interval;
+        timing_clock::time_point  m_tick;
+        timing_clock::duration    m_interval;
         std::any    m_data;
         TaskFunc_t  m_func;
     };
@@ -87,12 +87,12 @@ public:
     CTask* AddTask(CTask*);
 
     template <typename F>
-    CTask* AddTask(std::string const& InitName, time_point InitTick, std::any InitData, TASKTYPE InitType, duration InitInterval, F&& InitFunc)
+    CTask* AddTask(std::string const& InitName, timing_clock::time_point InitTick, std::any InitData, TASKTYPE InitType, timing_clock::duration InitInterval, F&& InitFunc)
     {
         return AddTask(new CTask(InitName, InitTick, InitData, InitType, InitInterval, std::forward<F>(InitFunc)));
     }
 
-    auto doExpiredTasks(time_point tick) -> duration;
+    auto doExpiredTasks(timing_clock::time_point tick) -> timing_clock::duration;
     void RemoveTask(std::string const& TaskName);
 
 protected:

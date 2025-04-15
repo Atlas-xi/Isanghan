@@ -203,12 +203,12 @@ void CMobEntity::setEntityFlags(uint32 EntityFlags)
  *                                                                       *
  ************************************************************************/
 
-time_point CMobEntity::GetDespawnTime()
+timing_clock::time_point CMobEntity::GetDespawnTime()
 {
     return m_DespawnTimer;
 }
 
-void CMobEntity::SetDespawnTime(duration _duration)
+void CMobEntity::SetDespawnTime(timing_clock::duration _duration)
 {
     if (_duration > 0s)
     {
@@ -216,7 +216,7 @@ void CMobEntity::SetDespawnTime(duration _duration)
     }
     else
     {
-        m_DespawnTimer = time_point::min();
+        m_DespawnTimer = timing_clock::time_point::min();
     }
 }
 
@@ -529,7 +529,7 @@ void CMobEntity::PostTick()
 {
     TracyZoneScoped;
     CBattleEntity::PostTick();
-    time_point now = timing_clock::now();
+    timing_clock::time_point now = timing_clock::now();
     if (loc.zone && updatemask && now > m_nextUpdateTimer)
     {
         m_nextUpdateTimer = now + 250ms;
@@ -641,7 +641,7 @@ void CMobEntity::Spawn()
         }
     }
 
-    m_DespawnTimer = time_point::min();
+    m_DespawnTimer = timing_clock::time_point::min();
     luautils::OnMobSpawn(this);
 }
 

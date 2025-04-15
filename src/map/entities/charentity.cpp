@@ -1015,7 +1015,7 @@ bool CCharEntity::PersistData()
     return didPersist;
 }
 
-bool CCharEntity::PersistData(time_point tick)
+bool CCharEntity::PersistData(timing_clock::time_point tick)
 {
     if (tick < nextDataPersistTime || !PersistData())
     {
@@ -1026,7 +1026,7 @@ bool CCharEntity::PersistData(time_point tick)
     return true;
 }
 
-void CCharEntity::Tick(time_point tick)
+void CCharEntity::Tick(timing_clock::time_point tick)
 {
     TracyZoneScoped;
     CBattleEntity::Tick(tick);
@@ -1091,7 +1091,7 @@ void CCharEntity::PostTick()
         m_EffectsChanged = false;
     }
 
-    time_point now = timing_clock::now();
+    timing_clock::time_point now = timing_clock::now();
 
     if (updatemask && now > m_nextUpdateTimer)
     {
@@ -2675,7 +2675,7 @@ void CCharEntity::Die()
     luautils::OnPlayerDeath(this);
 }
 
-void CCharEntity::Die(duration _duration)
+void CCharEntity::Die(timing_clock::duration _duration)
 {
     TracyZoneScoped;
 

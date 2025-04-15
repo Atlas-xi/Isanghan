@@ -83,7 +83,7 @@ void CTrustController::Despawn()
     CMobController::Despawn();
 }
 
-void CTrustController::Tick(time_point tick)
+void CTrustController::Tick(timing_clock::time_point tick)
 {
     TracyZoneScoped;
     TracyZoneString(POwner->getName());
@@ -110,7 +110,7 @@ void CTrustController::Tick(time_point tick)
     }
 }
 
-void CTrustController::DoCombatTick(time_point tick)
+void CTrustController::DoCombatTick(timing_clock::time_point tick)
 {
     TracyZoneScoped;
 
@@ -215,7 +215,7 @@ void CTrustController::DoCombatTick(time_point tick)
     }
 }
 
-void CTrustController::DoRoamTick(time_point tick)
+void CTrustController::DoRoamTick(timing_clock::time_point tick)
 {
     TracyZoneScoped;
 
@@ -424,7 +424,7 @@ bool CTrustController::RangedAttack(uint16 targid)
 {
     TracyZoneScoped;
 
-    duration rangedDelay = 10s;
+    timing_clock::duration rangedDelay = 10s;
     if (CItemWeapon* PRange = dynamic_cast<CItemWeapon*>(POwner->m_Weapons[SLOT_RANGED]))
     {
         rangedDelay = std::chrono::milliseconds(PRange->getDelay());

@@ -146,7 +146,7 @@ void MapNetworking::tapStatistics()
     TotalPacketsDelayedPerTick = 0U;
 }
 
-auto MapNetworking::doSocketsBlocking(duration next) -> duration
+auto MapNetworking::doSocketsBlocking(timing_clock::duration next) -> timing_clock::duration
 {
     TracyZoneScoped;
 

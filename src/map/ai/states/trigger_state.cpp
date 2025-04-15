@@ -32,7 +32,7 @@ CTriggerState::CTriggerState(CBaseEntity* PEntity, uint16 targid, bool door)
 {
 }
 
-bool CTriggerState::Update(time_point tick)
+bool CTriggerState::Update(timing_clock::time_point tick)
 {
     if (!IsCompleted())
     {

@@ -2699,12 +2699,12 @@ void CBattleEntity::OnDespawn(CDespawnState& /*unused*/)
     PAI->Internal_Respawn(0s);
 }
 
-void CBattleEntity::SetBattleStartTime(time_point time)
+void CBattleEntity::SetBattleStartTime(timing_clock::time_point time)
 {
     m_battleStartTime = time;
 }
 
-duration CBattleEntity::GetBattleTime()
+timing_clock::duration CBattleEntity::GetBattleTime()
 {
     return timing_clock::now() - m_battleStartTime;
 }
@@ -2719,7 +2719,7 @@ uint16 CBattleEntity::getBattleID()
     return m_battleID;
 }
 
-void CBattleEntity::Tick(time_point /*unused*/)
+void CBattleEntity::Tick(timing_clock::time_point /*unused*/)
 {
     TracyZoneScoped;
 }

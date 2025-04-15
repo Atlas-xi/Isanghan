@@ -73,7 +73,7 @@ public:
     void ResumePatrol();
 
     // moves mob to next point
-    void FollowPath(time_point tick);
+    void FollowPath(timing_clock::time_point tick);
 
     // returns true if entity is on a way point
     bool OnPoint() const;
@@ -146,7 +146,7 @@ private:
     bool   m_onPoint;
     int16  m_currentPoint;
 
-    time_point m_timeAtPoint;
+    timing_clock::time_point m_timeAtPoint;
 
     uint8 m_currentTurn;
 

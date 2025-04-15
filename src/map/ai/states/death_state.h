@@ -27,12 +27,12 @@
 class CDeathState : public CState
 {
 public:
-    CDeathState(CBattleEntity* PEntity, duration death_time);
+    CDeathState(CBattleEntity* PEntity, timing_clock::duration death_time);
 
     // state logic done per tick - returns whether to exit the state or not
-    virtual bool Update(time_point tick) override;
+    virtual bool Update(timing_clock::time_point tick) override;
 
-    virtual void Cleanup(time_point tick) override
+    virtual void Cleanup(timing_clock::time_point tick) override
     {
     }
     // whether the state can be changed by normal means
@@ -53,9 +53,9 @@ public:
 
 private:
     CBattleEntity* const m_PEntity;
-    duration             m_deathTime;
+    timing_clock::duration             m_deathTime;
     bool                 m_raiseSent{ false };
-    time_point           m_raiseTime;
+    timing_clock::time_point           m_raiseTime;
 };
 
 #endif

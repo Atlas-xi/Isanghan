@@ -21,7 +21,7 @@
 
 #include "watchdog.h"
 
-Watchdog::Watchdog(duration timeout, std::function<void()> callback)
+Watchdog::Watchdog(timing_clock::duration timeout, std::function<void()> callback)
 : m_timeout(timeout)
 , m_callback(std::move(callback))
 , m_lastUpdate(timing_clock::now())

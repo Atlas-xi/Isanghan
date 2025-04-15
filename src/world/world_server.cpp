@@ -56,7 +56,7 @@ void pump_queues(WorldServer* worldServer, asio::steady_timer* timer)
 }
 */
 
-int32 pump_queues(time_point tick, CTaskManager::CTask* PTask)
+int32 pump_queues(timing_clock::time_point tick, CTaskManager::CTask* PTask)
 {
     TracyZoneScoped;
 

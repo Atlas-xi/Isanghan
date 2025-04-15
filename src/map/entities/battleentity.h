@@ -742,13 +742,13 @@ public:
     virtual void TryHitInterrupt(CBattleEntity* PAttacker);
     virtual void OnDespawn(CDespawnState&);
 
-    void     SetBattleStartTime(time_point);
-    duration GetBattleTime();
+    void     SetBattleStartTime(timing_clock::time_point);
+    timing_clock::duration GetBattleTime();
 
     void   setBattleID(uint16 battleID);
     uint16 getBattleID();
 
-    virtual void Tick(time_point) override;
+    virtual void Tick(timing_clock::time_point) override;
     virtual void PostTick() override;
 
     health_t health{}; // hp,mp,tp
@@ -758,7 +758,7 @@ public:
     uint16   m_magicEvasion; // store this so it can be removed easily
     bool     m_unkillable;   // entity is not able to die (probably until some action removes this flag)
 
-    time_point charmTime; // to hold the time entity is charmed
+    timing_clock::time_point charmTime; // to hold the time entity is charmed
     bool       isCharmed; // is the battle entity charmed?
 
     float           m_ModelRadius;  // The radius of the entity model, for calculating the range of a physical attack
@@ -777,7 +777,7 @@ public:
     CBattleEntity*  PPet;
     CBattleEntity*  PMaster; // Owner/owner of the entity (applies to all combat entities)
     CBattleEntity*  PLastAttacker;
-    time_point      LastAttacked;
+    timing_clock::time_point      LastAttacked;
     battlehistory_t BattleHistory{}; // Stores info related to most recent combat actions taken towards this entity.
 
     std::unique_ptr<CStatusEffectContainer> StatusEffectContainer;
@@ -790,7 +790,7 @@ private:
     uint8      m_mlvl; // CURRENT level of the main job
     uint8      m_slvl; // CURRENT level of the sub job
     uint16     m_battleTarget{ 0 };
-    time_point m_battleStartTime;
+    timing_clock::time_point m_battleStartTime;
     uint16     m_battleID = 0; // Current battle the entity is participating in. Battle ID must match in order for entities to interact with each other.
 
     std::unordered_map<Mod, int16, EnumClassHash>                                                m_modStat;     // array of modifiers

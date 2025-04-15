@@ -46,15 +46,15 @@ protected:
     {
         return true;
     }
-    virtual bool Update(time_point tick) override;
-    virtual void Cleanup(time_point tick) override
+    virtual bool Update(timing_clock::time_point tick) override;
+    virtual void Cleanup(timing_clock::time_point tick) override
     {
     }
 
     bool CanUseAbility();
 
 private:
-    duration                  m_castTime{ 0s };
+    timing_clock::duration                  m_castTime{ 0s };
     CBattleEntity* const      m_PEntity;
     std::unique_ptr<CAbility> m_PAbility;
 };

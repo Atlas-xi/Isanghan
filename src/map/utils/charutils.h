@@ -259,7 +259,7 @@ namespace charutils
     uint16 getWideScanRange(CCharEntity* PChar);
 
     void SendTimerPacket(CCharEntity* PChar, uint32 seconds);
-    void SendTimerPacket(CCharEntity* PChar, duration dur);
+    void SendTimerPacket(CCharEntity* PChar, timing_clock::duration dur);
     void SendClearTimerPacket(CCharEntity* PChar);
 
     time_t getTraverserEpoch(CCharEntity* PChar);

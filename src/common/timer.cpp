@@ -37,7 +37,7 @@
 #endif
 
 // server startup time
-time_point start_time;
+timing_clock::time_point start_time;
 
 /*----------------------------
  *  Get tick time
@@ -141,7 +141,7 @@ uint32 gettick()
 #endif
 /////////////////////////////////////////////////////////////////////////
 
-duration get_uptime()
+timing_clock::duration get_uptime()
 {
     return timing_clock::now() - start_time;
 }
@@ -158,7 +158,7 @@ void timer_final()
 {
 }
 
-time_point get_server_start_time()
+timing_clock::time_point get_server_start_time()
 {
     return start_time;
 }
@@ -168,7 +168,7 @@ uint32 getCurrentTimeMs()
     return std::chrono::duration_cast<std::chrono::milliseconds>(wall_clock::now().time_since_epoch()).count() % 1000;
 }
 
-auto getMilliseconds(const duration& d) -> int64
+auto getMilliseconds(const timing_clock::duration& d) -> int64
 {
     return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
 };

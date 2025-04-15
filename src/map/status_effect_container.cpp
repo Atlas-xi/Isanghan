@@ -1781,7 +1781,7 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
  *                                                                       *
  ************************************************************************/
 
-void CStatusEffectContainer::CheckEffectsExpiry(time_point tick)
+void CStatusEffectContainer::CheckEffectsExpiry(timing_clock::time_point tick)
 {
     if (m_POwner == nullptr)
     {
@@ -2001,7 +2001,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
  *                                                                       *
  ************************************************************************/
 
-void CStatusEffectContainer::TickEffects(time_point tick)
+void CStatusEffectContainer::TickEffects(timing_clock::time_point tick)
 {
     TracyZoneScoped;
 
@@ -2038,7 +2038,7 @@ void CStatusEffectContainer::TickEffects(time_point tick)
  *                                                                       *
  ************************************************************************/
 
-void CStatusEffectContainer::TickRegen(time_point tick)
+void CStatusEffectContainer::TickRegen(timing_clock::time_point tick)
 {
     TracyZoneScoped;
 

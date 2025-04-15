@@ -33,7 +33,7 @@
 class Watchdog final
 {
 public:
-    Watchdog(duration timeout, std::function<void()> callback);
+    Watchdog(timing_clock::duration timeout, std::function<void()> callback);
     ~Watchdog();
 
     void update();
@@ -43,9 +43,9 @@ private:
 
     using voidFunc_t = std::function<void()>;
 
-    duration   m_timeout;
+    timing_clock::duration   m_timeout;
     voidFunc_t m_callback;
-    time_point m_lastUpdate;
+    timing_clock::time_point m_lastUpdate;
 
     nonstd::jthread         m_watchdog;
     std::atomic_bool        m_running;

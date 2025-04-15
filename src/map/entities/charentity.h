@@ -451,7 +451,7 @@ public:
 
     void SetName(const std::string& name); // set the name of character, limited to 15 characters
 
-    time_point   lastTradeInvite{};
+    timing_clock::time_point   lastTradeInvite{};
     EntityID_t   TradePending{};    // Character ID offering trade
     EntityID_t   InvitePending{};   // Character ID sending party invite
     EntityID_t   BazaarID{};        // Pointer to the bazaar we are browsing.
@@ -464,7 +464,7 @@ public:
     uint16     m_Costume2;
     uint32     m_AHHistoryTimestamp;
     uint32     m_DeathTimestamp;
-    time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
+    timing_clock::time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
 
     uint8      m_hasTractor;        // checks if player has tractor already
     uint8      m_hasRaise;          // checks if player has raise already
@@ -478,7 +478,7 @@ public:
     uint32 m_PlayTime;
     uint32 m_SaveTime;
 
-    time_point m_LeaderCreatedPartyTime{}; // Time that a party member joined and this player was leader.
+    timing_clock::time_point m_LeaderCreatedPartyTime{}; // Time that a party member joined and this player was leader.
 
     uint8 m_GMlevel;    // Level of the GM flag assigned to this character
     bool  m_isGMHidden; // GM Hidden flag to prevent player updates from being processed.
@@ -504,8 +504,8 @@ public:
 
     bool       m_EquipSwap; // true if equipment was recently changed
     bool       m_EffectsChanged;
-    time_point m_LastSynthTime{};
-    time_point m_LastRangedAttackTime{};
+    timing_clock::time_point m_LastSynthTime{};
+    timing_clock::time_point m_LastRangedAttackTime{};
 
     CHAR_SUBSTATE m_Substate;
 
@@ -540,9 +540,9 @@ public:
 
     void RequestPersist(CHAR_PERSIST toPersist);
     bool PersistData();
-    bool PersistData(time_point tick);
+    bool PersistData(timing_clock::time_point tick);
 
-    virtual void Tick(time_point) override;
+    virtual void Tick(timing_clock::time_point) override;
     void         PostTick() override;
 
     virtual void addTrait(CTrait*) override;
@@ -553,11 +553,11 @@ public:
     bool         IsMobOwner(CBattleEntity* PTarget);
 
     virtual void Die() override;
-    void         Die(duration _duration);
+    void         Die(timing_clock::duration _duration);
     void         Raise();
 
-    static constexpr duration death_duration         = 60min;
-    static constexpr duration death_update_frequency = 16s;
+    static constexpr timing_clock::duration death_duration         = 60min;
+    static constexpr timing_clock::duration death_update_frequency = 16s;
 
     void  SetDeathTimestamp(uint32 timestamp);
     int32 GetSecondsElapsedSinceDeath() const;
@@ -651,7 +651,7 @@ private:
     std::unordered_set<uint32>                                charTriggerAreaIDs; // Holds any TriggerArea IDs that the player is currently within the bounds of
 
     uint8      dataToPersist = 0;
-    time_point nextDataPersistTime{};
+    timing_clock::time_point nextDataPersistTime{};
 
     // TODO: Don't use raw ptrs for this, but don't duplicate whole packets with unique_ptr either.
     std::deque<std::unique_ptr<CBasicPacket>> PacketList;          // The list of packets to be sent to the character during the next network cycle

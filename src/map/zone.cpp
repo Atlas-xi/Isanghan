@@ -647,7 +647,7 @@ void CZone::UpdateWeather()
 
     // clang-format off
     CTaskManager::getInstance()->AddTask("zone_update_weather", timing_clock::now() + std::chrono::seconds(WeatherNextUpdate), this, CTaskManager::TASK_ONCE, 1s,
-    [](time_point tick, CTaskManager::CTask* PTask)
+    [](timing_clock::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
         if (!PZone->IsWeatherStatic())
@@ -844,7 +844,7 @@ void CZone::WideScan(CCharEntity* PChar, uint16 radius)
  *                                                                       *
  ************************************************************************/
 
-void CZone::ZoneServer(time_point tick)
+void CZone::ZoneServer(timing_clock::time_point tick)
 {
     TracyZoneScoped;
 
@@ -955,7 +955,7 @@ void CZone::createZoneTimers()
 
     // clang-format off
     ZoneTimer = CTaskManager::getInstance()->AddTask(m_zoneName, timing_clock::now(), this, CTaskManager::TASK_INTERVAL, kLogicUpdateInterval,
-    [](time_point tick, CTaskManager::CTask* PTask)
+    [](timing_clock::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
         PZone->ZoneServer(tick);
@@ -963,7 +963,7 @@ void CZone::createZoneTimers()
     });
 
     ZoneTimerTriggerAreas = CTaskManager::getInstance()->AddTask(m_zoneName + "TriggerAreas", timing_clock::now(), this, CTaskManager::TASK_INTERVAL, kTriggerAreaInterval,
-    [](time_point tick, CTaskManager::CTask* PTask)
+    [](timing_clock::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
         PZone->CheckTriggerAreas();

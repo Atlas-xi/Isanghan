@@ -103,7 +103,7 @@ bool WheatyExceptionReport::alreadyCrashed;
 std::mutex WheatyExceptionReport::alreadyCrashedLock;
 WheatyExceptionReport::pRtlGetVersion WheatyExceptionReport::RtlGetVersion;
 
-time_point gStartUpTime = timing_clock::now();
+timing_clock::time_point gStartUpTime = timing_clock::now();
 std::string gUptimeString;
 std::string gCrashDateString;
 std::string gProcessMemoryUsageString;

@@ -35,7 +35,7 @@ public:
     {
     }
 
-    virtual void Tick(time_point) override;
+    virtual void Tick(timing_clock::time_point) override;
 
     virtual bool Cast(uint16 targid, SpellID spellid) override;
     virtual bool Engage(uint16 targid) override;
@@ -47,17 +47,17 @@ public:
     virtual bool RangedAttack(uint16 targid);
     virtual bool UseItem(uint16 targid, uint8 loc, uint8 slotid);
 
-    time_point getLastAttackTime();
-    void       setLastAttackTime(time_point);
+    timing_clock::time_point getLastAttackTime();
+    void       setLastAttackTime(timing_clock::time_point);
 
-    void       setLastErrMsgTime(time_point);
-    time_point getLastErrMsgTime();
+    void       setLastErrMsgTime(timing_clock::time_point);
+    timing_clock::time_point getLastErrMsgTime();
 
     CWeaponSkill* getLastWeaponSkill();
 
 protected:
-    time_point    m_lastAttackTime{ timing_clock::now() };
-    time_point    m_errMsgTime{ timing_clock::now() };
+    timing_clock::time_point    m_lastAttackTime{ timing_clock::now() };
+    timing_clock::time_point    m_errMsgTime{ timing_clock::now() };
     CWeaponSkill* m_lastWeaponSkill{ nullptr };
 };
 

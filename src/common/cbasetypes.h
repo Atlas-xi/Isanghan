@@ -73,11 +73,12 @@ inline void destroy_arr(T*& ptr)
 }
 
 using namespace std::literals::chrono_literals;
+
+// UTC clock. Use sparingly as this is nonmonotonic and susceptible to e.g. NTP time changes.
 using wall_clock = std::chrono::system_clock;
 
+// Stopwatch. Used for duration timing (the majority of our clock use).
 using timing_clock = std::chrono::steady_clock;
-using time_point   = timing_clock::time_point;
-using duration     = timing_clock::duration;
 
 // Not used so as not to accidentally mix with timing_clock
 // using hires_clock      = std::chrono::high_resolution_clock;

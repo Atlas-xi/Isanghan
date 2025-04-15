@@ -796,7 +796,7 @@ public:
     uint32         GetTickTime() const;
     uint32         GetDuration() const;
     int            GetElapsedTickCount() const;
-    time_point     GetStartTime();
+    timing_clock::time_point     GetStartTime();
     CBattleEntity* GetOwner();
 
     void SetEffectFlags(uint32 Flags);
@@ -815,7 +815,7 @@ public:
     void SetTickTime(uint32 tick);
 
     void IncrementElapsedTickCount();
-    void SetStartTime(time_point StartTime);
+    void SetStartTime(timing_clock::time_point StartTime);
 
     void addMod(Mod modType, int16 amount);
     void setMod(Mod modType, int16 value);
@@ -848,7 +848,7 @@ private:
 
     uint32     m_TickTime{ 0 };  // Effect repetition time (ms)
     uint32     m_Duration{ 0 };  // Duration of effect (ms)
-    time_point m_StartTime;      // Time to obtain effect (ms)
+    timing_clock::time_point m_StartTime;      // Time to obtain effect (ms)
     int        m_tickCount{ 0 }; // Time of last effect execution (ms)
 
     std::string m_Name; // Effect name for scripts

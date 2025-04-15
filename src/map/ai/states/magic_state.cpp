@@ -112,7 +112,7 @@ CMagicState::CMagicState(CBattleEntity* PEntity, uint16 targid, SpellID spellid,
     m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(action));
 }
 
-bool CMagicState::Update(time_point tick)
+bool CMagicState::Update(timing_clock::time_point tick)
 {
     action_t    action;
     auto*       PTarget = m_PEntity->IsValidTarget(m_targid, m_PSpell->getValidTarget(), m_errorMsg);
@@ -305,7 +305,7 @@ bool CMagicState::Update(time_point tick)
     return false;
 }
 
-void CMagicState::Cleanup(time_point tick)
+void CMagicState::Cleanup(timing_clock::time_point tick)
 {
     if (!IsCompleted())
     {

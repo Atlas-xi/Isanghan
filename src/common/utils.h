@@ -210,7 +210,7 @@ namespace utils
 } // namespace utils
 
 // clang-format off
-static Synchronized<std::unordered_map<std::string, time_point>> lastExecutionTimes;
+static Synchronized<std::unordered_map<std::string, timing_clock::time_point>> lastExecutionTimes;
 #define RATE_LIMIT(duration, code)                                                    \
 {                                                                                     \
     const auto currentTime = timing_clock::now();                                     \

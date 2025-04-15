@@ -35,7 +35,7 @@ CPetController::CPetController(CMobEntity* _PPet)
     SetWeaponSkillEnabled(false);
 }
 
-void CPetController::Tick(time_point tick)
+void CPetController::Tick(timing_clock::time_point tick)
 {
     TracyZoneScoped;
     TracyZoneString(PPet->getName());
@@ -68,7 +68,7 @@ void CPetController::Tick(time_point tick)
     CMobController::Tick(tick);
 }
 
-void CPetController::DoRoamTick(time_point tick)
+void CPetController::DoRoamTick(timing_clock::time_point tick)
 {
     if ((PPet->PMaster == nullptr || PPet->PMaster->isDead()) && PPet->isAlive() && PPet->objtype != TYPE_MOB)
     {

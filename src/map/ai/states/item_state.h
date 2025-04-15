@@ -36,8 +36,8 @@ public:
     CItemState(CCharEntity* PEntity, uint16 targid, uint8 loc, uint8 slotid);
     void UpdateTarget(CBaseEntity* target) override;
     void UpdateTarget(uint16 targid) override;
-    bool Update(time_point tick) override;
-    void Cleanup(time_point tick) override;
+    bool Update(timing_clock::time_point tick) override;
+    void Cleanup(timing_clock::time_point tick) override;
     bool CanChangeState() override;
     bool CanFollowPath() override
     {
@@ -63,8 +63,8 @@ protected:
     CItemUsable* m_PItem;
     uint8        m_location;
     uint8        m_slot;
-    duration     m_castTime{};
-    duration     m_animationTime{};
+    timing_clock::duration     m_castTime{};
+    timing_clock::duration     m_animationTime{};
     position_t   m_startPos;
     bool         m_interrupted{ false };
     bool         m_interruptable{ true };
