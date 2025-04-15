@@ -57,8 +57,8 @@ protected:
     bool AttackReady();
 
 private:
-    CBattleEntity* const m_PEntity;
-    timing_clock::duration             m_attackTime{ 2s };
+    CBattleEntity* const   m_PEntity;
+    timing_clock::duration m_attackTime{ 2s };
 };
 
 #endif

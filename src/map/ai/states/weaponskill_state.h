@@ -57,7 +57,7 @@ protected:
 private:
     CBattleEntity* const          m_PEntity;
     std::unique_ptr<CWeaponSkill> m_PSkill;
-    timing_clock::time_point                    m_finishTime;
+    timing_clock::time_point      m_finishTime;
     int16                         m_spent{ 0 };
 };
 

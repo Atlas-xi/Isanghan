@@ -56,8 +56,8 @@ struct LotInfo
 
 struct TreasurePoolItem
 {
-    uint16     ID;
-    uint8      SlotID;
+    uint16                   ID;
+    uint8                    SlotID;
     timing_clock::time_point TimeStamp;
 
     std::vector<LotInfo> Lotters;
@@ -101,7 +101,7 @@ public:
 
 private:
     timing_clock::time_point m_Tick;
-    uint8      m_count;
+    uint8                    m_count;
 
     TreasurePoolType m_TreasurePoolType;
 

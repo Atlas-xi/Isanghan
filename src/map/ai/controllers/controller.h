@@ -58,11 +58,11 @@ public:
     bool canUpdate{ true };
 
 protected:
-    timing_clock::time_point     m_Tick;
-    CBattleEntity* POwner;
-    bool           m_AutoAttackEnabled{ true };
-    bool           m_WeaponSkillEnabled{ true };
-    bool           m_MagicCastingEnabled{ true };
+    timing_clock::time_point m_Tick;
+    CBattleEntity*           POwner;
+    bool                     m_AutoAttackEnabled{ true };
+    bool                     m_WeaponSkillEnabled{ true };
+    bool                     m_MagicCastingEnabled{ true };
 };
 
 #endif

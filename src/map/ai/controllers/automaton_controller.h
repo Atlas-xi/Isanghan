@@ -92,17 +92,17 @@ private:
 
     CAutomatonEntity* PAutomaton;
 
-    timing_clock::duration             m_actionCooldown{ 3s };
-    timing_clock::duration             m_rangedCooldown{};
-    static constexpr int m_RangedAbility{ 1949 };
-    timing_clock::duration             m_magicCooldown{};
-    timing_clock::duration             m_enfeebleCooldown{};
-    timing_clock::duration             m_elementalCooldown{};
-    timing_clock::duration             m_healCooldown{};
-    timing_clock::duration             m_enhanceCooldown{};
-    timing_clock::duration             m_statusCooldown{};
-    timing_clock::duration             m_shieldbashCooldown{};
-    static constexpr int m_ShieldBashAbility{ 1944 };
+    timing_clock::duration m_actionCooldown{ 3s };
+    timing_clock::duration m_rangedCooldown{};
+    static constexpr int   m_RangedAbility{ 1949 };
+    timing_clock::duration m_magicCooldown{};
+    timing_clock::duration m_enfeebleCooldown{};
+    timing_clock::duration m_elementalCooldown{};
+    timing_clock::duration m_healCooldown{};
+    timing_clock::duration m_enhanceCooldown{};
+    timing_clock::duration m_statusCooldown{};
+    timing_clock::duration m_shieldbashCooldown{};
+    static constexpr int   m_ShieldBashAbility{ 1944 };
 
     timing_clock::time_point m_LastActionTime;
     timing_clock::time_point m_LastMagicTime;

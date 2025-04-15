@@ -59,15 +59,15 @@ public:
 protected:
     bool HasMoved();
 
-    CCharEntity* m_PEntity;
-    CItemUsable* m_PItem;
-    uint8        m_location;
-    uint8        m_slot;
-    timing_clock::duration     m_castTime{};
-    timing_clock::duration     m_animationTime{};
-    position_t   m_startPos;
-    bool         m_interrupted{ false };
-    bool         m_interruptable{ true };
+    CCharEntity*           m_PEntity;
+    CItemUsable*           m_PItem;
+    uint8                  m_location;
+    uint8                  m_slot;
+    timing_clock::duration m_castTime{};
+    timing_clock::duration m_animationTime{};
+    position_t             m_startPos;
+    bool                   m_interrupted{ false };
+    bool                   m_interruptable{ true };
 };
 
 #endif

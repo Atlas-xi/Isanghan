@@ -451,19 +451,19 @@ public:
 
     void SetName(const std::string& name); // set the name of character, limited to 15 characters
 
-    timing_clock::time_point   lastTradeInvite{};
-    EntityID_t   TradePending{};    // Character ID offering trade
-    EntityID_t   InvitePending{};   // Character ID sending party invite
-    EntityID_t   BazaarID{};        // Pointer to the bazaar we are browsing.
-    BazaarList_t BazaarCustomers{}; // Array holding the IDs of the current customers
+    timing_clock::time_point lastTradeInvite{};
+    EntityID_t               TradePending{};    // Character ID offering trade
+    EntityID_t               InvitePending{};   // Character ID sending party invite
+    EntityID_t               BazaarID{};        // Pointer to the bazaar we are browsing.
+    BazaarList_t             BazaarCustomers{}; // Array holding the IDs of the current customers
 
     std::unique_ptr<monstrosity::MonstrosityData_t> m_PMonstrosity;
 
-    uint8      m_LevelRestriction; // Character level limit
-    uint16     m_Costume;
-    uint16     m_Costume2;
-    uint32     m_AHHistoryTimestamp;
-    uint32     m_DeathTimestamp;
+    uint8                    m_LevelRestriction; // Character level limit
+    uint16                   m_Costume;
+    uint16                   m_Costume2;
+    uint32                   m_AHHistoryTimestamp;
+    uint32                   m_DeathTimestamp;
     timing_clock::time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
 
     uint8      m_hasTractor;        // checks if player has tractor already
@@ -502,8 +502,8 @@ public:
     // Send updates about dirty containers in post tick
     std::map<CONTAINER_ID, bool> dirtyInventoryContainers;
 
-    bool       m_EquipSwap; // true if equipment was recently changed
-    bool       m_EffectsChanged;
+    bool                     m_EquipSwap; // true if equipment was recently changed
+    bool                     m_EffectsChanged;
     timing_clock::time_point m_LastSynthTime{};
     timing_clock::time_point m_LastRangedAttackTime{};
 
@@ -650,7 +650,7 @@ private:
     std::unordered_set<std::string>                           charVarChanges;
     std::unordered_set<uint32>                                charTriggerAreaIDs; // Holds any TriggerArea IDs that the player is currently within the bounds of
 
-    uint8      dataToPersist = 0;
+    uint8                    dataToPersist = 0;
     timing_clock::time_point nextDataPersistTime{};
 
     // TODO: Don't use raw ptrs for this, but don't duplicate whole packets with unique_ptr either.

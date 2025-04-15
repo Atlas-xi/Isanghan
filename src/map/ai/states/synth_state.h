@@ -55,8 +55,8 @@ protected:
     bool SynthReady();
 
 private:
-    CCharEntity* const m_PEntity;
-    timing_clock::duration           m_synthFinishTime{ 16s };
+    CCharEntity* const     m_PEntity;
+    timing_clock::duration m_synthFinishTime{ 16s };
 };
 
 #endif

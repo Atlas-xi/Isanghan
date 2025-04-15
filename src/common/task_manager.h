@@ -69,12 +69,12 @@ public:
         {
         }
 
-        std::string m_name;
-        TASKTYPE    m_type;
-        timing_clock::time_point  m_tick;
-        timing_clock::duration    m_interval;
-        std::any    m_data;
-        TaskFunc_t  m_func;
+        std::string              m_name;
+        TASKTYPE                 m_type;
+        timing_clock::time_point m_tick;
+        timing_clock::duration   m_interval;
+        std::any                 m_data;
+        TaskFunc_t               m_func;
     };
 
     ~CTaskManager();

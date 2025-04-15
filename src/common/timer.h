@@ -27,7 +27,7 @@ uint32 gettick(void);
 uint32 gettick_nocache(void);
 
 timing_clock::time_point get_server_start_time(void);
-timing_clock::duration get_uptime();
+timing_clock::duration   get_uptime();
 
 void timer_init(void);
 void timer_final(void);

@@ -44,7 +44,7 @@ private:
     using voidFunc_t = std::function<void()>;
 
     timing_clock::duration   m_timeout;
-    voidFunc_t m_callback;
+    voidFunc_t               m_callback;
     timing_clock::time_point m_lastUpdate;
 
     nonstd::jthread         m_watchdog;

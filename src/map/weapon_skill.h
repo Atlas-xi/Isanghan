@@ -41,13 +41,13 @@ public:
     uint8  getElement() const;
     bool   isElemental() const;
 
-    bool     isAoE() const;
-    bool     mainOnly() const; // can only be used as main job
-    uint8    getAoe() const;
-    uint8    getAnimationId() const;
+    bool                   isAoE() const;
+    bool                   mainOnly() const; // can only be used as main job
+    uint8                  getAoe() const;
+    uint8                  getAnimationId() const;
     timing_clock::duration getAnimationTime();
-    uint8    getType() const;
-    uint8    getUnlockId() const;
+    uint8                  getType() const;
+    uint8                  getUnlockId() const;
 
     void setID(uint16 id);
     void setJob(int8* jobs);
@@ -72,20 +72,20 @@ public:
     void               setName(const std::string& name);
 
 private:
-    uint16   m_ID;
-    uint8    m_TypeID;
-    uint8    m_Job[MAX_JOBTYPE]{};
-    uint16   m_Skilllevel;
-    uint8    m_AnimationId;
+    uint16                 m_ID;
+    uint8                  m_TypeID;
+    uint8                  m_Job[MAX_JOBTYPE]{};
+    uint16                 m_Skilllevel;
+    uint8                  m_AnimationId;
     timing_clock::duration m_AnimationTime{};
-    uint8    m_Element;
-    uint8    m_PrimarySkillchain;
-    uint8    m_SecondarySkillchain;
-    uint8    m_TertiarySkillchain;
-    uint8    m_Range;
-    uint8    m_AOE;
-    uint8    m_mainOnly;
-    uint8    m_unlockId;
+    uint8                  m_Element;
+    uint8                  m_PrimarySkillchain;
+    uint8                  m_SecondarySkillchain;
+    uint8                  m_TertiarySkillchain;
+    uint8                  m_Range;
+    uint8                  m_AOE;
+    uint8                  m_mainOnly;
+    uint8                  m_unlockId;
 
     std::string m_name;
 };

@@ -36,11 +36,11 @@ struct queueAction_t
 {
     using EntityFunc_t = std::function<void(CBaseEntity*)>;
 
-    timing_clock::time_point    start_time{ timing_clock::now() };
-    timing_clock::duration      delay{ 0ms };
-    bool          checkState{ false };
-    sol::function lua_func{};
-    EntityFunc_t  func{};
+    timing_clock::time_point start_time{ timing_clock::now() };
+    timing_clock::duration   delay{ 0ms };
+    bool                     checkState{ false };
+    sol::function            lua_func{};
+    EntityFunc_t             func{};
 
     queueAction_t(int _ms, bool _checkstate, sol::function _lua_func)
     : delay(std::chrono::milliseconds(_ms))

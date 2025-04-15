@@ -120,10 +120,10 @@ private:
     timing_clock::time_point m_EffectCheckTime{ timing_clock::now() };
 
     timing_clock::time_point m_computeTime{ timing_clock::now() };
-    uint16     m_lastCharComputeTargId{ 0 };
+    uint16                   m_lastCharComputeTargId{ 0 };
 
     timing_clock::time_point m_charPersistTime{ timing_clock::now() };
-    uint16     m_lastCharPersistTargId{ 0 };
+    uint16                   m_lastCharPersistTargId{ 0 };
 
     //
     // Intermediate collections for use inside ZoneServer

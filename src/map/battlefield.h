@@ -94,9 +94,9 @@ struct BattlefieldMob_t
 
 struct BattlefieldRecord_t
 {
-    std::string name;
-    size_t      partySize;
-    timing_clock::duration    time;
+    std::string            name;
+    size_t                 partySize;
+    timing_clock::duration time;
 
     BattlefieldRecord_t()
     : partySize(0)
@@ -141,17 +141,17 @@ public:
     const BattlefieldRecord_t&    GetRecord() const;
     uint8                         GetStatus() const;
     uint16                        GetRuleMask() const;
-    timing_clock::time_point                    GetStartTime() const;
-    timing_clock::duration                      GetTimeInside() const;
-    timing_clock::time_point                    GetFightTime() const;
-    timing_clock::duration                      GetTimeLimit() const;
-    timing_clock::time_point                    GetWipeTime() const;
+    timing_clock::time_point      GetStartTime() const;
+    timing_clock::duration        GetTimeInside() const;
+    timing_clock::time_point      GetFightTime() const;
+    timing_clock::duration        GetTimeLimit() const;
+    timing_clock::time_point      GetWipeTime() const;
     size_t                        GetMaxParticipants() const;
     size_t                        GetPlayerCount() const;
     uint8                         GetLevelCap() const;
-    timing_clock::duration                      GetFinishTime() const;
-    timing_clock::duration                      GetRemainingTime() const;
-    timing_clock::duration                      GetLastTimeUpdate() const;
+    timing_clock::duration        GetFinishTime() const;
+    timing_clock::duration        GetRemainingTime() const;
+    timing_clock::duration        GetLastTimeUpdate() const;
     uint64_t                      GetLocalVar(std::string const& name) const;
     uint32                        GetArmouryCrate() const;
 
@@ -209,30 +209,30 @@ public:
     std::vector<CMobEntity*>      m_AllyList;
 
 private:
-    uint16                 m_ID;
-    CZone*                 m_Zone;
-    std::string            m_Name;
-    BattlefieldInitiator_t m_Initiator;
-    uint8                  m_Area;
-    BattlefieldRecord_t    m_Record;
-    uint8                  m_Status{ BATTLEFIELD_STATUS_OPEN };
-    uint16                 m_Rules;
-    timing_clock::time_point             m_StartTime;
-    timing_clock::time_point             m_Tick;
-    timing_clock::time_point             m_FightTick;
-    timing_clock::duration               m_TimeLimit{};
-    timing_clock::time_point             m_WipeTime;
-    timing_clock::duration               m_FinishTime{};
-    timing_clock::duration               m_LastPromptTime{};
-    size_t                 m_MaxParticipants;
-    uint8                  m_LevelCap;
+    uint16                   m_ID;
+    CZone*                   m_Zone;
+    std::string              m_Name;
+    BattlefieldInitiator_t   m_Initiator;
+    uint8                    m_Area;
+    BattlefieldRecord_t      m_Record;
+    uint8                    m_Status{ BATTLEFIELD_STATUS_OPEN };
+    uint16                   m_Rules;
+    timing_clock::time_point m_StartTime;
+    timing_clock::time_point m_Tick;
+    timing_clock::time_point m_FightTick;
+    timing_clock::duration   m_TimeLimit{};
+    timing_clock::time_point m_WipeTime;
+    timing_clock::duration   m_FinishTime{};
+    timing_clock::duration   m_LastPromptTime{};
+    size_t                   m_MaxParticipants;
+    uint8                    m_LevelCap;
     // Entity id of the Armoury Crate that appears upon victory
     uint32 m_armouryCrate = 0;
 
     timing_clock::time_point m_cleanupTime{};
-    bool       m_cleanedPlayers = false;
-    bool       m_Cleanup        = false;
-    bool       m_Attacked       = false;
+    bool                     m_cleanedPlayers = false;
+    bool                     m_Cleanup        = false;
+    bool                     m_Attacked       = false;
 
     std::unordered_map<std::string, uint64_t> m_LocalVars;
     std::vector<BattlefieldGroup>             m_groups;

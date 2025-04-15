@@ -76,8 +76,8 @@ protected:
     virtual void UpdateTarget(uint16 targid);
     virtual void UpdateTarget(CBaseEntity* target);
 
-    uint16     GetTargetID() const;
-    void       Complete();
+    uint16                   GetTargetID() const;
+    void                     Complete();
     timing_clock::time_point GetEntryTime() const;
 
     std::unique_ptr<CBasicPacket> m_errorMsg;
@@ -86,9 +86,9 @@ protected:
     uint16             m_targid{ 0 };
 
 private:
-    CBaseEntity* m_PTarget{ nullptr };
-    bool         m_completed{ false };
-    timing_clock::time_point   m_entryTime{ timing_clock::now() };
+    CBaseEntity*             m_PTarget{ nullptr };
+    bool                     m_completed{ false };
+    timing_clock::time_point m_entryTime{ timing_clock::now() };
 };
 
 #endif

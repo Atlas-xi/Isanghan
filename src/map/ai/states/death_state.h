@@ -52,10 +52,10 @@ public:
     void allowSendRaise();
 
 private:
-    CBattleEntity* const m_PEntity;
-    timing_clock::duration             m_deathTime;
-    bool                 m_raiseSent{ false };
-    timing_clock::time_point           m_raiseTime;
+    CBattleEntity* const     m_PEntity;
+    timing_clock::duration   m_deathTime;
+    bool                     m_raiseSent{ false };
+    timing_clock::time_point m_raiseTime;
 };
 
 #endif

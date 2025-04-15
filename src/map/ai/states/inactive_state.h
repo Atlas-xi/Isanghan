@@ -53,8 +53,8 @@ protected:
 
 private:
     timing_clock::duration m_duration;
-    bool     m_canChangeState{ false };
-    bool     m_untargetable{ false };
+    bool                   m_canChangeState{ false };
+    bool                   m_untargetable{ false };
 };
 
 #endif

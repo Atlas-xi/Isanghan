@@ -214,7 +214,7 @@ namespace gambits
         std::vector<Action_t>         actions;
         G_TARGET                      target_selector;
         uint16                        retry_delay;
-        timing_clock::time_point                    last_used;
+        timing_clock::time_point      last_used;
         std::string                   identifier;
 
         Gambit_t()
@@ -289,9 +289,9 @@ namespace gambits
         bool PartyHasHealer();
         bool PartyHasTank();
 
-        CTrustEntity*         POwner;
-        timing_clock::time_point            m_lastAction;
-        std::vector<Gambit_t> gambits;
+        CTrustEntity*            POwner;
+        timing_clock::time_point m_lastAction;
+        std::vector<Gambit_t>    gambits;
 
         // clang-format off
         std::set<JOBTYPE> melee_jobs =

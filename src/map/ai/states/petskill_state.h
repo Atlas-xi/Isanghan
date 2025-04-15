@@ -59,8 +59,8 @@ protected:
 private:
     CPetEntity* const          m_PEntity;
     std::unique_ptr<CPetSkill> m_PSkill;
-    timing_clock::time_point                 m_finishTime;
-    timing_clock::duration                   m_castTime{};
+    timing_clock::time_point   m_finishTime;
+    timing_clock::duration     m_castTime{};
     int16                      m_spentTP;
 };
 

@@ -105,9 +105,9 @@ private:
     timing_clock::time_point m_NeutralTime;
     timing_clock::time_point m_WaitTime;
     timing_clock::time_point m_mobHealTime;
-    FollowType m_followType = FollowType::None;
+    FollowType               m_followType = FollowType::None;
 
-    bool       m_firstSpell{ true };
+    bool                     m_firstSpell{ true };
     timing_clock::time_point m_LastRoamScript{ timing_clock::time_point::min() };
 };
 

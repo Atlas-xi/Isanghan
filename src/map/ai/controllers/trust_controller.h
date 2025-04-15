@@ -69,11 +69,11 @@ private:
     CBattleEntity* m_LastTopEnmity;
 
     timing_clock::time_point m_LastRepositionTime;
-    uint8      m_failedRepositionAttempts;
-    bool       m_InTransit;
+    uint8                    m_failedRepositionAttempts;
+    bool                     m_InTransit;
 
-    timing_clock::time_point                        m_CombatEndTime;
-    timing_clock::time_point                        m_LastHealTickTime;
+    timing_clock::time_point          m_CombatEndTime;
+    timing_clock::time_point          m_LastHealTickTime;
     std::vector<std::chrono::seconds> m_tickDelays      = { 15s, 10s, 10s, 3s };
     std::size_t                       m_NumHealingTicks = { 0 };
 

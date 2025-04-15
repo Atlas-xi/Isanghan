@@ -39,7 +39,7 @@ public:
     void LockingUpdate();
 
 private:
-    httplib::Server         m_httpServer;
+    httplib::Server                       m_httpServer;
     std::atomic<timing_clock::time_point> m_lastUpdate;
 
     struct APIDataCache
