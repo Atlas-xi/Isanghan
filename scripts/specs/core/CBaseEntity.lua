@@ -2729,6 +2729,11 @@ function CBaseEntity:setVE(target, amount)
 end
 
 ---@param PEntity CBaseEntity
+---@return nil
+function CBaseEntity:addBaseEnmity(PEntity)
+end
+
+---@param PEntity CBaseEntity
 ---@param CE integer
 ---@param VE integer
 ---@return nil
