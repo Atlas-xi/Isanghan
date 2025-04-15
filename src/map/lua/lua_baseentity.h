@@ -647,6 +647,7 @@ public:
     int32 getVE(CLuaBaseEntity const* target);
     void  setCE(CLuaBaseEntity* target, uint16 amount);
     void  setVE(CLuaBaseEntity* target, uint16 amount);
+    void  addBaseEnmity(CLuaBaseEntity* PEntity);
     void  addEnmity(CLuaBaseEntity* PEntity, int32 CE, int32 VE); // Add specified amount of enmity (target, CE, VE)
     void  lowerEnmity(CLuaBaseEntity* PEntity, uint8 percent);
     void  updateEnmity(CLuaBaseEntity* PEntity);
