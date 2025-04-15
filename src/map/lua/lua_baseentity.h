@@ -680,7 +680,7 @@ public:
     uint8  eraseAllStatusEffect();
     int32  dispelStatusEffect(sol::object const& flagObj);
     uint8  dispelAllStatusEffect(sol::object const& flagObj);
-    uint16 stealStatusEffect(CLuaBaseEntity* PTargetEntity, sol::object const& flagObj);
+    uint16 stealStatusEffect(CLuaBaseEntity* PTargetEntity, sol::object const& flagObj, sol::object const& silentObj);
 
     void  addMod(uint16 type, int16 amount);
     int16 getMod(uint16 modID);

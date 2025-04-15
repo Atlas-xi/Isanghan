@@ -2950,8 +2950,9 @@ end
 
 ---@param PTargetEntity CBaseEntity
 ---@param flagObj integer?
+---@param silentObj boolean?
 ---@return integer
-function CBaseEntity:stealStatusEffect(PTargetEntity, flagObj)
+function CBaseEntity:stealStatusEffect(PTargetEntity, flagObj, silentObj)
 end
 
 ---@param type integer
