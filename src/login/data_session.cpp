@@ -349,7 +349,7 @@ void data_session::read_func()
                     exceptionTime = rset3->get<uint64>("UNIX_TIMESTAMP(exception)");
                 }
 
-                const auto timeStamp    = static_cast<uint64>(std::chrono::duration_cast<std::chrono::seconds>(server_clock::now().time_since_epoch()).count());
+                const auto timeStamp    = static_cast<uint64>(std::chrono::duration_cast<std::chrono::seconds>(timing_clock::now().time_since_epoch()).count());
                 const auto isNotMaint   = !settings::get<bool>("login.MAINT_MODE");
                 const auto loginLimit   = settings::get<uint8>("login.LOGIN_LIMIT");
                 const auto excepted     = exceptionTime > timeStamp;

@@ -280,7 +280,7 @@ void auth_session::read_func()
 
                     auto& session          = loginHelpers::get_authenticated_session(ipAddress, asStringFromUntrustedSource(hash, sizeof(hash)));
                     session.accountID      = accountID;
-                    session.authorizedTime = server_clock::now();
+                    session.authorizedTime = timing_clock::now();
                 }
                 else if (status & ACCOUNT_STATUS_CODE::BANNED)
                 {

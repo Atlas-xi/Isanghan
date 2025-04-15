@@ -62,7 +62,7 @@ time_point CState::GetEntryTime() const
 
 void CState::ResetEntryTime()
 {
-    m_entryTime = server_clock::now();
+    m_entryTime = timing_clock::now();
 }
 
 void CState::SetTarget(uint16 _targid)

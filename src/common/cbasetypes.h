@@ -73,11 +73,13 @@ inline void destroy_arr(T*& ptr)
 }
 
 using namespace std::literals::chrono_literals;
-using server_clock = std::chrono::steady_clock;
-using time_point   = server_clock::time_point;
-using duration     = server_clock::duration;
+using wall_clock = std::chrono::system_clock;
 
-// Not used so as not to accidentally mix with server_clock
+using timing_clock = std::chrono::steady_clock;
+using time_point   = timing_clock::time_point;
+using duration     = timing_clock::duration;
+
+// Not used so as not to accidentally mix with timing_clock
 // using hires_clock      = std::chrono::high_resolution_clock;
 // using hires_time_point = hires_clock::time_point;
 // using hires_duration   = hires_clock::duration;

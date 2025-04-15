@@ -117,12 +117,12 @@ private:
 
     std::vector<std::pair<uint16, time_point>> m_dynamicTargIdsToDelete; // list of targids pending deletion at a later date
 
-    time_point m_EffectCheckTime{ server_clock::now() };
+    time_point m_EffectCheckTime{ timing_clock::now() };
 
-    time_point m_computeTime{ server_clock::now() };
+    time_point m_computeTime{ timing_clock::now() };
     uint16     m_lastCharComputeTargId{ 0 };
 
-    time_point m_charPersistTime{ server_clock::now() };
+    time_point m_charPersistTime{ timing_clock::now() };
     uint16     m_lastCharPersistTargId{ 0 };
 
     //

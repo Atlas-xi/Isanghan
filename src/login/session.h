@@ -39,5 +39,5 @@ struct session_t
     bool        justCreatedNewChar        = false;
     bool        versionMismatch           = false;
 
-    std::chrono::time_point<server_clock> authorizedTime = server_clock::now();
+    time_point authorizedTime = timing_clock::now();
 };

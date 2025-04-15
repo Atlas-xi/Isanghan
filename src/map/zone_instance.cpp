@@ -157,7 +157,7 @@ void CZoneInstance::DecreaseZoneCounter(CCharEntity* PChar)
         {
             if (!(PInstance->Failed() || PInstance->Completed()))
             {
-                PInstance->SetWipeTime(PInstance->GetElapsedTime(server_clock::now()));
+                PInstance->SetWipeTime(PInstance->GetElapsedTime(timing_clock::now()));
             }
         }
     }

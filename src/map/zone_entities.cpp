@@ -670,7 +670,7 @@ void CZoneEntities::EraseStaleDynamicTargIDs()
     for (auto it = m_dynamicTargIdsToDelete.begin(); it != m_dynamicTargIdsToDelete.end();)
     {
         // Erase dynamic targid if it's stale enough
-        if ((server_clock::now() - it->second) > 60s)
+        if ((timing_clock::now() - it->second) > 60s)
         {
             m_dynamicTargIds.erase(it->first);
             it = m_dynamicTargIdsToDelete.erase(it);
@@ -1927,7 +1927,7 @@ void CZoneEntities::ZoneServer(time_point tick)
         if (auto itr = m_mobList.find(PMob->targid); itr != m_mobList.end())
         {
             m_mobList.erase(itr);
-            m_dynamicTargIdsToDelete.emplace_back(PMob->targid, server_clock::now());
+            m_dynamicTargIdsToDelete.emplace_back(PMob->targid, timing_clock::now());
             destroy(PMob);
         }
     }
@@ -1937,7 +1937,7 @@ void CZoneEntities::ZoneServer(time_point tick)
         if (auto itr = m_npcList.find(PNpc->targid); itr != m_npcList.end())
         {
             m_npcList.erase(itr);
-            m_dynamicTargIdsToDelete.emplace_back(PNpc->targid, server_clock::now());
+            m_dynamicTargIdsToDelete.emplace_back(PNpc->targid, timing_clock::now());
             destroy(PNpc);
         }
     }
@@ -1947,7 +1947,7 @@ void CZoneEntities::ZoneServer(time_point tick)
         if (auto itr = m_petList.find(PPet->targid); itr != m_petList.end())
         {
             m_petList.erase(itr);
-            m_dynamicTargIdsToDelete.emplace_back(PPet->targid, server_clock::now());
+            m_dynamicTargIdsToDelete.emplace_back(PPet->targid, timing_clock::now());
             destroy(PPet);
         }
     }
@@ -1957,7 +1957,7 @@ void CZoneEntities::ZoneServer(time_point tick)
         if (auto itr = m_trustList.find(PTrust->targid); itr != m_trustList.end())
         {
             m_trustList.erase(itr);
-            m_dynamicTargIdsToDelete.emplace_back(PTrust->targid, server_clock::now());
+            m_dynamicTargIdsToDelete.emplace_back(PTrust->targid, timing_clock::now());
             destroy(PTrust);
         }
     }

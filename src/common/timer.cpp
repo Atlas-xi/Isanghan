@@ -143,7 +143,7 @@ uint32 gettick()
 
 duration get_uptime()
 {
-    return server_clock::now() - start_time;
+    return timing_clock::now() - start_time;
 }
 
 void timer_init()
@@ -151,7 +151,7 @@ void timer_init()
 #if defined(ENABLE_RDTSC)
     rdtsc_calibrate();
 #endif
-    start_time = server_clock::now();
+    start_time = timing_clock::now();
 }
 
 void timer_final()
@@ -165,7 +165,7 @@ time_point get_server_start_time()
 
 uint32 getCurrentTimeMs()
 {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() % 1000;
+    return std::chrono::duration_cast<std::chrono::milliseconds>(wall_clock::now().time_since_epoch()).count() % 1000;
 }
 
 auto getMilliseconds(const duration& d) -> int64

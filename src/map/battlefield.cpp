@@ -60,7 +60,7 @@ CBattlefield::CBattlefield(uint16 id, CZone* PZone, uint8 area, CCharEntity* PIn
 , m_Area(area)
 , m_Record(BattlefieldRecord_t())
 , m_Rules(0)
-, m_StartTime(server_clock::now())
+, m_StartTime(timing_clock::now())
 , m_LastPromptTime(0s)
 , m_MaxParticipants(8)
 , m_LevelCap(0)

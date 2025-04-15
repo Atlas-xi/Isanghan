@@ -88,7 +88,7 @@ protected:
 private:
     CBaseEntity* m_PTarget{ nullptr };
     bool         m_completed{ false };
-    time_point   m_entryTime{ server_clock::now() };
+    time_point   m_entryTime{ timing_clock::now() };
 };
 
 #endif

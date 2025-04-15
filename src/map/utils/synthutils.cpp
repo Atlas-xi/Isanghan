@@ -1062,7 +1062,7 @@ namespace synthutils
 
     int32 startSynth(CCharEntity* PChar)
     {
-        PChar->m_LastSynthTime = server_clock::now();
+        PChar->m_LastSynthTime = timing_clock::now();
 
         if (!isRightRecipe(PChar))
         {

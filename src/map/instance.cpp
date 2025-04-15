@@ -38,7 +38,7 @@ CInstance::CInstance(CZone* zone, uint32 instanceid)
     TracyZoneScoped;
     LoadInstance();
 
-    m_startTime = server_clock::now();
+    m_startTime = timing_clock::now();
     m_wipeTimer = m_startTime;
 }
 

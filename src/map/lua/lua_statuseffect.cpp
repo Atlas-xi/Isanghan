@@ -112,7 +112,7 @@ uint32 CLuaStatusEffect::getTimeRemaining()
     uint32 remaining = 0;
     if (m_PLuaStatusEffect->GetDuration() > 0)
     {
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(server_clock::now() - m_PLuaStatusEffect->GetStartTime()).count();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timing_clock::now() - m_PLuaStatusEffect->GetStartTime()).count();
         remaining     = (uint32)std::max(m_PLuaStatusEffect->GetDuration() - duration, std::chrono::seconds::rep{});
     }
 
@@ -184,7 +184,7 @@ void CLuaStatusEffect::setTick(uint32 tick)
 
 void CLuaStatusEffect::resetStartTime()
 {
-    m_PLuaStatusEffect->SetStartTime(server_clock::now());
+    m_PLuaStatusEffect->SetStartTime(timing_clock::now());
 }
 
 void CLuaStatusEffect::setStartTime(uint32 time)

@@ -1091,7 +1091,7 @@ void CCharEntity::PostTick()
         m_EffectsChanged = false;
     }
 
-    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    time_point now = timing_clock::now();
 
     if (updatemask && now > m_nextUpdateTimer)
     {
@@ -1271,7 +1271,7 @@ bool CCharEntity::OnAttack(CAttackState& state, action_t& action)
 {
     TracyZoneScoped;
     auto* controller{ static_cast<CPlayerController*>(PAI->GetController()) };
-    controller->setLastAttackTime(server_clock::now());
+    controller->setLastAttackTime(timing_clock::now());
     auto ret = CBattleEntity::OnAttack(state, action);
 
     return ret;
@@ -2694,7 +2694,7 @@ void CCharEntity::Die(duration _duration)
         m_weaknessLvl = 0;
     }
 
-    m_deathSyncTime = server_clock::now() + death_update_frequency;
+    m_deathSyncTime = timing_clock::now() + death_update_frequency;
     PAI->ClearStateStack();
     PAI->Internal_Die(_duration);
 

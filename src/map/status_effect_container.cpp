@@ -509,7 +509,7 @@ bool CStatusEffectContainer::AddStatusEffect(CStatusEffect* PStatusEffect, Effec
         // remove effects with same type
         DelStatusEffectsByType(PStatusEffect->GetEffectType());
 
-        PStatusEffect->SetStartTime(server_clock::now());
+        PStatusEffect->SetStartTime(timing_clock::now());
 
         m_StatusEffectSet.insert(PStatusEffect);
 
@@ -1640,10 +1640,10 @@ void CStatusEffectContainer::LoadStatusEffects()
             if (flags & EFFECTFLAG_OFFLINE_TICK)
             {
                 auto timestamp = rset->get<uint32>("timestamp");
-                auto endTime   = std::chrono::system_clock::time_point() + std::chrono::seconds(timestamp) + std::chrono::seconds(duration);
-                if (std::chrono::system_clock::now() < endTime)
+                auto endTime   = wall_clock::time_point() + std::chrono::seconds(timestamp) + std::chrono::seconds(duration);
+                if (wall_clock::now() < endTime)
                 {
-                    duration = static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(endTime - std::chrono::system_clock::now()).count());
+                    duration = static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(endTime - wall_clock::now()).count());
                 }
                 else if (effectID == EFFECT::EFFECT_VISITANT)
                 {
@@ -1721,7 +1721,7 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
             continue;
         }
 
-        auto realduration = std::chrono::milliseconds(PStatusEffect->GetDuration()) + PStatusEffect->GetStartTime() - server_clock::now();
+        auto realduration = std::chrono::milliseconds(PStatusEffect->GetDuration()) + PStatusEffect->GetStartTime() - timing_clock::now();
 
         if (realduration > 0s || PStatusEffect->GetDuration() == 0)
         {
@@ -1765,8 +1765,8 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
                     }
                 }
             }
-            auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(server_clock::now() - PStatusEffect->GetStartTime());
-            auto timestamp   = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now() - elapsedTime).time_since_epoch().count();
+            auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(timing_clock::now() - PStatusEffect->GetStartTime());
+            auto timestamp   = std::chrono::time_point_cast<std::chrono::seconds>(wall_clock::now() - elapsedTime).time_since_epoch().count();
             _sql->Query(Query, m_POwner->id, PStatusEffect->GetStatusID(), PStatusEffect->GetIcon(), PStatusEffect->GetPower(), tick, duration,
                         PStatusEffect->GetSubID(), PStatusEffect->GetSubPower(), PStatusEffect->GetTier(), PStatusEffect->GetEffectFlags(),
                         timestamp);
@@ -1833,7 +1833,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
 
                     if (PEffect && (PEffect->GetEffectFlags() & EFFECTFLAG_ALWAYS_EXPIRING) != 0)
                     {
-                        PEffect->SetStartTime(server_clock::now());
+                        PEffect->SetStartTime(timing_clock::now());
 
                         // Effect updated, probably from Ecliptic Attrition
                         // Update status effect with new potency.
@@ -1875,7 +1875,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
 
                     if (PEffect && (PEffect->GetEffectFlags() & EFFECTFLAG_ALWAYS_EXPIRING) != 0)
                     {
-                        PEffect->SetStartTime(server_clock::now());
+                        PEffect->SetStartTime(timing_clock::now());
 
                         // Effect updated, probably from Ecliptic Attrition
                         // Update status effect with new potency.
@@ -1920,7 +1920,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
 
                     if (PEffect && (PEffect->GetEffectFlags() & EFFECTFLAG_ALWAYS_EXPIRING) != 0)
                     {
-                        PEffect->SetStartTime(server_clock::now());
+                        PEffect->SetStartTime(timing_clock::now());
 
                         // Effect updated, probably from Ecliptic Attrition
                         // Update status effect with new potency.
@@ -1965,7 +1965,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
 
                     if (PEffect && (PEffect->GetEffectFlags() & EFFECTFLAG_ALWAYS_EXPIRING) != 0)
                     {
-                        PEffect->SetStartTime(server_clock::now());
+                        PEffect->SetStartTime(timing_clock::now());
 
                         // Effect updated, probably from Ecliptic Attrition
                         // Update status effect with new potency.

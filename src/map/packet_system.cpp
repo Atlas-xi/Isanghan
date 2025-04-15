@@ -1501,7 +1501,7 @@ void SmallPacket0x032(MapSession* const PSession, CCharEntity* const PChar, CBas
             return;
         }
 
-        auto lastTargetTradeTimeSeconds = std::chrono::duration_cast<std::chrono::seconds>(server_clock::now() - PTarget->lastTradeInvite).count();
+        auto lastTargetTradeTimeSeconds = std::chrono::duration_cast<std::chrono::seconds>(timing_clock::now() - PTarget->lastTradeInvite).count();
         if ((PTarget->TradePending.targid != 0 && lastTargetTradeTimeSeconds < 60) || PTarget->UContainer->GetType() == UCONTAINER_TRADE)
         {
             // Can't trade with someone who's already got a pending trade before timeout
@@ -1527,11 +1527,11 @@ void SmallPacket0x032(MapSession* const PSession, CCharEntity* const PChar, CBas
             }
         }
 
-        PChar->lastTradeInvite     = server_clock::now();
+        PChar->lastTradeInvite     = timing_clock::now();
         PChar->TradePending.id     = charid;
         PChar->TradePending.targid = targid;
 
-        PTarget->lastTradeInvite     = server_clock::now();
+        PTarget->lastTradeInvite     = timing_clock::now();
         PTarget->TradePending.id     = PChar->id;
         PTarget->TradePending.targid = PChar->targid;
         PTarget->pushPacket<CTradeRequestPacket>(PChar);
@@ -4161,7 +4161,7 @@ void SmallPacket0x096(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     // Force full synth duration wait no matter the synth animation length
     // Thus players can synth on whatever fps they want
-    if (PChar->m_LastSynthTime + 15s > server_clock::now())
+    if (PChar->m_LastSynthTime + 15s > timing_clock::now())
     {
         PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 0, 94);
         return;

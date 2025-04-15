@@ -212,7 +212,7 @@ void CMobEntity::SetDespawnTime(duration _duration)
 {
     if (_duration > 0s)
     {
-        m_DespawnTimer = server_clock::now() + _duration;
+        m_DespawnTimer = timing_clock::now() + _duration;
     }
     else
     {
@@ -529,7 +529,7 @@ void CMobEntity::PostTick()
 {
     TracyZoneScoped;
     CBattleEntity::PostTick();
-    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    time_point now = timing_clock::now();
     if (loc.zone && updatemask && now > m_nextUpdateTimer)
     {
         m_nextUpdateTimer = now + 250ms;

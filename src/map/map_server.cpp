@@ -223,13 +223,13 @@ void MapServer::run()
         duration networkDuration;
         duration tickDuration;
 
-        const auto tickStart = server_clock::now();
+        const auto tickStart = timing_clock::now();
         {
             tasksDuration   = CTaskManager::getInstance()->doExpiredTasks(tickStart);
             networkDuration = networking_->doSocketsBlocking(kMainLoopInterval - tasksDuration); // Use tick remainder for networking
             watchdog_->update();
         }
-        tickDuration  = server_clock::now() - tickStart;
+        tickDuration  = timing_clock::now() - tickStart;
         tasksDuration = tickDuration - networkDuration; // Since we don't measure logic directly, we can calculate it based on the total and network durations
 
         const auto tickDiffTime = kMainLoopInterval - tickDuration;
@@ -366,10 +366,10 @@ void MapServer::do_init()
 
     CTransportHandler::getInstance()->InitializeTransport(mapIPP);
 
-    CTaskManager::getInstance()->AddTask("time_server", server_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, kTimeServerTickInterval, time_server);
-    CTaskManager::getInstance()->AddTask("map_cleanup", server_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, 5s, std::bind(&MapServer::map_cleanup, this, std::placeholders::_1, std::placeholders::_2));
-    CTaskManager::getInstance()->AddTask("garbage_collect", server_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, 15min, std::bind(&MapServer::map_garbage_collect, this, std::placeholders::_1, std::placeholders::_2));
-    CTaskManager::getInstance()->AddTask("persist_server_vars", server_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, 1min, serverutils::PersistVolatileServerVars);
+    CTaskManager::getInstance()->AddTask("time_server", timing_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, kTimeServerTickInterval, time_server);
+    CTaskManager::getInstance()->AddTask("map_cleanup", timing_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, 5s, std::bind(&MapServer::map_cleanup, this, std::placeholders::_1, std::placeholders::_2));
+    CTaskManager::getInstance()->AddTask("garbage_collect", timing_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, 15min, std::bind(&MapServer::map_garbage_collect, this, std::placeholders::_1, std::placeholders::_2));
+    CTaskManager::getInstance()->AddTask("persist_server_vars", timing_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, 1min, serverutils::PersistVolatileServerVars);
 
     zoneutils::TOTDChange(CVanaTime::getInstance()->GetCurrentTOTD()); // This tells the zones to spawn stuff based on time of day conditions (such as undead at night)
 

@@ -317,6 +317,6 @@ uint8 CBattlefieldHandler::MaxBattlefieldAreas() const
 
 void CBattlefieldHandler::addOrphanedPlayer(CCharEntity* PChar)
 {
-    auto orphan = std::make_pair(PChar->id, server_clock::now() + 5s);
+    auto orphan = std::make_pair(PChar->id, timing_clock::now() + 5s);
     m_orphanedPlayers.emplace_back(orphan);
 }

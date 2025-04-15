@@ -25,7 +25,7 @@
 #include "entities/battleentity.h"
 
 CController::CController(CBattleEntity* _POwner)
-: m_Tick(server_clock::now())
+: m_Tick(timing_clock::now())
 , POwner(_POwner)
 {
 }

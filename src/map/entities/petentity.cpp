@@ -45,8 +45,8 @@ CPetEntity::CPetEntity(PET_TYPE petType)
 , m_PetID(0)
 , m_PetType(petType)
 , m_spawnLevel(0)
-, m_jugSpawnTime(std::chrono::system_clock::time_point::min())
-, m_jugDuration(duration::min())
+, m_jugSpawnTime(wall_clock::time_point::min())
+, m_jugDuration(wall_clock::duration::min())
 {
     TracyZoneScoped;
     objtype                     = TYPE_PET;
@@ -104,7 +104,7 @@ void CPetEntity::setJugSpawnTime(uint32 spawnTime)
         return;
     }
 
-    m_jugSpawnTime = std::chrono::system_clock::time_point(std::chrono::duration<uint32>(spawnTime));
+    m_jugSpawnTime = wall_clock::time_point(std::chrono::duration<uint32>(spawnTime));
 }
 
 uint32 CPetEntity::getJugDuration()
@@ -204,7 +204,7 @@ WYVERN_TYPE CPetEntity::getWyvernType()
 void CPetEntity::PostTick()
 {
     CBattleEntity::PostTick();
-    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    time_point now = timing_clock::now();
     if (loc.zone && updatemask && status != STATUS_TYPE::DISAPPEAR && now > m_nextUpdateTimer)
     {
         m_nextUpdateTimer = now + 250ms;
@@ -262,7 +262,7 @@ void CPetEntity::Spawn()
 
     if (m_PetType == PET_TYPE::JUG_PET)
     {
-        m_jugSpawnTime = std::chrono::system_clock::now();
+        m_jugSpawnTime = wall_clock::now();
     }
 
     // NOTE: This is purposefully calling CBattleEntity's impl.

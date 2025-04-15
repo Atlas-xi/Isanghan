@@ -103,7 +103,7 @@ bool WheatyExceptionReport::alreadyCrashed;
 std::mutex WheatyExceptionReport::alreadyCrashedLock;
 WheatyExceptionReport::pRtlGetVersion WheatyExceptionReport::RtlGetVersion;
 
-time_point gStartUpTime = server_clock::now();
+time_point gStartUpTime = timing_clock::now();
 std::string gUptimeString;
 std::string gCrashDateString;
 std::string gProcessMemoryUsageString;
@@ -149,7 +149,7 @@ WheatyExceptionReport::~WheatyExceptionReport()
 
 const char* GetUptimeString()
 {
-    auto uptimeDuration = server_clock::now() - gStartUpTime;
+    auto uptimeDuration = timing_clock::now() - gStartUpTime;
     if (uptimeDuration < std::chrono::minutes(2))
     {
         gUptimeString = fmt::format("{} seconds", std::chrono::duration_cast<std::chrono::seconds>(uptimeDuration).count()).c_str();

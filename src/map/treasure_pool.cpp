@@ -255,12 +255,12 @@ uint8 CTreasurePool::addItem(uint16 ItemID, CBaseEntity* PEntity)
     if (SlotID == 10)
     {
         m_PoolItems[FreeSlotID].TimeStamp = get_server_start_time();
-        checkTreasureItem(server_clock::now(), FreeSlotID);
+        checkTreasureItem(timing_clock::now(), FreeSlotID);
     }
 
     m_count++;
     m_PoolItems[FreeSlotID].ID        = ItemID;
-    m_PoolItems[FreeSlotID].TimeStamp = server_clock::now() - treasure_checktime;
+    m_PoolItems[FreeSlotID].TimeStamp = timing_clock::now() - treasure_checktime;
 
     for (const auto& member : m_Members)
     {
@@ -269,7 +269,7 @@ uint8 CTreasurePool::addItem(uint16 ItemID, CBaseEntity* PEntity)
 
     if (memberCount() == 1)
     {
-        checkTreasureItem(server_clock::now(), FreeSlotID);
+        checkTreasureItem(timing_clock::now(), FreeSlotID);
     }
 
     return m_count;
@@ -296,7 +296,7 @@ void CTreasurePool::flush()
 {
     if (m_count != 0)
     {
-        const auto tick = server_clock::now() + treasure_checktime + std::chrono::seconds(1);
+        const auto tick = timing_clock::now() + treasure_checktime + std::chrono::seconds(1);
 
         for (uint8 i = 0; i < TREASUREPOOL_SIZE; ++i)
         {
