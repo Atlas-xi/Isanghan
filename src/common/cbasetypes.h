@@ -73,7 +73,7 @@ inline void destroy_arr(T*& ptr)
 }
 
 using namespace std::literals::chrono_literals;
-using server_clock = std::chrono::system_clock;
+using server_clock = std::chrono::steady_clock;
 using time_point   = server_clock::time_point;
 using duration     = server_clock::duration;
 

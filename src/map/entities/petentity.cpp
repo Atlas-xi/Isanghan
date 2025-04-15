@@ -45,7 +45,7 @@ CPetEntity::CPetEntity(PET_TYPE petType)
 , m_PetID(0)
 , m_PetType(petType)
 , m_spawnLevel(0)
-, m_jugSpawnTime(time_point::min())
+, m_jugSpawnTime(std::chrono::system_clock::time_point::min())
 , m_jugDuration(duration::min())
 {
     TracyZoneScoped;
@@ -262,7 +262,7 @@ void CPetEntity::Spawn()
 
     if (m_PetType == PET_TYPE::JUG_PET)
     {
-        m_jugSpawnTime = server_clock::now();
+        m_jugSpawnTime = std::chrono::system_clock::now();
     }
 
     // NOTE: This is purposefully calling CBattleEntity's impl.

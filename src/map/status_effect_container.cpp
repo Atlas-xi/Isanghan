@@ -1640,11 +1640,10 @@ void CStatusEffectContainer::LoadStatusEffects()
             if (flags & EFFECTFLAG_OFFLINE_TICK)
             {
                 auto timestamp = rset->get<uint32>("timestamp");
-                if (server_clock::now() < time_point() + std::chrono::seconds(timestamp) + std::chrono::seconds(duration))
+                auto endTime   = std::chrono::system_clock::time_point() + std::chrono::seconds(timestamp) + std::chrono::seconds(duration);
+                if (std::chrono::system_clock::now() < endTime)
                 {
-                    duration = (uint32)std::chrono::duration_cast<std::chrono::seconds>(time_point() + std::chrono::seconds(timestamp) +
-                                                                                        std::chrono::seconds(duration) - server_clock::now())
-                                   .count();
+                    duration = static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(endTime - std::chrono::system_clock::now()).count());
                 }
                 else if (effectID == EFFECT::EFFECT_VISITANT)
                 {
@@ -1766,9 +1765,11 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
                     }
                 }
             }
+            auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(server_clock::now() - PStatusEffect->GetStartTime());
+            auto timestamp   = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now() - elapsedTime).time_since_epoch().count();
             _sql->Query(Query, m_POwner->id, PStatusEffect->GetStatusID(), PStatusEffect->GetIcon(), PStatusEffect->GetPower(), tick, duration,
                         PStatusEffect->GetSubID(), PStatusEffect->GetSubPower(), PStatusEffect->GetTier(), PStatusEffect->GetEffectFlags(),
-                        std::chrono::duration_cast<std::chrono::seconds>(PStatusEffect->GetStartTime().time_since_epoch()).count());
+                        timestamp);
         }
     }
     DeleteStatusEffects();

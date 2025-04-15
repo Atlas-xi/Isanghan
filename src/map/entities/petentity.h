@@ -74,10 +74,10 @@ public:
     virtual bool      CanAttack(CBattleEntity* PTarget, std::unique_ptr<CBasicPacket>& errMsg) override;
 
 private:
-    PET_TYPE   m_PetType;      // the type of pet e.g. avatar/wyvern/jugpet etc
-    uint8      m_spawnLevel;   // The level the pet was spawned at
-    time_point m_jugSpawnTime; // original spawn time of a jug pet
-    duration   m_jugDuration;  // Time before the jug is despawned after being called
+    PET_TYPE                              m_PetType;      // the type of pet e.g. avatar/wyvern/jugpet etc
+    uint8                                 m_spawnLevel;   // The level the pet was spawned at
+    std::chrono::system_clock::time_point m_jugSpawnTime; // original spawn time of a jug pet
+    duration                              m_jugDuration;  // Time before the jug is despawned after being called
 
     void setJugSpawnTime(uint32 spawnTime); // sets the initial spawn time of this pet in seconds since epoch
 };
