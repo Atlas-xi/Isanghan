@@ -13318,7 +13318,9 @@ bool CLuaBaseEntity::addStatusEffectEx(sol::variadic_args va)
                           tier,
                           effectFlag); // Effect Flag (i.e in lua xi.effectFlag.AURA will make this an aura effect)
 
-    return ((CBattleEntity*)m_PBaseEntity)->StatusEffectContainer->AddStatusEffect(PEffect, silent);
+    auto addNotice = silent ? EffectNotice::Silent : EffectNotice::ShowMessage;
+
+    return ((CBattleEntity*)m_PBaseEntity)->StatusEffectContainer->AddStatusEffect(PEffect, addNotice);
 }
 
 /************************************************************************
@@ -13655,9 +13657,9 @@ void CLuaBaseEntity::delStatusEffectsByFlag(uint32 flag, sol::object const& sile
         return;
     }
 
-    bool bool_silent = silent.is<bool>() ? silent.as<bool>() : false;
+    auto removalNotice = (silent.is<bool>() && silent.as<bool>()) ? EffectNotice::Silent : EffectNotice::ShowMessage;
 
-    PBattleEntity->StatusEffectContainer->DelStatusEffectsByFlag(static_cast<EFFECTFLAG>(flag), bool_silent);
+    PBattleEntity->StatusEffectContainer->DelStatusEffectsByFlag(static_cast<EFFECTFLAG>(flag), removalNotice);
 }
 
 /************************************************************************
@@ -13793,7 +13795,7 @@ uint8 CLuaBaseEntity::dispelAllStatusEffect(sol::object const& flagObj)
  *  Notes   :
  ************************************************************************/
 
-uint16 CLuaBaseEntity::stealStatusEffect(CLuaBaseEntity* PTargetEntity, sol::object const& flagObj)
+uint16 CLuaBaseEntity::stealStatusEffect(CLuaBaseEntity* PTargetEntity, sol::object const& flagObj, sol::object const& silentObj)
 {
     if (m_PBaseEntity->objtype == TYPE_NPC)
     {
@@ -13813,9 +13815,10 @@ uint16 CLuaBaseEntity::stealStatusEffect(CLuaBaseEntity* PTargetEntity, sol::obj
         return 0;
     }
 
-    uint32 flag = flagObj.is<uint32>() ? flagObj.as<uint32>() : (uint32)EFFECTFLAG_DISPELABLE;
+    uint32 flag          = flagObj.is<uint32>() ? flagObj.as<uint32>() : (uint32)EFFECTFLAG_DISPELABLE;
+    auto   removalNotice = (silentObj.is<bool>() && silentObj.as<bool>()) ? EffectNotice::Silent : EffectNotice::ShowMessage;
 
-    if (CStatusEffect* PStatusEffect = PTargetBattleEntity->StatusEffectContainer->StealStatusEffect(static_cast<EFFECTFLAG>(flag)))
+    if (CStatusEffect* PStatusEffect = PTargetBattleEntity->StatusEffectContainer->StealStatusEffect(static_cast<EFFECTFLAG>(flag), removalNotice))
     {
         PBattleEntity->StatusEffectContainer->AddStatusEffect(PStatusEffect);
         return PStatusEffect->GetStatusID();
