@@ -121,6 +121,8 @@ xi.mobSkill =
 
     HYPNIC_LAMP              = 1695, -- Unique entry.
 
+    PROBOSCIS_SHOWER         = 1708,
+
     FORCEFUL_BLOW            = 1731, -- Used with Mamool's weapons break.
 
     XENOGLOSSIA              = 1823, -- Unique entry.

@@ -6,21 +6,6 @@ xi.einherjar = xi.einherjar or {}
 
 local ID = zones[xi.zone.HAZHALM_TESTING_GROUNDS]
 
--- Merge two mob groups into one
--- Certain mob groups contain different models/jobs of the same mob family
-local function mergeArrays(a, b)
-    local result = {}
-    for i = 1, #a do
-        result[#result + 1] = a[i]
-    end
-
-    for i = 1, #b do
-        result[#result + 1] = b[i]
-    end
-
-    return result
-end
-
 -- Ensure two concurrent chambers cannot plan the same mobs
 local lockedMobs = {}
 
@@ -42,7 +27,7 @@ local mobPool =
         ID.mob.HAZHALM_BATS,
         ID.mob.HYNDLA,
         ID.mob.INFECTED_WAMOURA,
-        ID.mob.LOGI,
+        utils.appendArrays(ID.mob.LOGI_GROW, ID.mob.LOGI),
         ID.mob.NICKUR,
         ID.mob.ROTTING_HUSKARL_WAR,
         ID.mob.ROTTING_HUSKARL_BLM,
@@ -62,7 +47,7 @@ local mobPool =
         ID.mob.HAZHALM_BATS,
         ID.mob.HAZHALM_LEECH,
         ID.mob.ODINS_FOOL,
-        mergeArrays(ID.mob.ROTTING_HUSKARL_DRK, ID.mob.ROTTING_HUSKARL_THF),
+        utils.appendArrays(ID.mob.ROTTING_HUSKARL_DRK, ID.mob.ROTTING_HUSKARL_THF),
         ID.mob.SJOKRAKJEN,
         ID.mob.UTGARTH_BAT,
         ID.mob.UTGARTH_BATS,
