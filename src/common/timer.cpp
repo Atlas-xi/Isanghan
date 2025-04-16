@@ -172,3 +172,18 @@ auto getMilliseconds(const timing_clock::duration& d) -> int64
 {
     return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
 };
+
+// https://stackoverflow.com/questions/35282308/convert-between-c11-clocks/35282833#35282833
+wall_clock::time_point convertTimeTimingToWall(timing_clock::time_point steadyTime)
+{
+    auto wallNow  = wall_clock::now();
+    auto timerNow = timing_clock::now();
+    return time_point_cast<wall_clock::duration>(steadyTime - timerNow + wallNow);
+};
+
+timing_clock::time_point convertTimeWallToTiming(wall_clock::time_point wallTime)
+{
+    auto timerNow = timing_clock::now();
+    auto wallNow  = wall_clock::now();
+    return wallTime - wallNow + timerNow;
+};

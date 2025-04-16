@@ -35,3 +35,6 @@ void timer_final(void);
 uint32 getCurrentTimeMs();
 
 auto getMilliseconds(const timing_clock::duration& d) -> int64;
+
+wall_clock::time_point   convertTimeTimingToWall(timing_clock::time_point steadyTime);
+timing_clock::time_point convertTimeWallToTiming(wall_clock::time_point wallTime);

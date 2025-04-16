@@ -604,7 +604,7 @@ void CCharEntity::resetPetZoningInfo()
     petZoningInfo.petMP        = 0;
     petZoningInfo.respawnPet   = false;
     petZoningInfo.petType      = PET_TYPE::AVATAR;
-    petZoningInfo.jugSpawnTime = 0;
+    petZoningInfo.jugSpawnTime = timing_clock::time_point::min();
     petZoningInfo.jugDuration  = 0;
 }
 

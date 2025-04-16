@@ -45,8 +45,8 @@ CPetEntity::CPetEntity(PET_TYPE petType)
 , m_PetID(0)
 , m_PetType(petType)
 , m_spawnLevel(0)
-, m_jugSpawnTime(wall_clock::time_point::min())
-, m_jugDuration(wall_clock::duration::min())
+, m_jugSpawnTime(timing_clock::time_point::min())
+, m_jugDuration(timing_clock::duration::min())
 {
     TracyZoneScoped;
     objtype                     = TYPE_PET;
@@ -84,19 +84,17 @@ bool CPetEntity::isBstPet()
     return getPetType() == PET_TYPE::JUG_PET || objtype == TYPE_MOB;
 }
 
-uint32 CPetEntity::getJugSpawnTime()
+timing_clock::time_point CPetEntity::getJugSpawnTime()
 {
     if (m_PetType != PET_TYPE::JUG_PET)
     {
         ShowWarning("Non-Jug Pet calling function (%d).", static_cast<uint8>(m_PetType));
-        return 0;
     }
 
-    const auto epoch = m_jugSpawnTime.time_since_epoch();
-    return static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(epoch).count());
+    return m_jugSpawnTime;
 }
 
-void CPetEntity::setJugSpawnTime(uint32 spawnTime)
+void CPetEntity::setJugSpawnTime(timing_clock::time_point spawnTime)
 {
     if (m_PetType != PET_TYPE::JUG_PET)
     {
@@ -104,7 +102,7 @@ void CPetEntity::setJugSpawnTime(uint32 spawnTime)
         return;
     }
 
-    m_jugSpawnTime = wall_clock::time_point(std::chrono::duration<uint32>(spawnTime));
+    m_jugSpawnTime = spawnTime;
 }
 
 uint32 CPetEntity::getJugDuration()
@@ -262,7 +260,7 @@ void CPetEntity::Spawn()
 
     if (m_PetType == PET_TYPE::JUG_PET)
     {
-        m_jugSpawnTime = wall_clock::now();
+        m_jugSpawnTime = timing_clock::now();
     }
 
     // NOTE: This is purposefully calling CBattleEntity's impl.

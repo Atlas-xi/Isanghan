@@ -705,7 +705,8 @@ namespace charutils
                 PChar->petZoningInfo.petType      = static_cast<PET_TYPE>(rset->get<uint8>("pet_type"));
                 PChar->petZoningInfo.petLevel     = rset->get<uint8>("pet_level");
                 PChar->petZoningInfo.respawnPet   = true;
-                PChar->petZoningInfo.jugSpawnTime = static_cast<uint32>(PChar->getCharVar("jugpet-spawn-time"));
+                auto jugTimestamp                 = static_cast<uint32>(PChar->getCharVar("jugpet-spawn-time"));
+                PChar->petZoningInfo.jugSpawnTime = convertTimeWallToTiming(wall_clock::time_point(std::chrono::seconds(jugTimestamp)));
                 PChar->petZoningInfo.jugDuration  = static_cast<uint32>(PChar->getCharVar("jugpet-duration-seconds"));
 
                 // clear the charvars used for jug state
@@ -5511,7 +5512,8 @@ namespace charutils
 
         // These two are jug only variables. We should probably move pet char stats into its own table, but in the meantime
         // we use charvars for jug specific things
-        PChar->setCharVar("jugpet-spawn-time", static_cast<int32>(PChar->petZoningInfo.jugSpawnTime));
+        auto jugTimestamp = std::chrono::time_point_cast<std::chrono::seconds>(convertTimeTimingToWall(PChar->petZoningInfo.jugSpawnTime)).time_since_epoch().count();
+        PChar->setCharVar("jugpet-spawn-time", jugTimestamp);
         PChar->setCharVar("jugpet-duration-seconds", static_cast<int32>(PChar->petZoningInfo.jugDuration));
     }
 
