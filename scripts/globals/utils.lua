@@ -112,6 +112,25 @@ function utils.bind(func, ...)
     end
 end
 
+-- Appends two array-style tables into a new one
+-- Creates and returns a new iterable table containing all elements from both input arrays `a` and `b`,
+---@nodiscard
+---@param a table
+---@param b table
+---@return table
+function utils.appendArrays(a, b)
+    local result = {}
+    for i = 1, #a do
+        result[#result + 1] = a[i]
+    end
+
+    for i = 1, #b do
+        result[#result + 1] = b[i]
+    end
+
+    return result
+end
+
 -- Creates a slice of an input table and returns a new table
 ---@nodiscard
 ---@param inputTable table
@@ -334,6 +353,15 @@ function utils.map(tbl, func)
     end
 
     return t
+end
+
+-- Iterates through the table and calls the callback on each key, value pair.
+---@param tbl table
+---@param func function
+function utils.each(tbl, func)
+    for k, v in pairs(tbl) do
+        func(k, v)
+    end
 end
 
 -- Given a table and a filter function, returns a new table composed of the
