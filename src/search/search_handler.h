@@ -91,7 +91,7 @@ private:
     // Deadline timer to drop a read
     asio::steady_timer deadline_;
 
-    void checkDeadline();
+    void checkDeadline(std::shared_ptr<search_handler> self);
 
     uint16_t getNumSessionsInUse(std::string const& ipAddressStr);
     void     addToUsedIPAddresses(std::string const& ipAddressStr);

@@ -74,7 +74,7 @@ void search_handler::start()
     if (socket_.lowest_layer().is_open())
     {
         deadline_.expires_after(std::chrono::milliseconds(10000)); // AH searches can take quite a while
-        deadline_.async_wait(std::bind(&search_handler::checkDeadline, this));
+        deadline_.async_wait(std::bind(&search_handler::checkDeadline, this, shared_from_this()));
 
         do_read();
     }
@@ -242,14 +242,15 @@ void search_handler::read_func(uint16_t length)
         return;
     }
 
-    deadline_.cancel(); // If we read, don't abort the deadline in the future
     if (length != ref<uint16>(data_, 0x00) || length < 28)
     {
         ShowErrorFmt("Search packetsize wrong. Size {} should be {}.", length, ref<uint16>(data_, 0x00));
         return;
     }
 
+    deadline_.cancel(); // If we read, don't abort the deadline in the future
     decrypt(length);
+
     if (validatePacket(length))
     {
         uint8 packetType = data_[0x0B];
@@ -901,7 +902,7 @@ void search_handler::addToUsedIPAddresses(std::string const& ipAddressStr)
     // clang-format on
 }
 
-void search_handler::checkDeadline()
+void search_handler::checkDeadline(std::shared_ptr<search_handler> self) // self to keep the object alive
 {
     if (std::chrono::steady_clock::now() > deadline_.expiry())
     {
