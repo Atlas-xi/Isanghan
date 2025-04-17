@@ -27,7 +27,7 @@
 class CInactiveState : public CState
 {
 public:
-    CInactiveState(CBaseEntity* PEntity, timing_clock::duration _duration, bool canChangeState, bool untargetable);
+    CInactiveState(CBaseEntity* PEntity, timer::duration _duration, bool canChangeState, bool untargetable);
 
     bool GetUntargetable()
     {
@@ -48,13 +48,13 @@ protected:
         return false;
     }
 
-    virtual bool Update(timing_clock::time_point tick) override;
-    virtual void Cleanup(timing_clock::time_point tick) override;
+    virtual bool Update(timer::time_point tick) override;
+    virtual void Cleanup(timer::time_point tick) override;
 
 private:
-    timing_clock::duration m_duration;
-    bool                   m_canChangeState{ false };
-    bool                   m_untargetable{ false };
+    timer::duration m_duration;
+    bool            m_canChangeState{ false };
+    bool            m_untargetable{ false };
 };
 
 #endif

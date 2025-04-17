@@ -89,7 +89,7 @@ namespace serverutils
         return GetServerVar(name);
     }
 
-    int32 PersistVolatileServerVars(timing_clock::time_point tick, CTaskManager::CTask* PTask)
+    int32 PersistVolatileServerVars(timer::time_point tick, CTaskManager::CTask* PTask)
     {
         if (serverVarChanges.empty())
         {

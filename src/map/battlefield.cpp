@@ -60,7 +60,7 @@ CBattlefield::CBattlefield(uint16 id, CZone* PZone, uint8 area, CCharEntity* PIn
 , m_Area(area)
 , m_Record(BattlefieldRecord_t())
 , m_Rules(0)
-, m_StartTime(timing_clock::now())
+, m_StartTime(timer::clock::now())
 , m_LastPromptTime(0s)
 , m_MaxParticipants(8)
 , m_LevelCap(0)
@@ -124,42 +124,42 @@ uint16 CBattlefield::GetRuleMask() const
     return m_Rules;
 }
 
-timing_clock::time_point CBattlefield::GetStartTime() const
+timer::time_point CBattlefield::GetStartTime() const
 {
     return m_StartTime;
 }
 
-timing_clock::duration CBattlefield::GetTimeInside() const
+timer::duration CBattlefield::GetTimeInside() const
 {
     return m_Tick - m_StartTime;
 }
 
-timing_clock::time_point CBattlefield::GetFightTime() const
+timer::time_point CBattlefield::GetFightTime() const
 {
     return m_FightTick;
 }
 
-timing_clock::duration CBattlefield::GetTimeLimit() const
+timer::duration CBattlefield::GetTimeLimit() const
 {
     return m_TimeLimit;
 }
 
-timing_clock::time_point CBattlefield::GetWipeTime() const
+timer::time_point CBattlefield::GetWipeTime() const
 {
     return m_WipeTime;
 }
 
-timing_clock::duration CBattlefield::GetFinishTime() const
+timer::duration CBattlefield::GetFinishTime() const
 {
     return m_FinishTime;
 }
 
-timing_clock::duration CBattlefield::GetRemainingTime() const
+timer::duration CBattlefield::GetRemainingTime() const
 {
-    return GetTimeLimit() > GetTimeInside() ? GetTimeLimit() - GetTimeInside() : timing_clock::duration(0);
+    return GetTimeLimit() > GetTimeInside() ? GetTimeLimit() - GetTimeInside() : timer::duration(0);
 }
 
-timing_clock::duration CBattlefield::GetLastTimeUpdate() const
+timer::duration CBattlefield::GetLastTimeUpdate() const
 {
     return m_LastPromptTime;
 }
@@ -200,7 +200,7 @@ void CBattlefield::SetInitiator(std::string const& name)
     m_Initiator.name = name;
 }
 
-void CBattlefield::SetTimeLimit(timing_clock::duration time)
+void CBattlefield::SetTimeLimit(timer::duration time)
 {
     m_TimeLimit      = time;
     m_LastPromptTime = time;
@@ -214,7 +214,7 @@ void CBattlefield::SetTimeLimit(timing_clock::duration time)
     }
 }
 
-void CBattlefield::SetWipeTime(timing_clock::time_point time)
+void CBattlefield::SetWipeTime(timer::time_point time)
 {
     m_WipeTime = time;
 }
@@ -224,7 +224,7 @@ void CBattlefield::SetArea(uint8 area)
     m_Area = area;
 }
 
-void CBattlefield::SetRecord(std::string const& name, timing_clock::duration time, size_t partySize)
+void CBattlefield::SetRecord(std::string const& name, timer::duration time, size_t partySize)
 {
     m_Record.name      = !name.empty() ? name : m_Initiator.name;
     m_Record.time      = time;
@@ -257,7 +257,7 @@ void CBattlefield::SetLocalVar(std::string const& name, uint64_t value)
     m_LocalVars[name] = value;
 }
 
-void CBattlefield::SetLastTimeUpdate(timing_clock::duration time)
+void CBattlefield::SetLastTimeUpdate(timer::duration time)
 {
     m_LastPromptTime = time;
 }
@@ -672,7 +672,7 @@ bool CBattlefield::RemoveEntity(CBaseEntity* PEntity, uint8 leavecode)
     return found;
 }
 
-void CBattlefield::onTick(timing_clock::time_point time)
+void CBattlefield::onTick(timer::time_point time)
 {
     TracyZoneScoped;
     if (!m_Attacked)
@@ -701,7 +701,7 @@ bool CBattlefield::CanCleanup(bool cleanup)
     return m_Cleanup || m_EnteredPlayers.empty();
 }
 
-bool CBattlefield::Cleanup(timing_clock::time_point time, bool force)
+bool CBattlefield::Cleanup(timer::time_point time, bool force)
 {
     // Wait until
     if (!force && !m_EnteredPlayers.empty() && m_cleanupTime > time)
@@ -815,12 +815,12 @@ bool CBattlefield::Cleanup(timing_clock::time_point time, bool force)
         if (rset && rset->rowsCount() && rset->next())
         {
             const auto fastestTime = rset->get<uint32>("fastestTime");
-            updateRecord           = fastestTime > std::chrono::duration_cast<std::chrono::seconds>(m_Record.time).count();
+            updateRecord           = fastestTime > timer::getSeconds(m_Record.time);
         }
 
         if (updateRecord)
         {
-            const uint32 timeThing = std::chrono::duration_cast<std::chrono::seconds>(m_Record.time).count();
+            const uint32 timeThing = timer::getSeconds(m_Record.time);
 
             db::preparedStmt("UPDATE bcnm_records SET fastestName = ?, fastestTime = ?, fastestPartySize = ? WHERE bcnmId = ? AND zoneid = ?",
                              m_Record.name, timeThing, m_Record.partySize, this->GetID(), GetZoneID());

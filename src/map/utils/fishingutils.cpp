@@ -24,6 +24,7 @@
 #include "common/database.h"
 #include "common/logging.h"
 #include "common/sql.h"
+#include "common/timer.h"
 #include "common/utils.h"
 #include "common/vana_time.h"
 
@@ -1974,8 +1975,8 @@ namespace fishingutils
         }
         else
         {
-            auto secs = std::chrono::duration_cast<std::chrono::seconds>(timing_clock::now().time_since_epoch());
-            PChar->setCharVar("[Fish]LastCastTime", secs.count());
+            auto secs = timer::getSeconds(utc_clock::now().time_since_epoch());
+            PChar->setCharVar("[Fish]LastCastTime", secs);
             PChar->lastCastTime = vanaTime;
             PChar->nextFishTime = PChar->lastCastTime + 5;
         }

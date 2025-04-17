@@ -131,7 +131,7 @@ int CStatusEffect::GetElapsedTickCount() const
     return m_tickCount;
 }
 
-timing_clock::time_point CStatusEffect::GetStartTime()
+timer::time_point CStatusEffect::GetStartTime()
 {
     return m_StartTime;
 }
@@ -208,7 +208,7 @@ void CStatusEffect::SetDuration(uint32 Duration)
     m_Duration = Duration;
 }
 
-void CStatusEffect::SetStartTime(timing_clock::time_point StartTime)
+void CStatusEffect::SetStartTime(timer::time_point StartTime)
 {
     m_tickCount = 0;
     m_StartTime = StartTime;

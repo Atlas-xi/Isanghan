@@ -3768,7 +3768,7 @@ namespace battleutils
             // Chainbound active on target
             if (PCBEffect)
             {
-                if (PCBEffect->GetStartTime() + 2s < timing_clock::now())
+                if (PCBEffect->GetStartTime() + 2s < timer::clock::now())
                 {
                     // Konzen-Ittai
                     if (PCBEffect->GetPower() > 1)
@@ -3793,7 +3793,7 @@ namespace battleutils
                 PSCEffect = PDefender->StatusEffectContainer->GetStatusEffect(EFFECT_SKILLCHAIN, 0);
             }
             // Previous effect exists
-            else if (PSCEffect && PSCEffect->GetStartTime() + 3s < timing_clock::now())
+            else if (PSCEffect && PSCEffect->GetStartTime() + 3s < timer::clock::now())
             {
                 if (PSCEffect->GetTier() == 0)
                 {
@@ -3834,7 +3834,7 @@ namespace battleutils
 
             if (skillchain != SC_NONE)
             {
-                PSCEffect->SetStartTime(timing_clock::now());
+                PSCEffect->SetStartTime(timer::clock::now());
                 PSCEffect->SetDuration(PSCEffect->GetDuration() - 1000);
                 PSCEffect->SetTier(GetSkillchainTier(skillchain));
                 PSCEffect->SetPower(skillchain);
@@ -3854,7 +3854,7 @@ namespace battleutils
                 return (SUBEFFECT)GetSkillchainSubeffect(skillchain);
             }
 
-            PSCEffect->SetStartTime(timing_clock::now());
+            PSCEffect->SetStartTime(timer::clock::now());
             PSCEffect->SetDuration(10000);
             PSCEffect->SetTier(0);
             PSCEffect->SetPower(combined_properties);
@@ -4669,7 +4669,7 @@ namespace battleutils
         return shotCount;
     }
 
-    void applyCharm(CBattleEntity* PCharmer, CBattleEntity* PVictim, timing_clock::duration charmTime)
+    void applyCharm(CBattleEntity* PCharmer, CBattleEntity* PVictim, timer::duration charmTime)
     {
         PVictim->isCharmed = true;
 
@@ -4691,7 +4691,7 @@ namespace battleutils
 
             // set the mobs ai to petAi
             PCharmer->PPet->PAI->SetController(std::make_unique<CPetController>(PMob));
-            PCharmer->PPet->charmTime = timing_clock::now() + charmTime;
+            PCharmer->PPet->charmTime = timer::clock::now() + charmTime;
 
             // this will make him transition back to roaming if sleeping
             PCharmer->PPet->animation = ANIMATION_NONE;

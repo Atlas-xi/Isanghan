@@ -37,6 +37,7 @@
 #include "utils/mobutils.h"
 #include "utils/petutils.h"
 
+#include "common/timer.h"
 #include "common/utils.h"
 #include "petentity.h"
 
@@ -45,8 +46,8 @@ CPetEntity::CPetEntity(PET_TYPE petType)
 , m_PetID(0)
 , m_PetType(petType)
 , m_spawnLevel(0)
-, m_jugSpawnTime(timing_clock::time_point::min())
-, m_jugDuration(timing_clock::duration::min())
+, m_jugSpawnTime(timer::time_point::min())
+, m_jugDuration(timer::duration::min())
 {
     TracyZoneScoped;
     objtype                     = TYPE_PET;
@@ -84,7 +85,7 @@ bool CPetEntity::isBstPet()
     return getPetType() == PET_TYPE::JUG_PET || objtype == TYPE_MOB;
 }
 
-timing_clock::time_point CPetEntity::getJugSpawnTime()
+timer::time_point CPetEntity::getJugSpawnTime()
 {
     if (m_PetType != PET_TYPE::JUG_PET)
     {
@@ -94,7 +95,7 @@ timing_clock::time_point CPetEntity::getJugSpawnTime()
     return m_jugSpawnTime;
 }
 
-void CPetEntity::setJugSpawnTime(timing_clock::time_point spawnTime)
+void CPetEntity::setJugSpawnTime(timer::time_point spawnTime)
 {
     if (m_PetType != PET_TYPE::JUG_PET)
     {
@@ -113,7 +114,7 @@ uint32 CPetEntity::getJugDuration()
         return 0;
     }
 
-    return static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(m_jugDuration).count());
+    return static_cast<uint32>(timer::getSeconds(m_jugDuration));
 }
 
 void CPetEntity::setJugDuration(uint32 seconds)
@@ -202,7 +203,7 @@ WYVERN_TYPE CPetEntity::getWyvernType()
 void CPetEntity::PostTick()
 {
     CBattleEntity::PostTick();
-    timing_clock::time_point now = timing_clock::now();
+    timer::time_point now = timer::clock::now();
     if (loc.zone && updatemask && status != STATUS_TYPE::DISAPPEAR && now > m_nextUpdateTimer)
     {
         m_nextUpdateTimer = now + 250ms;
@@ -260,7 +261,7 @@ void CPetEntity::Spawn()
 
     if (m_PetType == PET_TYPE::JUG_PET)
     {
-        m_jugSpawnTime = timing_clock::now();
+        m_jugSpawnTime = timer::clock::now();
     }
 
     // NOTE: This is purposefully calling CBattleEntity's impl.

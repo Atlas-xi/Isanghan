@@ -75,15 +75,8 @@ inline void destroy_arr(T*& ptr)
 using namespace std::literals::chrono_literals;
 
 // UTC clock. Use sparingly as this is nonmonotonic and susceptible to e.g. NTP time changes.
-using wall_clock = std::chrono::system_clock;
-
-// Stopwatch. Used for duration timing (the majority of our clock use).
-using timing_clock = std::chrono::steady_clock;
-
-// Not used so as not to accidentally mix with timing_clock
-// using hires_clock      = std::chrono::high_resolution_clock;
-// using hires_time_point = hires_clock::time_point;
-// using hires_duration   = hires_clock::duration;
+// Use timer.h timer namespace for duration measurements.
+using utc_clock = std::chrono::system_clock;
 
 template <class T>
 using MinHeap = std::priority_queue<T, std::vector<T>, std::greater<T>>;

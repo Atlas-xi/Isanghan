@@ -90,14 +90,14 @@ struct profile_t
 
 struct capacityChain_t
 {
-    uint16 chainNumber;
-    uint32 chainTime;
+    uint16            chainNumber;
+    timer::time_point chainTime;
 };
 
 struct expChain_t
 {
-    uint16 chainNumber;
-    uint32 chainTime;
+    uint16            chainNumber;
+    timer::time_point chainTime;
 };
 
 struct telepoint_t
@@ -131,15 +131,15 @@ struct teleport_t
 
 struct PetInfo_t
 {
-    bool                     respawnPet;   // Used for spawning pet on zone
-    timing_clock::time_point jugSpawnTime; // Keeps track of original spawn time
-    uint32                   jugDuration;  // Number of seconds a jug pet should last after its original spawn time
-    uint8                    petID;        // ID as in wyvern(48) , carbuncle(8) ect..
-    PET_TYPE                 petType;      // Type of pet being transferred
-    uint8                    petLevel;     // Level the pet was spawned with
-    int16                    petHP;
-    int16                    petMP;
-    float                    petTP;
+    bool              respawnPet;   // Used for spawning pet on zone
+    timer::time_point jugSpawnTime; // Keeps track of original spawn time
+    uint32            jugDuration;  // Number of seconds a jug pet should last after its original spawn time
+    uint8             petID;        // ID as in wyvern(48) , carbuncle(8) ect..
+    PET_TYPE          petType;      // Type of pet being transferred
+    uint8             petLevel;     // Level the pet was spawned with
+    int16             petHP;
+    int16             petMP;
+    float             petTP;
 };
 
 struct AuctionHistory_t
@@ -451,20 +451,20 @@ public:
 
     void SetName(const std::string& name); // set the name of character, limited to 15 characters
 
-    timing_clock::time_point lastTradeInvite{};
-    EntityID_t               TradePending{};    // Character ID offering trade
-    EntityID_t               InvitePending{};   // Character ID sending party invite
-    EntityID_t               BazaarID{};        // Pointer to the bazaar we are browsing.
-    BazaarList_t             BazaarCustomers{}; // Array holding the IDs of the current customers
+    timer::time_point lastTradeInvite{};
+    EntityID_t        TradePending{};    // Character ID offering trade
+    EntityID_t        InvitePending{};   // Character ID sending party invite
+    EntityID_t        BazaarID{};        // Pointer to the bazaar we are browsing.
+    BazaarList_t      BazaarCustomers{}; // Array holding the IDs of the current customers
 
     std::unique_ptr<monstrosity::MonstrosityData_t> m_PMonstrosity;
 
-    uint8                    m_LevelRestriction; // Character level limit
-    uint16                   m_Costume;
-    uint16                   m_Costume2;
-    uint32                   m_AHHistoryTimestamp;
-    uint32                   m_DeathTimestamp;
-    timing_clock::time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
+    uint8             m_LevelRestriction; // Character level limit
+    uint16            m_Costume;
+    uint16            m_Costume2;
+    timer::time_point m_AHHistoryTimestamp;
+    uint32            m_DeathTimestamp;
+    timer::time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
 
     uint8      m_hasTractor;        // checks if player has tractor already
     uint8      m_hasRaise;          // checks if player has raise already
@@ -475,10 +475,10 @@ public:
 
     location_t m_previousLocation{};
 
-    uint32 m_PlayTime;
-    uint32 m_SaveTime;
+    uint32            m_PlayTime;
+    timer::time_point m_SaveTime;
 
-    timing_clock::time_point m_LeaderCreatedPartyTime{}; // Time that a party member joined and this player was leader.
+    timer::time_point m_LeaderCreatedPartyTime{}; // Time that a party member joined and this player was leader.
 
     uint8 m_GMlevel;    // Level of the GM flag assigned to this character
     bool  m_isGMHidden; // GM Hidden flag to prevent player updates from being processed.
@@ -502,10 +502,10 @@ public:
     // Send updates about dirty containers in post tick
     std::map<CONTAINER_ID, bool> dirtyInventoryContainers;
 
-    bool                     m_EquipSwap; // true if equipment was recently changed
-    bool                     m_EffectsChanged;
-    timing_clock::time_point m_LastSynthTime{};
-    timing_clock::time_point m_LastRangedAttackTime{};
+    bool              m_EquipSwap; // true if equipment was recently changed
+    bool              m_EffectsChanged;
+    timer::time_point m_LastSynthTime{};
+    timer::time_point m_LastRangedAttackTime{};
 
     CHAR_SUBSTATE m_Substate;
 
@@ -540,9 +540,9 @@ public:
 
     void RequestPersist(CHAR_PERSIST toPersist);
     bool PersistData();
-    bool PersistData(timing_clock::time_point tick);
+    bool PersistData(timer::time_point tick);
 
-    virtual void Tick(timing_clock::time_point) override;
+    virtual void Tick(timer::time_point) override;
     void         PostTick() override;
 
     virtual void addTrait(CTrait*) override;
@@ -553,11 +553,11 @@ public:
     bool         IsMobOwner(CBattleEntity* PTarget);
 
     virtual void Die() override;
-    void         Die(timing_clock::duration _duration);
+    void         Die(timer::duration _duration);
     void         Raise();
 
-    static constexpr timing_clock::duration death_duration         = 60min;
-    static constexpr timing_clock::duration death_update_frequency = 16s;
+    static constexpr timer::duration death_duration         = 60min;
+    static constexpr timer::duration death_update_frequency = 16s;
 
     void  SetDeathTimestamp(uint32 timestamp);
     int32 GetSecondsElapsedSinceDeath() const;
@@ -650,8 +650,8 @@ private:
     std::unordered_set<std::string>                           charVarChanges;
     std::unordered_set<uint32>                                charTriggerAreaIDs; // Holds any TriggerArea IDs that the player is currently within the bounds of
 
-    uint8                    dataToPersist = 0;
-    timing_clock::time_point nextDataPersistTime{};
+    uint8             dataToPersist = 0;
+    timer::time_point nextDataPersistTime{};
 
     // TODO: Don't use raw ptrs for this, but don't duplicate whole packets with unique_ptr either.
     std::deque<std::unique_ptr<CBasicPacket>> PacketList;          // The list of packets to be sent to the character during the next network cycle

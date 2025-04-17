@@ -21,20 +21,37 @@
 
 #pragma once
 
-#include "common/cbasetypes.h"
+#include <chrono>
 
-uint32 gettick(void);
-uint32 gettick_nocache(void);
+#include "cbasetypes.h"
 
-timing_clock::time_point get_server_start_time(void);
-timing_clock::duration   get_uptime();
+namespace timer
+{
+    // This clock is not stable across reboots.
+    // Use utc_clock if you need real time.
+    // Use timer::toUtc/timer::fromUtc to persist timestamps to the database (status effects).
+    using clock      = std::chrono::steady_clock;
+    using duration   = clock::duration;
+    using time_point = clock::time_point;
 
-void timer_init(void);
-void timer_final(void);
+    void init();
+    void final();
 
-uint32 getCurrentTimeMs();
+    time_point getStartTime();
+    duration   getUptime();
 
-auto getMilliseconds(const timing_clock::duration& d) -> int64;
+    template <typename Rep, typename Period>
+    auto getMilliseconds(const std::chrono::duration<Rep, Period>& d) -> int64
+    {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
+    };
 
-wall_clock::time_point   convertTimeTimingToWall(timing_clock::time_point steadyTime);
-timing_clock::time_point convertTimeWallToTiming(wall_clock::time_point wallTime);
+    template <typename Rep, typename Period>
+    auto getSeconds(const std::chrono::duration<Rep, Period>& d) -> int64
+    {
+        return std::chrono::duration_cast<std::chrono::seconds>(d).count();
+    };
+
+    utc_clock::time_point toUtc(time_point timerTime);
+    time_point            fromUtc(utc_clock::time_point utcTime);
+}; // namespace timer

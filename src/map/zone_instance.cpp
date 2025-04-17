@@ -157,7 +157,7 @@ void CZoneInstance::DecreaseZoneCounter(CCharEntity* PChar)
         {
             if (!(PInstance->Failed() || PInstance->Completed()))
             {
-                PInstance->SetWipeTime(PInstance->GetElapsedTime(timing_clock::now()));
+                PInstance->SetWipeTime(PInstance->GetElapsedTime(timer::clock::now()));
             }
         }
     }
@@ -382,7 +382,7 @@ void CZoneInstance::WideScan(CCharEntity* PChar, uint16 radius)
     }
 }
 
-void CZoneInstance::ZoneServer(timing_clock::time_point tick)
+void CZoneInstance::ZoneServer(timer::time_point tick)
 {
     TracyZoneScoped;
 

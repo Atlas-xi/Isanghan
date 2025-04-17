@@ -31,9 +31,9 @@ public:
     CSynthState(CCharEntity* PChar, SKILLTYPE skill);
 
     // state logic done per tick - returns whether to exit the state or not
-    virtual bool Update(timing_clock::time_point tick) override;
+    virtual bool Update(timer::time_point tick) override;
 
-    virtual void Cleanup(timing_clock::time_point tick) override;
+    virtual void Cleanup(timer::time_point tick) override;
     // whether the state can be changed by normal means
     virtual bool CanChangeState() override
     {
@@ -55,8 +55,8 @@ protected:
     bool SynthReady();
 
 private:
-    CCharEntity* const     m_PEntity;
-    timing_clock::duration m_synthFinishTime{ 16s };
+    CCharEntity* const m_PEntity;
+    timer::duration    m_synthFinishTime{ 16s };
 };
 
 #endif

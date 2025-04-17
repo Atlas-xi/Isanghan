@@ -55,14 +55,14 @@ void CState::Complete()
     m_completed = true;
 }
 
-timing_clock::time_point CState::GetEntryTime() const
+timer::time_point CState::GetEntryTime() const
 {
     return m_entryTime;
 }
 
 void CState::ResetEntryTime()
 {
-    m_entryTime = timing_clock::now();
+    m_entryTime = timer::clock::now();
 }
 
 void CState::SetTarget(uint16 _targid)
@@ -91,7 +91,7 @@ auto CState::GetErrorMsg() -> std::unique_ptr<CBasicPacket>
     return std::unique_ptr<CBasicPacket>();
 }
 
-bool CState::DoUpdate(timing_clock::time_point tick)
+bool CState::DoUpdate(timer::time_point tick)
 {
     UpdateTarget(m_targid);
     return Update(tick);

@@ -23,7 +23,6 @@
 
 #include "common/logging.h"
 #include "common/task_manager.h"
-#include "common/timer.h"
 #include "common/tracy.h"
 #include "common/utils.h"
 
@@ -84,13 +83,13 @@ void CTaskManager::RemoveTask(std::string const& TaskName)
     m_TaskList = newPq;
 }
 
-timing_clock::duration CTaskManager::doExpiredTasks(timing_clock::time_point tick) // tick is normally timing_clock::now()
+timer::duration CTaskManager::doExpiredTasks(timer::time_point tick) // tick is normally timer::clock::now()
 {
     TracyZoneScoped;
 
-    const auto start = timing_clock::now();
+    const auto start = timer::clock::now();
 
-    timing_clock::duration diff = 1s;
+    timer::duration diff = 1s;
     while (!m_TaskList.empty())
     {
         CTask* PTask = m_TaskList.top();
@@ -128,5 +127,5 @@ timing_clock::duration CTaskManager::doExpiredTasks(timing_clock::time_point tic
     }
 
     // We clamp with a minimum to ensure that the network phase doesn't starve
-    return std::clamp<timing_clock::duration>(timing_clock::now() - start, 50ms, 1000ms);
+    return std::clamp<timer::duration>(timer::clock::now() - start, 50ms, 1000ms);
 }

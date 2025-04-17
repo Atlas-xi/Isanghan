@@ -171,7 +171,7 @@ void CItemState::UpdateTarget(uint16 targid)
     }
 }
 
-bool CItemState::Update(timing_clock::time_point tick)
+bool CItemState::Update(timer::time_point tick)
 {
     if (tick > GetEntryTime() + m_castTime && !IsCompleted())
     {
@@ -205,7 +205,7 @@ bool CItemState::Update(timing_clock::time_point tick)
     return false;
 }
 
-void CItemState::Cleanup(timing_clock::time_point tick)
+void CItemState::Cleanup(timer::time_point tick)
 {
     m_PEntity->UContainer->Clean();
 

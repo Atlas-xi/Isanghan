@@ -24,6 +24,7 @@
 
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
+#include "common/timer.h"
 #include <functional>
 #include <memory>
 #include <queue>
@@ -36,11 +37,11 @@ struct queueAction_t
 {
     using EntityFunc_t = std::function<void(CBaseEntity*)>;
 
-    timing_clock::time_point start_time{ timing_clock::now() };
-    timing_clock::duration   delay{ 0ms };
-    bool                     checkState{ false };
-    sol::function            lua_func{};
-    EntityFunc_t             func{};
+    timer::time_point start_time{ timer::clock::now() };
+    timer::duration   delay{ 0ms };
+    bool              checkState{ false };
+    sol::function     lua_func{};
+    EntityFunc_t      func{};
 
     queueAction_t(int _ms, bool _checkstate, sol::function _lua_func)
     : delay(std::chrono::milliseconds(_ms))
@@ -49,7 +50,7 @@ struct queueAction_t
     {
     }
 
-    queueAction_t(timing_clock::duration _ms, bool _checkstate, std::function<void(CBaseEntity*)> _func)
+    queueAction_t(timer::duration _ms, bool _checkstate, std::function<void(CBaseEntity*)> _func)
     : delay(_ms)
     , checkState(_checkstate)
     , func(_func)
@@ -80,7 +81,7 @@ public:
     CAIActionQueue(CBaseEntity*);
 
     void pushAction(queueAction_t&&);
-    void checkAction(timing_clock::time_point tick);
+    void checkAction(timer::time_point tick);
 
     void handleAction(queueAction_t& action);
 

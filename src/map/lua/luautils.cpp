@@ -26,6 +26,7 @@
 #include "common/ipc.h"
 #include "common/logging.h"
 #include "common/settings.h"
+#include "common/timer.h"
 #include "common/utils.h"
 #include "common/vana_time.h"
 #include "common/version.h"
@@ -3172,7 +3173,7 @@ namespace luautils
         }
 
         auto name    = PBattlefield->GetName();
-        auto seconds = std::chrono::duration_cast<std::chrono::seconds>(PBattlefield->GetTimeInside()).count();
+        auto seconds = timer::getSeconds(PBattlefield->GetTimeInside());
 
         if (invokeBattlefieldEvent(PBattlefield->GetID(), "onBattlefieldTick", PBattlefield, seconds) == 0)
         {

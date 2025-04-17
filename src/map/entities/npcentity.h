@@ -43,7 +43,7 @@ public:
     bool         IsTriggerable() const;
     virtual bool isWideScannable() override;
     virtual void PostTick() override;
-    virtual void Tick(timing_clock::time_point) override
+    virtual void Tick(timer::time_point) override
     {
     }
 

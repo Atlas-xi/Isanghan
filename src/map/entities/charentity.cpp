@@ -190,7 +190,7 @@ CCharEntity::CCharEntity()
     m_hasArise           = false;
     m_LevelRestriction   = 0;
     m_lastBcnmTimePrompt = 0;
-    m_AHHistoryTimestamp = 0;
+    m_AHHistoryTimestamp = timer::time_point::min();
     m_DeathTimestamp     = 0;
 
     m_EquipFlag         = 0;
@@ -233,7 +233,7 @@ CCharEntity::CCharEntity()
     petZoningInfo.petID = 0;
 
     m_PlayTime    = 0;
-    m_SaveTime    = 0;
+    m_SaveTime    = timer::time_point::min();
     m_reloadParty = false;
 
     m_moghouseID     = 0;
@@ -604,7 +604,7 @@ void CCharEntity::resetPetZoningInfo()
     petZoningInfo.petMP        = 0;
     petZoningInfo.respawnPet   = false;
     petZoningInfo.petType      = PET_TYPE::AVATAR;
-    petZoningInfo.jugSpawnTime = timing_clock::time_point::min();
+    petZoningInfo.jugSpawnTime = timer::time_point::min();
     petZoningInfo.jugDuration  = 0;
 }
 
@@ -877,16 +877,16 @@ void CCharEntity::setBlockingAid(bool isBlockingAid)
 void CCharEntity::SetPlayTime(uint32 playTime)
 {
     m_PlayTime = playTime;
-    m_SaveTime = gettick() / 1000;
+    m_SaveTime = timer::clock::now();
 }
 
 uint32 CCharEntity::GetPlayTime(bool needUpdate)
 {
     if (needUpdate)
     {
-        uint32 currentTime = gettick() / 1000;
+        auto currentTime = timer::clock::now();
 
-        m_PlayTime += currentTime - m_SaveTime;
+        m_PlayTime += static_cast<uint32>(timer::getSeconds(currentTime - m_SaveTime));
         m_SaveTime = currentTime;
     }
 
@@ -1015,7 +1015,7 @@ bool CCharEntity::PersistData()
     return didPersist;
 }
 
-bool CCharEntity::PersistData(timing_clock::time_point tick)
+bool CCharEntity::PersistData(timer::time_point tick)
 {
     if (tick < nextDataPersistTime || !PersistData())
     {
@@ -1026,7 +1026,7 @@ bool CCharEntity::PersistData(timing_clock::time_point tick)
     return true;
 }
 
-void CCharEntity::Tick(timing_clock::time_point tick)
+void CCharEntity::Tick(timer::time_point tick)
 {
     TracyZoneScoped;
     CBattleEntity::Tick(tick);
@@ -1091,7 +1091,7 @@ void CCharEntity::PostTick()
         m_EffectsChanged = false;
     }
 
-    timing_clock::time_point now = timing_clock::now();
+    timer::time_point now = timer::clock::now();
 
     if (updatemask && now > m_nextUpdateTimer)
     {
@@ -1271,7 +1271,7 @@ bool CCharEntity::OnAttack(CAttackState& state, action_t& action)
 {
     TracyZoneScoped;
     auto* controller{ static_cast<CPlayerController*>(PAI->GetController()) };
-    controller->setLastAttackTime(timing_clock::now());
+    controller->setLastAttackTime(timer::clock::now());
     auto ret = CBattleEntity::OnAttack(state, action);
 
     return ret;
@@ -2675,7 +2675,7 @@ void CCharEntity::Die()
     luautils::OnPlayerDeath(this);
 }
 
-void CCharEntity::Die(timing_clock::duration _duration)
+void CCharEntity::Die(timer::duration _duration)
 {
     TracyZoneScoped;
 
@@ -2694,7 +2694,7 @@ void CCharEntity::Die(timing_clock::duration _duration)
         m_weaknessLvl = 0;
     }
 
-    m_deathSyncTime = timing_clock::now() + death_update_frequency;
+    m_deathSyncTime = timer::clock::now() + death_update_frequency;
     PAI->ClearStateStack();
     PAI->Internal_Die(_duration);
 

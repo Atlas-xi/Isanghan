@@ -52,34 +52,34 @@ public:
     CPetEntity(PET_TYPE petType);
     ~CPetEntity();
 
-    PET_TYPE                 getPetType();
-    uint8                    getSpawnLevel();
-    void                     setSpawnLevel(uint8 level);
-    timing_clock::time_point getJugSpawnTime();              // initial spawn time of this pet if it's a jug pet
-    uint32                   getJugDuration();               // duration of this jug pet in seconds
-    void                     setJugDuration(uint32 seconds); // sets the duration of this jug pet in seconds
-    bool                     isBstPet();
-    uint32                   m_PetID;
-    const std::string        GetScriptName();
-    WYVERN_TYPE              getWyvernType();
-    virtual void             PostTick() override;
-    virtual void             FadeOut() override;
-    virtual void             Die() override;
-    virtual void             Spawn() override;
-    bool                     shouldPersistThroughZone(); // if true, zoning should not cause a currently active pet to despawn
-    void                     loadPetZoningInfo();        // loads info from previous zone (hp / mp / tp / spawn time). This MUST be called after Spawn()
-    virtual void             OnAbility(CAbilityState&, action_t&) override;
-    virtual bool             ValidTarget(CBattleEntity* PInitiator, uint16 targetFlags) override;
-    void                     OnPetSkillFinished(CPetSkillState& state, action_t& action);
-    virtual bool             CanAttack(CBattleEntity* PTarget, std::unique_ptr<CBasicPacket>& errMsg) override;
+    PET_TYPE          getPetType();
+    uint8             getSpawnLevel();
+    void              setSpawnLevel(uint8 level);
+    timer::time_point getJugSpawnTime();              // initial spawn time of this pet if it's a jug pet
+    uint32            getJugDuration();               // duration of this jug pet in seconds
+    void              setJugDuration(uint32 seconds); // sets the duration of this jug pet in seconds
+    bool              isBstPet();
+    uint32            m_PetID;
+    const std::string GetScriptName();
+    WYVERN_TYPE       getWyvernType();
+    virtual void      PostTick() override;
+    virtual void      FadeOut() override;
+    virtual void      Die() override;
+    virtual void      Spawn() override;
+    bool              shouldPersistThroughZone(); // if true, zoning should not cause a currently active pet to despawn
+    void              loadPetZoningInfo();        // loads info from previous zone (hp / mp / tp / spawn time). This MUST be called after Spawn()
+    virtual void      OnAbility(CAbilityState&, action_t&) override;
+    virtual bool      ValidTarget(CBattleEntity* PInitiator, uint16 targetFlags) override;
+    void              OnPetSkillFinished(CPetSkillState& state, action_t& action);
+    virtual bool      CanAttack(CBattleEntity* PTarget, std::unique_ptr<CBasicPacket>& errMsg) override;
 
 private:
-    PET_TYPE                 m_PetType;      // the type of pet e.g. avatar/wyvern/jugpet etc
-    uint8                    m_spawnLevel;   // The level the pet was spawned at
-    timing_clock::time_point m_jugSpawnTime; // original spawn time of a jug pet
-    timing_clock::duration   m_jugDuration;  // Time before the jug is despawned after being called
+    PET_TYPE          m_PetType;      // the type of pet e.g. avatar/wyvern/jugpet etc
+    uint8             m_spawnLevel;   // The level the pet was spawned at
+    timer::time_point m_jugSpawnTime; // original spawn time of a jug pet
+    timer::duration   m_jugDuration;  // Time before the jug is despawned after being called
 
-    void setJugSpawnTime(timing_clock::time_point spawnTime); // sets the initial spawn time of this pet
+    void setJugSpawnTime(timer::time_point spawnTime); // sets the initial spawn time of this pet
 };
 
 #endif

@@ -54,7 +54,7 @@ CBattlefieldHandler::CBattlefieldHandler(CZone* PZone)
 {
 }
 
-void CBattlefieldHandler::HandleBattlefields(timing_clock::time_point tick)
+void CBattlefieldHandler::HandleBattlefields(timer::time_point tick)
 {
     TracyZoneScoped;
     // todo: use raw pointers otherwise might be harming lua
@@ -317,6 +317,6 @@ uint8 CBattlefieldHandler::MaxBattlefieldAreas() const
 
 void CBattlefieldHandler::addOrphanedPlayer(CCharEntity* PChar)
 {
-    auto orphan = std::make_pair(PChar->id, timing_clock::now() + 5s);
+    auto orphan = std::make_pair(PChar->id, timer::clock::now() + 5s);
     m_orphanedPlayers.emplace_back(orphan);
 }

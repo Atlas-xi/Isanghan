@@ -37,16 +37,16 @@
 #include "utils/moduleutils.h"
 #include "utils/zoneutils.h"
 
-int32 time_server(timing_clock::time_point tick, CTaskManager::CTask* PTask)
+int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 {
     TracyZoneScoped;
     TIMETYPE VanadielTOTD = CVanaTime::getInstance()->SyncTime();
     // uint8 WeekDay = (uint8)CVanaTime::getInstance()->getWeekday();
 
     // Weekly update for conquest (sunday at midnight)
-    static timing_clock::time_point lastConquestTally  = tick - 1h;
-    static timing_clock::time_point lastConquestUpdate = tick - 1h;
-    static timing_clock::time_point lastZnmPriceDecay  = tick - 1h;
+    static timer::time_point lastConquestTally  = tick - 1h;
+    static timer::time_point lastConquestUpdate = tick - 1h;
+    static timer::time_point lastZnmPriceDecay  = tick - 1h;
 
     if (CVanaTime::getInstance()->getJstWeekDay() == 1 && CVanaTime::getInstance()->getJstHour() == 0 && CVanaTime::getInstance()->getJstMinute() == 0)
     {
@@ -78,7 +78,7 @@ int32 time_server(timing_clock::time_point tick, CTaskManager::CTask* PTask)
     }
 
     // Vanadiel Hour
-    static timing_clock::time_point lastVHourlyUpdate = tick - 4800ms;
+    static timer::time_point lastVHourlyUpdate = tick - 4800ms;
     if (CVanaTime::getInstance()->getMinute() == 0)
     {
         if (tick > (lastVHourlyUpdate + 4800ms))
@@ -100,7 +100,7 @@ int32 time_server(timing_clock::time_point tick, CTaskManager::CTask* PTask)
     }
 
     // JST Midnight
-    static timing_clock::time_point lastTickedJstMidnight = tick - 1h;
+    static timer::time_point lastTickedJstMidnight = tick - 1h;
     if (CVanaTime::getInstance()->getJstHour() == 0 && CVanaTime::getInstance()->getJstMinute() == 0)
     {
         if (tick > (lastTickedJstMidnight + 1h))
@@ -118,7 +118,7 @@ int32 time_server(timing_clock::time_point tick, CTaskManager::CTask* PTask)
     }
 
     // 4-hour RoE Timed blocks
-    static timing_clock::time_point lastTickedRoeBlock = tick - 1h;
+    static timer::time_point lastTickedRoeBlock = tick - 1h;
     if (CVanaTime::getInstance()->getJstHour() % 4 == 0 && CVanaTime::getInstance()->getJstMinute() == 0)
     {
         if (tick > (lastTickedRoeBlock + 1h))
@@ -129,7 +129,7 @@ int32 time_server(timing_clock::time_point tick, CTaskManager::CTask* PTask)
     }
 
     // Vanadiel Day
-    static timing_clock::time_point lastVDailyUpdate = tick - 4800ms;
+    static timer::time_point lastVDailyUpdate = tick - 4800ms;
     if (CVanaTime::getInstance()->getHour() == 0 && CVanaTime::getInstance()->getMinute() == 0)
     {
         TracyZoneScoped;

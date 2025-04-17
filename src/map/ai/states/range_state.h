@@ -46,18 +46,18 @@ protected:
     {
         return true;
     }
-    virtual bool Update(timing_clock::time_point tick) override;
-    virtual void Cleanup(timing_clock::time_point tick) override;
+    virtual bool Update(timer::time_point tick) override;
+    virtual void Cleanup(timer::time_point tick) override;
     bool         CanUseRangedAttack(CBattleEntity* PTarget, bool isEndOfAttack);
     bool         HasMoved();
 
 private:
-    CBattleEntity* const         m_PEntity;
-    timing_clock::duration       m_aimTime{};                                           // The calculated "phase 1" delay based on weapon and job trait reductions
-    const timing_clock::duration m_returnWeaponDelay = std::chrono::milliseconds(1000); // Phase 2: Putting the weapon back after a shot (time between shot and being able to move)
-    const timing_clock::duration m_freePhaseTime     = std::chrono::milliseconds(1100); // Phase 3: The cooldown after a ranged attack is executed. (time after being able to move befer you stop getting "you must wait longer" when attempting to Range Attack again)
-    bool                         m_rapidShot{ false };
-    position_t                   m_startPos;
+    CBattleEntity* const  m_PEntity;
+    timer::duration       m_aimTime{};                                           // The calculated "phase 1" delay based on weapon and job trait reductions
+    const timer::duration m_returnWeaponDelay = std::chrono::milliseconds(1000); // Phase 2: Putting the weapon back after a shot (time between shot and being able to move)
+    const timer::duration m_freePhaseTime     = std::chrono::milliseconds(1100); // Phase 3: The cooldown after a ranged attack is executed. (time after being able to move befer you stop getting "you must wait longer" when attempting to Range Attack again)
+    bool                  m_rapidShot{ false };
+    position_t            m_startPos;
 };
 
 #endif

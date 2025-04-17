@@ -78,7 +78,7 @@ uint32 CLuaStatusEffect::getDuration()
 
 uint32 CLuaStatusEffect::getStartTime()
 {
-    return (uint32)std::chrono::duration_cast<std::chrono::milliseconds>(m_PLuaStatusEffect->GetStartTime() - get_server_start_time()).count();
+    return static_cast<uint32>(timer::getMilliseconds(m_PLuaStatusEffect->GetStartTime() - timer::getStartTime()));
 }
 
 /************************************************************************
@@ -112,8 +112,8 @@ uint32 CLuaStatusEffect::getTimeRemaining()
     uint32 remaining = 0;
     if (m_PLuaStatusEffect->GetDuration() > 0)
     {
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timing_clock::now() - m_PLuaStatusEffect->GetStartTime()).count();
-        remaining     = (uint32)std::max(m_PLuaStatusEffect->GetDuration() - duration, std::chrono::seconds::rep{});
+        auto duration = timer::getMilliseconds(timer::clock::now() - m_PLuaStatusEffect->GetStartTime());
+        remaining     = static_cast<uint32>(std::max(m_PLuaStatusEffect->GetDuration() - duration, std::chrono::seconds::rep{}));
     }
 
     return remaining;
@@ -184,12 +184,12 @@ void CLuaStatusEffect::setTick(uint32 tick)
 
 void CLuaStatusEffect::resetStartTime()
 {
-    m_PLuaStatusEffect->SetStartTime(timing_clock::now());
+    m_PLuaStatusEffect->SetStartTime(timer::clock::now());
 }
 
 void CLuaStatusEffect::setStartTime(uint32 time)
 {
-    m_PLuaStatusEffect->SetStartTime(get_server_start_time() + std::chrono::milliseconds(time));
+    m_PLuaStatusEffect->SetStartTime(timer::getStartTime() + std::chrono::milliseconds(time));
 }
 
 //======================================================//

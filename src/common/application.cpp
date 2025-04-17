@@ -100,7 +100,7 @@ Application::Application(std::string const& serverName, int argc, char** argv)
 
     // TODO: How much of this interferes with the signal handler in here?
     debug::init();
-    timer_init();
+    timer::init();
 
     lua_init();
     settings::init();

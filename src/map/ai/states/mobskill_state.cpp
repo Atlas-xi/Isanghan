@@ -117,7 +117,7 @@ void CMobSkillState::SpendCost()
     }
 }
 
-bool CMobSkillState::Update(timing_clock::time_point tick)
+bool CMobSkillState::Update(timer::time_point tick)
 {
     // Rotate towards target during ability // TODO : add force param to turnTowardsTarget on certain TP moves like Petro Eyes
     if (m_castTime > 0s && tick < GetEntryTime() + m_castTime)
@@ -164,7 +164,7 @@ bool CMobSkillState::Update(timing_clock::time_point tick)
     return false;
 }
 
-void CMobSkillState::Cleanup(timing_clock::time_point tick)
+void CMobSkillState::Cleanup(timer::time_point tick)
 {
     if (m_PEntity && m_PEntity->isAlive() && !IsCompleted())
     {

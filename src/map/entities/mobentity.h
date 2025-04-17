@@ -125,13 +125,13 @@ public:
 
     uint16 TPUseChance(); // return % chance to use TP move per 400ms tick
 
-    bool                     CanDeaggro() const;
-    timing_clock::time_point GetDespawnTime();
-    void                     SetDespawnTime(timing_clock::duration _duration);
-    uint32                   GetRandomGil();   // returns a random amount of gil
-    bool                     CanRoamHome();    // is it possible for me to walk back?
-    bool                     CanRoam();        // check if mob can walk around
-    void                     TapDeaggroTime(); // call CMobController->TapDeaggroTime if PAI->GetController() is a CMobController, otherwise do nothing.
+    bool              CanDeaggro() const;
+    timer::time_point GetDespawnTime();
+    void              SetDespawnTime(timer::duration _duration);
+    uint32            GetRandomGil();   // returns a random amount of gil
+    bool              CanRoamHome();    // is it possible for me to walk back?
+    bool              CanRoam();        // check if mob can walk around
+    void              TapDeaggroTime(); // call CMobController->TapDeaggroTime if PAI->GetController() is a CMobController, otherwise do nothing.
 
     bool CanLink(position_t* pos, int16 superLink = 0);
 
@@ -275,7 +275,7 @@ protected:
     void DropItems(CCharEntity* PChar);
 
 private:
-    timing_clock::time_point       m_DespawnTimer{ timing_clock::time_point::min() }; // Despawn Timer to despawn mob after set duration
+    timer::time_point              m_DespawnTimer{ timer::time_point::min() }; // Despawn Timer to despawn mob after set duration
     std::unordered_map<int, int16> m_mobModStat;
     std::unordered_map<int, int16> m_mobModStatSave;
     static constexpr float         roam_home_distance{ 60.f };

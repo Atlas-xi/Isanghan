@@ -129,7 +129,7 @@ bool CRangeState::CanChangeState()
     return false;
 }
 
-bool CRangeState::Update(timing_clock::time_point tick)
+bool CRangeState::Update(timer::time_point tick)
 {
     if (m_PEntity && m_PEntity->isAlive() && (tick > GetEntryTime() + m_aimTime && !IsCompleted()))
     {
@@ -187,7 +187,7 @@ bool CRangeState::Update(timing_clock::time_point tick)
     return false;
 }
 
-void CRangeState::Cleanup(timing_clock::time_point tick)
+void CRangeState::Cleanup(timer::time_point tick)
 {
 }
 

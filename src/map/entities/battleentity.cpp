@@ -2319,7 +2319,7 @@ bool CBattleEntity::OnAttack(CAttackState& state, action_t& action)
     }
 
     battleutils::ClaimMob(PTarget, this); // Mobs get claimed whether or not your attack actually is intimidated/paralyzed
-    PTarget->LastAttacked = timing_clock::now();
+    PTarget->LastAttacked = timer::clock::now();
 
     if (battleutils::IsParalyzed(this))
     {
@@ -2699,14 +2699,14 @@ void CBattleEntity::OnDespawn(CDespawnState& /*unused*/)
     PAI->Internal_Respawn(0s);
 }
 
-void CBattleEntity::SetBattleStartTime(timing_clock::time_point time)
+void CBattleEntity::SetBattleStartTime(timer::time_point time)
 {
     m_battleStartTime = time;
 }
 
-timing_clock::duration CBattleEntity::GetBattleTime()
+timer::duration CBattleEntity::GetBattleTime()
 {
-    return timing_clock::now() - m_battleStartTime;
+    return timer::clock::now() - m_battleStartTime;
 }
 
 void CBattleEntity::setBattleID(uint16 battleID)
@@ -2719,7 +2719,7 @@ uint16 CBattleEntity::getBattleID()
     return m_battleID;
 }
 
-void CBattleEntity::Tick(timing_clock::time_point /*unused*/)
+void CBattleEntity::Tick(timer::time_point /*unused*/)
 {
     TracyZoneScoped;
 }

@@ -706,7 +706,7 @@ namespace charutils
                 PChar->petZoningInfo.petLevel     = rset->get<uint8>("pet_level");
                 PChar->petZoningInfo.respawnPet   = true;
                 auto jugTimestamp                 = static_cast<uint32>(PChar->getCharVar("jugpet-spawn-time"));
-                PChar->petZoningInfo.jugSpawnTime = convertTimeWallToTiming(wall_clock::time_point(std::chrono::seconds(jugTimestamp)));
+                PChar->petZoningInfo.jugSpawnTime = timer::fromUtc(utc_clock::time_point(std::chrono::seconds(jugTimestamp)));
                 PChar->petZoningInfo.jugDuration  = static_cast<uint32>(PChar->getCharVar("jugpet-duration-seconds"));
 
                 // clear the charvars used for jug state
@@ -4391,7 +4391,7 @@ namespace charutils
 
                     if (mobCheck > EMobDifficulty::DecentChallenge)
                     {
-                        if (PMember->expChain.chainTime > gettick() || PMember->expChain.chainTime == 0)
+                        if (PMember->expChain.chainTime > timer::clock::now() || PMember->expChain.chainTime == timer::time_point::min())
                         {
                             chainactive = true;
                             switch (PMember->expChain.chainNumber)
@@ -4423,31 +4423,31 @@ namespace charutils
                         {
                             if (PMember->GetMLevel() <= 10)
                             {
-                                PMember->expChain.chainTime = gettick() + 50000;
+                                PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(50);
                             }
                             else if (PMember->GetMLevel() <= 20)
                             {
-                                PMember->expChain.chainTime = gettick() + 100000;
+                                PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(100);
                             }
                             else if (PMember->GetMLevel() <= 30)
                             {
-                                PMember->expChain.chainTime = gettick() + 150000;
+                                PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(150);
                             }
                             else if (PMember->GetMLevel() <= 40)
                             {
-                                PMember->expChain.chainTime = gettick() + 200000;
+                                PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(200);
                             }
                             else if (PMember->GetMLevel() <= 50)
                             {
-                                PMember->expChain.chainTime = gettick() + 250000;
+                                PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(250);
                             }
                             else if (PMember->GetMLevel() <= 60)
                             {
-                                PMember->expChain.chainTime = gettick() + 300000;
+                                PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(300);
                             }
                             else
                             {
-                                PMember->expChain.chainTime = gettick() + 360000;
+                                PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(360);
                             }
                             PMember->expChain.chainNumber = 1;
                         }
@@ -4457,25 +4457,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 50000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(50);
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 40000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(40);
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 30000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(30);
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 20000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(20);
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 10000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(10);
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 6000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(6);
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 2000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(2);
                                     break;
                             }
                         }
@@ -4484,25 +4484,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 100000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(100);
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 80000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(80);
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(60);
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 40000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(40);
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 20000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(20);
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 8000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(8);
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 4000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(4);
                                     break;
                             }
                         }
@@ -4511,25 +4511,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 150000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(150);
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 120000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(120);
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 90000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(90);
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(60);
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 30000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(30);
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 10000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(10);
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 5000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(5);
                                     break;
                             }
                         }
@@ -4538,25 +4538,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 200000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(200);
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 160000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(160);
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 120000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(120);
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 80000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(80);
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 40000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(40);
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 40000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(40);
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 30000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(30);
                                     break;
                             }
                         }
@@ -4565,25 +4565,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 250000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(250);
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 200000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(200);
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 150000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(150);
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 100000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(100);
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 50000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(50);
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 50000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(50);
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 50000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(50);
                                     break;
                             }
                         }
@@ -4592,25 +4592,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 300000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(300);
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 240000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(240);
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 180000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(180);
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 120000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(120);
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 90000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(90);
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(60);
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(60);
                                     break;
                             }
                         }
@@ -4619,25 +4619,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 360000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(360);
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 300000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(300);
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 240000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(240);
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 165000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(165);
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 105000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(105);
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(60);
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::clock::now() + std::chrono::seconds(60);
                                     break;
                             }
                         }
@@ -4702,7 +4702,7 @@ namespace charutils
                 // https://ffxiclopedia.fandom.com/wiki/Job_Points#Capacity_Points
                 capacityPoints = 0.0089 * std::pow(levelDiff, 3) + 0.0533 * std::pow(levelDiff, 2) + 3.7439 * levelDiff + 89.7;
 
-                if (PMember->capacityChain.chainTime > gettick() || PMember->capacityChain.chainTime == 0)
+                if (PMember->capacityChain.chainTime > timer::clock::now() || PMember->capacityChain.chainTime == timer::time_point::min())
                 {
                     chainActive = true;
 
@@ -4714,13 +4714,13 @@ namespace charutils
                 else
                 {
                     // TODO: Capacity Chain Timer is reduced after Chain 30
-                    PMember->capacityChain.chainTime   = gettick() + 30000;
+                    PMember->capacityChain.chainTime   = timer::clock::now() + std::chrono::seconds(30);
                     PMember->capacityChain.chainNumber = 1;
                 }
 
                 if (chainActive)
                 {
-                    PMember->capacityChain.chainTime = gettick() + 30000;
+                    PMember->capacityChain.chainTime = timer::clock::now() + std::chrono::seconds(30);
                 }
 
                 capacityPoints = AddCapacityBonus(PMember, capacityPoints);
@@ -5512,7 +5512,7 @@ namespace charutils
 
         // These two are jug only variables. We should probably move pet char stats into its own table, but in the meantime
         // we use charvars for jug specific things
-        auto jugTimestamp = std::chrono::time_point_cast<std::chrono::seconds>(convertTimeTimingToWall(PChar->petZoningInfo.jugSpawnTime)).time_since_epoch().count();
+        auto jugTimestamp = std::chrono::time_point_cast<std::chrono::seconds>(timer::toUtc(PChar->petZoningInfo.jugSpawnTime)).time_since_epoch().count();
         PChar->setCharVar("jugpet-spawn-time", jugTimestamp);
         PChar->setCharVar("jugpet-duration-seconds", static_cast<int32>(PChar->petZoningInfo.jugDuration));
     }
@@ -6887,9 +6887,9 @@ namespace charutils
         PChar->pushPacket<CObjectiveUtilityPacket>(seconds);
     }
 
-    void SendTimerPacket(CCharEntity* PChar, timing_clock::duration dur)
+    void SendTimerPacket(CCharEntity* PChar, timer::duration dur)
     {
-        auto timeLimitSeconds = static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(dur).count());
+        auto timeLimitSeconds = static_cast<uint32>(timer::getSeconds(dur));
         SendTimerPacket(PChar, timeLimitSeconds);
     }
 

@@ -98,7 +98,7 @@ void CPetSkillState::SpendCost()
     }
 }
 
-bool CPetSkillState::Update(timing_clock::time_point tick)
+bool CPetSkillState::Update(timer::time_point tick)
 {
     if (m_PEntity && m_PEntity->isAlive() && (tick > GetEntryTime() + m_castTime && !IsCompleted()))
     {
@@ -135,7 +135,7 @@ bool CPetSkillState::Update(timing_clock::time_point tick)
     return false;
 }
 
-void CPetSkillState::Cleanup(timing_clock::time_point tick)
+void CPetSkillState::Cleanup(timer::time_point tick)
 {
     if (m_PEntity && m_PEntity->isAlive() && !IsCompleted())
     {

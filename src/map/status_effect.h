@@ -793,11 +793,11 @@ public:
     uint16           GetEffectType() const;
     uint8            GetEffectSlot() const;
 
-    uint32                   GetTickTime() const;
-    uint32                   GetDuration() const;
-    int                      GetElapsedTickCount() const;
-    timing_clock::time_point GetStartTime();
-    CBattleEntity*           GetOwner();
+    uint32            GetTickTime() const;
+    uint32            GetDuration() const;
+    int               GetElapsedTickCount() const;
+    timer::time_point GetStartTime();
+    CBattleEntity*    GetOwner();
 
     void SetEffectFlags(uint32 Flags);
     void AddEffectFlag(uint32 Flag);
@@ -815,7 +815,7 @@ public:
     void SetTickTime(uint32 tick);
 
     void IncrementElapsedTickCount();
-    void SetStartTime(timing_clock::time_point StartTime);
+    void SetStartTime(timer::time_point StartTime);
 
     void addMod(Mod modType, int16 amount);
     void setMod(Mod modType, int16 value);
@@ -846,10 +846,10 @@ private:
     uint16           m_Type{ 0 };                                   // Used to enforce only one
     uint8            m_Slot{ 0 };                                   // Used to determine slot order for songs/rolls
 
-    uint32                   m_TickTime{ 0 };  // Effect repetition time (ms)
-    uint32                   m_Duration{ 0 };  // Duration of effect (ms)
-    timing_clock::time_point m_StartTime;      // Time to obtain effect (ms)
-    int                      m_tickCount{ 0 }; // Time of last effect execution (ms)
+    uint32            m_TickTime{ 0 };  // Effect repetition time (ms)
+    uint32            m_Duration{ 0 };  // Duration of effect (ms)
+    timer::time_point m_StartTime;      // Time to obtain effect (ms)
+    int               m_tickCount{ 0 }; // Time of last effect execution (ms)
 
     std::string m_Name; // Effect name for scripts
 };

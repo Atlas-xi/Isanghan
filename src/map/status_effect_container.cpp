@@ -183,7 +183,7 @@ bool statusOrdering(CStatusEffect* AStatus, CStatusEffect* BStatus)
     // Sort by start time
     if (isSortedByStartTime(AStatus->GetStatusID()) && isSortedByStartTime(BStatus->GetStatusID()))
     {
-        auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(AStatus->GetStartTime() - BStatus->GetStartTime()).count();
+        auto diff = timer::getMilliseconds(AStatus->GetStartTime() - BStatus->GetStartTime());
         if (diff != 0)
         {
             return diff > 0;
@@ -509,7 +509,7 @@ bool CStatusEffectContainer::AddStatusEffect(CStatusEffect* PStatusEffect, Effec
         // remove effects with same type
         DelStatusEffectsByType(PStatusEffect->GetEffectType());
 
-        PStatusEffect->SetStartTime(timing_clock::now());
+        PStatusEffect->SetStartTime(timer::clock::now());
 
         m_StatusEffectSet.insert(PStatusEffect);
 
@@ -1640,11 +1640,11 @@ void CStatusEffectContainer::LoadStatusEffects()
             if (flags & EFFECTFLAG_OFFLINE_TICK)
             {
                 auto timestamp = rset->get<uint32>("timestamp");
-                auto startTime = wall_clock::time_point(std::chrono::seconds(timestamp));
+                auto startTime = utc_clock::time_point(std::chrono::seconds(timestamp));
                 auto endTime   = startTime + std::chrono::seconds(duration);
-                if (wall_clock::now() < endTime)
+                if (utc_clock::now() < endTime)
                 {
-                    duration = static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(endTime - wall_clock::now()).count());
+                    duration = static_cast<uint32>(timer::getSeconds(endTime - utc_clock::now()));
                 }
                 else if (effectID == EFFECT::EFFECT_VISITANT)
                 {
@@ -1722,7 +1722,7 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
             continue;
         }
 
-        auto realduration = std::chrono::milliseconds(PStatusEffect->GetDuration()) + PStatusEffect->GetStartTime() - timing_clock::now();
+        auto realduration = std::chrono::milliseconds(PStatusEffect->GetDuration()) + PStatusEffect->GetStartTime() - timer::clock::now();
 
         if (realduration > 0s || PStatusEffect->GetDuration() == 0)
         {
@@ -1754,7 +1754,7 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
                 }
                 else
                 {
-                    auto seconds = (uint32)std::chrono::duration_cast<std::chrono::seconds>(realduration).count();
+                    auto seconds = static_cast<uint32>(timer::getSeconds(realduration));
 
                     if (seconds > 0)
                     {
@@ -1766,7 +1766,7 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
                     }
                 }
             }
-            auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(convertTimeTimingToWall(PStatusEffect->GetStartTime())).time_since_epoch().count();
+            auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(timer::toUtc(PStatusEffect->GetStartTime())).time_since_epoch().count();
             _sql->Query(Query, m_POwner->id, PStatusEffect->GetStatusID(), PStatusEffect->GetIcon(), PStatusEffect->GetPower(), tick, duration,
                         PStatusEffect->GetSubID(), PStatusEffect->GetSubPower(), PStatusEffect->GetTier(), PStatusEffect->GetEffectFlags(),
                         timestamp);
@@ -1781,7 +1781,7 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
  *                                                                       *
  ************************************************************************/
 
-void CStatusEffectContainer::CheckEffectsExpiry(timing_clock::time_point tick)
+void CStatusEffectContainer::CheckEffectsExpiry(timer::time_point tick)
 {
     if (m_POwner == nullptr)
     {
@@ -1833,7 +1833,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
 
                     if (PEffect && (PEffect->GetEffectFlags() & EFFECTFLAG_ALWAYS_EXPIRING) != 0)
                     {
-                        PEffect->SetStartTime(timing_clock::now());
+                        PEffect->SetStartTime(timer::clock::now());
 
                         // Effect updated, probably from Ecliptic Attrition
                         // Update status effect with new potency.
@@ -1875,7 +1875,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
 
                     if (PEffect && (PEffect->GetEffectFlags() & EFFECTFLAG_ALWAYS_EXPIRING) != 0)
                     {
-                        PEffect->SetStartTime(timing_clock::now());
+                        PEffect->SetStartTime(timer::clock::now());
 
                         // Effect updated, probably from Ecliptic Attrition
                         // Update status effect with new potency.
@@ -1920,7 +1920,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
 
                     if (PEffect && (PEffect->GetEffectFlags() & EFFECTFLAG_ALWAYS_EXPIRING) != 0)
                     {
-                        PEffect->SetStartTime(timing_clock::now());
+                        PEffect->SetStartTime(timer::clock::now());
 
                         // Effect updated, probably from Ecliptic Attrition
                         // Update status effect with new potency.
@@ -1965,7 +1965,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
 
                     if (PEffect && (PEffect->GetEffectFlags() & EFFECTFLAG_ALWAYS_EXPIRING) != 0)
                     {
-                        PEffect->SetStartTime(timing_clock::now());
+                        PEffect->SetStartTime(timer::clock::now());
 
                         // Effect updated, probably from Ecliptic Attrition
                         // Update status effect with new potency.
@@ -2001,7 +2001,7 @@ void CStatusEffectContainer::HandleAura(CStatusEffect* PStatusEffect)
  *                                                                       *
  ************************************************************************/
 
-void CStatusEffectContainer::TickEffects(timing_clock::time_point tick)
+void CStatusEffectContainer::TickEffects(timer::time_point tick)
 {
     TracyZoneScoped;
 
@@ -2017,7 +2017,7 @@ void CStatusEffectContainer::TickEffects(timing_clock::time_point tick)
         {
             if (PStatusEffect->GetTickTime() != 0 &&
                 PStatusEffect->GetElapsedTickCount() <=
-                    std::chrono::duration_cast<std::chrono::milliseconds>(tick - PStatusEffect->GetStartTime()).count() / PStatusEffect->GetTickTime())
+                    timer::getMilliseconds(tick - PStatusEffect->GetStartTime()) / PStatusEffect->GetTickTime())
             {
                 if (PStatusEffect->HasEffectFlag(EFFECTFLAG_AURA))
                 {
@@ -2038,7 +2038,7 @@ void CStatusEffectContainer::TickEffects(timing_clock::time_point tick)
  *                                                                       *
  ************************************************************************/
 
-void CStatusEffectContainer::TickRegen(timing_clock::time_point tick)
+void CStatusEffectContainer::TickRegen(timer::time_point tick)
 {
     TracyZoneScoped;
 

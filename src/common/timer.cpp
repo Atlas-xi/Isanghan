@@ -19,171 +19,44 @@
 ===========================================================================
 */
 
-#include "common/timer.h"
-#include "common/logging.h"
-#include "common/utils.h"
+#include "timer.h"
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h> // GetTickCount()
-#else
-#include <sys/time.h> // struct timeval, gettimeofday()
-#include <unistd.h>
-#endif
-
-// server startup time
-timing_clock::time_point start_time;
-
-/*----------------------------
- *  Get tick time
- *----------------------------*/
-
-#if defined(ENABLE_RDTSC)
-static uint64 RDTSC_BEGINTICK = 0, RDTSC_CLOCK = 0;
-
-static __inline uint64 _rdtsc()
+namespace timer
 {
-    // clang-format off
-    register union
+    // server startup time
+    time_point start_time;
+
+    void init()
     {
-        uint64 qw;
-        uint32 dw[2];
-    } t;
-
-    asm volatile("rdtsc" : "=a"(t.dw[0]), "=d"(t.dw[1]));
-    // clang-format on
-
-    return t.qw;
-}
-
-static void rdtsc_calibrate()
-{
-    uint64 t1, t2;
-    int32  i;
-
-    ShowInfo("Calibrating Timer Source, please wait... ");
-
-    RDTSC_CLOCK = 0;
-
-    for (i = 0; i < 5; i++)
-    {
-        t1 = _rdtsc();
-        usleep(1000000); // 1000 MS
-        t2 = _rdtsc();
-        RDTSC_CLOCK += (t2 - t1) / 1000;
+        start_time = clock::now();
     }
-    RDTSC_CLOCK /= 5;
 
-    RDTSC_BEGINTICK = _rdtsc();
+    void final()
+    {
+    }
 
-    ShowInfo(" done. (Frequency: %u Mhz)", (uint32)(RDTSC_CLOCK / 1000));
-}
-#endif
+    time_point getStartTime()
+    {
+        return start_time;
+    }
 
-/// platform-abstracted tick retrieval
-static uint32 tick()
-{
-#if defined(WIN32)
-    return GetTickCount();
-#elif defined(ENABLE_RDTSC)
-    //
-    return (uint32)((_rdtsc() - RDTSC_BEGINTICK) / RDTSC_CLOCK);
-    //
-#elif (defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0 && defined(_POSIX_MONOTONIC_CLOCK) /* posix compliant */) || \
-    (defined(__FreeBSD_cc_version) && __FreeBSD_cc_version >= 500005 /* FreeBSD >= 5.1.0 */)
-    timespec tval{};
-    clock_gettime(CLOCK_MONOTONIC, &tval);
-    return tval.tv_sec * 1000 + tval.tv_nsec / 1000000;
-#else
-    timeval tval{};
-    gettimeofday(&tval, nullptr);
-    return tval.tv_sec * 1000 + tval.tv_usec / 1000;
-#endif
-}
+    duration getUptime()
+    {
+        return clock::now() - start_time;
+    }
 
-//////////////////////////////////////////////////////////////////////////
-#if defined(TICK_CACHE) && TICK_CACHE > 1
-//////////////////////////////////////////////////////////////////////////
-// tick is cached for TICK_CACHE calls
-static uint32 gettick_cache;
-static int32  gettick_count = 1;
+    // https://stackoverflow.com/questions/35282308/convert-between-c11-clocks/35282833#35282833
+    utc_clock::time_point toUtc(time_point timerTime)
+    {
+        auto utcNow   = utc_clock::now();
+        auto timerNow = clock::now();
+        return std::chrono::time_point_cast<utc_clock::duration>(timerTime - timerNow + utcNow);
+    };
 
-unsigned int gettick_nocache(void)
-{
-    gettick_count = TICK_CACHE;
-    gettick_cache = tick();
-    return gettick_cache;
-}
-
-unsigned int gettick(void)
-{
-    return (--gettick_count == 0) ? gettick_nocache() : gettick_cache;
-}
-//////////////////////////////
-#else
-//////////////////////////////
-// tick doesn't get cached
-uint32 gettick_nocache()
-{
-    return tick() + 100000000; // +27 hours for respawn
-}
-
-uint32 gettick()
-{
-    return tick() + 100000000; // +27 hours for respawn
-}
-//////////////////////////////////////////////////////////////////////////
-#endif
-/////////////////////////////////////////////////////////////////////////
-
-timing_clock::duration get_uptime()
-{
-    return timing_clock::now() - start_time;
-}
-
-void timer_init()
-{
-#if defined(ENABLE_RDTSC)
-    rdtsc_calibrate();
-#endif
-    start_time = timing_clock::now();
-}
-
-void timer_final()
-{
-}
-
-timing_clock::time_point get_server_start_time()
-{
-    return start_time;
-}
-
-uint32 getCurrentTimeMs()
-{
-    return std::chrono::duration_cast<std::chrono::milliseconds>(wall_clock::now().time_since_epoch()).count() % 1000;
-}
-
-auto getMilliseconds(const timing_clock::duration& d) -> int64
-{
-    return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
-};
-
-// https://stackoverflow.com/questions/35282308/convert-between-c11-clocks/35282833#35282833
-wall_clock::time_point convertTimeTimingToWall(timing_clock::time_point steadyTime)
-{
-    auto wallNow  = wall_clock::now();
-    auto timerNow = timing_clock::now();
-    return time_point_cast<wall_clock::duration>(steadyTime - timerNow + wallNow);
-};
-
-timing_clock::time_point convertTimeWallToTiming(wall_clock::time_point wallTime)
-{
-    auto timerNow = timing_clock::now();
-    auto wallNow  = wall_clock::now();
-    return wallTime - wallNow + timerNow;
-};
+    time_point fromUtc(utc_clock::time_point utcTime)
+    {
+        auto timerNow = clock::now();
+        auto utcNow   = utc_clock::now();
+        return utcTime - utcNow + timerNow;
+    };
+}; // namespace timer

@@ -88,9 +88,9 @@ public:
     void   RemoveAllStatusEffectsInIDRange(EFFECT start, EFFECT end);
 
     void UpdateStatusIcons(); // We recall the effects of the effects
-    void CheckEffectsExpiry(timing_clock::time_point tick);
-    void TickEffects(timing_clock::time_point tick);
-    void TickRegen(timing_clock::time_point tick);
+    void CheckEffectsExpiry(timer::time_point tick);
+    void TickEffects(timer::time_point tick);
+    void TickRegen(timer::time_point tick);
 
     void LoadStatusEffects();                    // We load the character effects
     void SaveStatusEffects(bool logout = false); // We keep the character effects

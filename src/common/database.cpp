@@ -26,6 +26,7 @@
 #include "macros.h"
 #include "settings.h"
 #include "task_manager.h"
+#include "timer.h"
 #include "utils.h"
 
 #include <chrono>
@@ -215,11 +216,11 @@ Synchronized<db::detail::State>& db::detail::getState()
 auto db::detail::timer(std::string const& query) -> xi::final_action<std::function<void()>>
 {
     // clang-format off
-    const auto start = timing_clock::now();
+    const auto start = timer::clock::now();
     return xi::finally<std::function<void()>>([query, start]() -> void
     {
-        const auto end      = timing_clock::now();
-        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        const auto end      = timer::clock::now();
+        const auto duration = timer::getMilliseconds(end - start);
         if (timersEnabled && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
         {
             if (duration > settings::get<uint32>("logging.SQL_SLOW_QUERY_ERROR_TIME"))

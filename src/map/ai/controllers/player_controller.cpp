@@ -41,7 +41,7 @@ CPlayerController::CPlayerController(CCharEntity* _PChar)
 {
 }
 
-void CPlayerController::Tick(timing_clock::time_point /*tick*/)
+void CPlayerController::Tick(timer::time_point /*tick*/)
 {
 }
 
@@ -74,7 +74,7 @@ bool CPlayerController::Engage(uint16 targid)
     {
         if (distance(PChar->loc.p, PTarget->loc.p) < 30)
         {
-            if (m_lastAttackTime + std::chrono::milliseconds(PChar->GetWeaponDelay(false)) < timing_clock::now())
+            if (m_lastAttackTime + std::chrono::milliseconds(PChar->GetWeaponDelay(false)) < timer::clock::now())
             {
                 if (CController::Engage(targid))
                 {
@@ -260,22 +260,22 @@ bool CPlayerController::WeaponSkill(uint16 targid, uint16 wsid)
     return false;
 }
 
-timing_clock::time_point CPlayerController::getLastAttackTime()
+timer::time_point CPlayerController::getLastAttackTime()
 {
     return m_lastAttackTime;
 }
 
-void CPlayerController::setLastAttackTime(timing_clock::time_point _lastAttackTime)
+void CPlayerController::setLastAttackTime(timer::time_point _lastAttackTime)
 {
     m_lastAttackTime = _lastAttackTime;
 }
 
-void CPlayerController::setLastErrMsgTime(timing_clock::time_point _LastErrMsgTime)
+void CPlayerController::setLastErrMsgTime(timer::time_point _LastErrMsgTime)
 {
     m_errMsgTime = _LastErrMsgTime;
 }
 
-timing_clock::time_point CPlayerController::getLastErrMsgTime()
+timer::time_point CPlayerController::getLastErrMsgTime()
 {
     return m_errMsgTime;
 }

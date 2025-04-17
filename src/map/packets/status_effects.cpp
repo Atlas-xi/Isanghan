@@ -47,7 +47,7 @@ CStatusEffectPacket::CStatusEffectPacket(CCharEntity* PChar)
                 PEffect->GetDuration() == 0 || (PEffect->HasEffectFlag(EFFECTFLAG_HIDE_TIMER))
                     ? 0x7FFFFFFF
                     : (((PEffect->GetDuration() -
-                         (uint32)std::chrono::duration_cast<std::chrono::milliseconds>(timing_clock::now() - PEffect->GetStartTime()).count()) /
+                         static_cast<uint32>(timer::getMilliseconds(timer::clock::now() - PEffect->GetStartTime()))) /
                         1000) +
                        CVanaTime::getInstance()->getVanaTime()) *
                           60;

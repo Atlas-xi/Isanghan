@@ -280,7 +280,7 @@ void CPathFind::PrunePathWithin(float within)
     }
 }
 
-void CPathFind::FollowPath(timing_clock::time_point tick)
+void CPathFind::FollowPath(timer::time_point tick)
 {
     TracyZoneScoped;
     if (!IsFollowingPath())

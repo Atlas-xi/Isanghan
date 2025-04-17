@@ -21,6 +21,8 @@
 
 #include "packet_guard.h"
 
+#include "common/timer.h"
+
 // #define PACKETGUARD_CAP_ENABLED 1
 
 #include <unordered_map> // Lookup
@@ -115,7 +117,7 @@ namespace PacketGuard
         using namespace std::chrono;
 
         double lastPacketRecievedTime = static_cast<double>(PChar->m_PacketRecievedTimestamps[SmallPD_Type]);
-        double timeNowSeconds         = static_cast<double>(time_point_cast<seconds>(timing_clock::now()).time_since_epoch().count());
+        double timeNowSeconds         = static_cast<double>(timer::getSeconds(timer::clock::now().time_since_epoch()));
         double ratelimitTime          = ratelimitList[SmallPD_Type];
 
         PChar->m_PacketRecievedTimestamps[SmallPD_Type] = timeNowSeconds;

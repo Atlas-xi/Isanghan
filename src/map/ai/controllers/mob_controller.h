@@ -37,7 +37,7 @@ class CMobController : public CController
 public:
     CMobController(CMobEntity* PMob);
 
-    virtual void Tick(timing_clock::time_point tick) override;
+    virtual void Tick(timer::time_point tick) override;
     virtual bool Disengage() override;
     virtual bool Engage(uint16 targid) override;
     virtual void Despawn() override;
@@ -76,12 +76,12 @@ protected:
     void         CastSpell(SpellID spellid);
     virtual void Move();
 
-    virtual void DoCombatTick(timing_clock::time_point tick);
+    virtual void DoCombatTick(timer::time_point tick);
     void         FaceTarget(uint16 targid = 0);
     virtual void HandleEnmity();
 
-    virtual void DoRoamTick(timing_clock::time_point tick);
-    void         Wait(timing_clock::duration _duration);
+    virtual void DoRoamTick(timer::time_point tick);
+    void         Wait(timer::duration _duration);
     void         FollowRoamPath();
     bool         CanMoveForward(float currentDistance);
     bool         IsSpecialSkillReady(float currentDistance);
@@ -96,19 +96,19 @@ protected:
 private:
     CMobEntity* const PMob;
 
-    timing_clock::time_point m_LastActionTime;
-    timing_clock::time_point m_nextMagicTime;
-    timing_clock::time_point m_LastMobSkillTime;
-    timing_clock::time_point m_LastSpecialTime;
-    timing_clock::time_point m_DeaggroTime;
-    timing_clock::time_point m_DeclaimTime;
-    timing_clock::time_point m_NeutralTime;
-    timing_clock::time_point m_WaitTime;
-    timing_clock::time_point m_mobHealTime;
-    FollowType               m_followType = FollowType::None;
+    timer::time_point m_LastActionTime;
+    timer::time_point m_nextMagicTime;
+    timer::time_point m_LastMobSkillTime;
+    timer::time_point m_LastSpecialTime;
+    timer::time_point m_DeaggroTime;
+    timer::time_point m_DeclaimTime;
+    timer::time_point m_NeutralTime;
+    timer::time_point m_WaitTime;
+    timer::time_point m_mobHealTime;
+    FollowType        m_followType = FollowType::None;
 
-    bool                     m_firstSpell{ true };
-    timing_clock::time_point m_LastRoamScript{ timing_clock::time_point::min() };
+    bool              m_firstSpell{ true };
+    timer::time_point m_LastRoamScript{ timer::time_point::min() };
 };
 
 #endif // _AI_CONTROLLER_H

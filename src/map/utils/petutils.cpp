@@ -1360,7 +1360,7 @@ namespace petutils
 
             PMob->isCharmed  = false;
             PMob->allegiance = ALLEGIANCE_TYPE::MOB;
-            PMob->charmTime  = timing_clock::time_point::min();
+            PMob->charmTime  = timer::time_point::min();
             PMob->PMaster    = nullptr;
 
             PMob->PAI->SetController(std::make_unique<CMobController>(PMob));
