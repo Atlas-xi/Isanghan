@@ -86,14 +86,14 @@ enum class Mod
     MEVA = 31, // Magic Evasion
 
     // Magic Accuracy and Elemental Attacks
-    FIREATT      = 32, // Fire Damage
-    ICEATT       = 33, // Ice Damage
-    WINDATT      = 34, // Wind Damage
-    EARTHATT     = 35, // Earth Damage
-    THUNDERATT   = 36, // Thunder Damage
-    WATERATT     = 37, // Water Damage
-    LIGHTATT     = 38, // Light Damage
-    DARKATT      = 39, // Dark Damage
+    FIRE_MAB     = 32, // Elemental "Magic Attack Bonus" aka "Affinity"
+    ICE_MAB      = 33, // Elemental "Magic Attack Bonus" aka "Affinity"
+    WIND_MAB     = 34, // Elemental "Magic Attack Bonus" aka "Affinity"
+    EARTH_MAB    = 35, // Elemental "Magic Attack Bonus" aka "Affinity"
+    THUNDER_MAB  = 36, // Elemental "Magic Attack Bonus" aka "Affinity"
+    WATER_MAB    = 37, // Elemental "Magic Attack Bonus" aka "Affinity"
+    LIGHT_MAB    = 38, // Elemental "Magic Attack Bonus" aka "Affinity"
+    DARK_MAB     = 39, // Elemental "Magic Attack Bonus" aka "Affinity"
     FIRE_MACC    = 40, // Fire Accuracy
     ICE_MACC     = 41, // Ice Accuracy
     WIND_MACC    = 42, // Wind Accuracy
