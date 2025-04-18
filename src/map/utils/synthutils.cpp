@@ -39,6 +39,7 @@
 #include "packets/synth_result.h"
 
 #include "item_container.h"
+#include "items.h"
 #include "map_server.h"
 #include "roe.h"
 #include "trade_container.h"
@@ -116,43 +117,43 @@ namespace synthutils
 
             switch (crystalID)
             {
-                case 4096: // Fire Crystal
-                case 4238: // Inferno Crystal
+                case ITEMID::FIRE_CRYSTAL:
+                case ITEMID::INFERNO_CRYSTAL:
                     out = "Fire";
                     break;
 
-                case 4097: // Ice Crystal
-                case 4239: // Glacier Crystal
+                case ITEMID::ICE_CRYSTAL:
+                case ITEMID::GLACIER_CRYSTAL:
                     out = "Ice";
                     break;
 
-                case 4098: // Wind Crystal
-                case 4240: // Cyclone Crystal
+                case ITEMID::WIND_CRYSTAL:
+                case ITEMID::CYCLONE_CRYSTAL:
                     out = "Wind";
                     break;
 
-                case 4099: // Earth Crystal
-                case 4241: // Terra Crystal
+                case ITEMID::EARTH_CRYSTAL:
+                case ITEMID::TERRA_CRYSTAL:
                     out = "Earth";
                     break;
 
-                case 4100: // Lightning Crystal
-                case 4242: // Plasma Crystal
+                case ITEMID::LIGHTNING_CRYSTAL:
+                case ITEMID::PLASMA_CRYSTAL:
                     out = "Lightning";
                     break;
 
-                case 4101: // Water Crystal
-                case 4243: // Torrent Crystal
+                case ITEMID::WATER_CRYSTAL:
+                case ITEMID::TORRENT_CRYSTAL:
                     out = "Water";
                     break;
 
-                case 4102: // Light Crystal
-                case 4244: // Aurora Crystal
+                case ITEMID::LIGHT_CRYSTAL:
+                case ITEMID::AURORA_CRYSTAL:
                     out = "Light";
                     break;
 
-                case 4103: // Dark Crystal
-                case 4245: // Twilight Crystal
+                case ITEMID::DARK_CRYSTAL:
+                case ITEMID::TWILIGHT_CRYSTAL:
                     out = "Dark";
                     break;
             }
