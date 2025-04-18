@@ -693,7 +693,7 @@ namespace synthutils
 
             if (settings::get<bool>("map.CRAFT_MODERN_SYSTEM"))
             {
-                if (baseDiff > 0)
+                if (baseDiff > 1)
                 {
                     skillUpChance = (double)baseDiff * craftChanceMultiplier * (3 - (log(1.2 + charSkill / 100))) / 5; // Original skill up equation with "x2 chance" applied.
                 }
