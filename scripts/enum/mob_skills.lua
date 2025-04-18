@@ -127,6 +127,9 @@ xi.mobSkill =
 
     FORCEFUL_BLOW            = 1731, -- Used with Mamool's weapons break.
 
+    LAVA_SPIT                = 1785,
+    GATES_OF_HADES           = 1790,
+
     XENOGLOSSIA              = 1823, -- Unique entry.
 
     SANDBLAST_2              = 1841,
@@ -146,6 +149,16 @@ xi.mobSkill =
     DEATHGNASH               = 1977, -- Unique entry.
 
     BOREAS_MANTLE            = 1980, -- Unique entry.
+
+    NOCTURNAL_SERVITUDE      = 2112,
+
+    HELLSNAP                 = 2113,
+    HELLCLAP                 = 2114,
+    CACKLE                   = 2115,
+    NECROBANE                = 2116,
+    NECROPURGE               = 2117,
+    BILGESTORM               = 2118,
+    THUNDRIS_SHRIEK          = 2119,
 
     HELL_SCISSORS            = 2221,
 
