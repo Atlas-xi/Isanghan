@@ -192,7 +192,7 @@ HTTPServer::~HTTPServer()
 
 void HTTPServer::LockingUpdate()
 {
-    auto now = timer::clock::now();
+    auto now = timer::now();
     if (now < (m_lastUpdate.load() + 60s))
     {
         return;

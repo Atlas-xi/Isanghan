@@ -145,7 +145,7 @@ uint8 CLuaInstance::getLevelCap()
 
 uint32 CLuaInstance::getLastTimeUpdate()
 {
-    auto time_ms = timer::getMilliseconds(m_PLuaInstance->GetLastTimeUpdate());
+    auto time_ms = timer::get_milliseconds(m_PLuaInstance->GetLastTimeUpdate());
     return static_cast<uint32>(time_ms);
 }
 
@@ -156,7 +156,7 @@ uint32 CLuaInstance::getProgress()
 
 uint32 CLuaInstance::getWipeTime()
 {
-    auto time_ms = timer::getMilliseconds(m_PLuaInstance->GetWipeTime());
+    auto time_ms = timer::get_milliseconds(m_PLuaInstance->GetWipeTime());
     return static_cast<uint32>(time_ms);
 }
 

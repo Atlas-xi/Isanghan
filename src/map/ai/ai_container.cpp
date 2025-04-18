@@ -56,8 +56,8 @@ CAIContainer::CAIContainer(CBaseEntity* _PEntity, std::unique_ptr<CPathFind>&& _
 : TargetFind(std::move(_targetfind))
 , PathFind(std::move(_pathfind))
 , Controller(std::move(_controller))
-, m_Tick(timer::clock::now())
-, m_PrevTick(timer::clock::now())
+, m_Tick(timer::now())
+, m_PrevTick(timer::now())
 , PEntity(_PEntity)
 , ActionQueue(_PEntity)
 {
@@ -464,7 +464,7 @@ void CAIContainer::ClearStateStack()
 {
     while (!m_stateStack.empty())
     {
-        m_stateStack.top()->Cleanup(timer::clock::now());
+        m_stateStack.top()->Cleanup(timer::now());
         m_stateStack.pop();
     }
 }
@@ -473,7 +473,7 @@ void CAIContainer::InterruptStates()
 {
     while (!m_stateStack.empty() && m_stateStack.top()->CanInterrupt())
     {
-        m_stateStack.top()->Cleanup(timer::clock::now());
+        m_stateStack.top()->Cleanup(timer::now());
         m_stateStack.pop();
     }
 }
@@ -542,7 +542,7 @@ void CAIContainer::ClearTimerQueue()
 
 void CAIContainer::checkQueueImmediately()
 {
-    ActionQueue.checkAction(timer::clock::now());
+    ActionQueue.checkAction(timer::now());
 }
 
 bool CAIContainer::Internal_Despawn(bool instantDespawn)
@@ -577,7 +577,7 @@ void CAIContainer::CheckCompletedStates()
 {
     while (!m_stateStack.empty() && m_stateStack.top()->IsCompleted())
     {
-        m_stateStack.top()->Cleanup(timer::clock::now());
+        m_stateStack.top()->Cleanup(timer::now());
         m_stateStack.pop();
     }
 }

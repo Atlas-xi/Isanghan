@@ -908,7 +908,7 @@ void search_handler::addToUsedIPAddresses(std::string const& ipAddressStr)
 
 void search_handler::checkDeadline(std::shared_ptr<search_handler> self) // self to keep the object alive
 {
-    if (timer::clock::now() > deadline_.expiry())
+    if (timer::now() > deadline_.expiry())
     {
         DebugSocketsFmt("Socket timed out from {}", ipAddress);
         socket_.cancel();

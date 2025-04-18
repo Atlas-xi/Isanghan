@@ -82,6 +82,6 @@ bool CDeathState::Update(timer::time_point tick)
 
 void CDeathState::allowSendRaise()
 {
-    m_raiseTime = timer::clock::now() + 12s;
+    m_raiseTime = timer::now() + 12s;
     m_raiseSent = false;
 }

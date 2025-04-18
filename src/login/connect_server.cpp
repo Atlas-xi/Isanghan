@@ -135,7 +135,7 @@ void ConnectServer::periodicCleanup(const asio::error_code& error, asio::steady_
                 // If it's been 15 minutes, erase it from the session list
                 if (!session.data_session &&
                     !session.view_session &&
-                    timer::clock::now() > session.authorizedTime + std::chrono::minutes(15))
+                    timer::now() > session.authorizedTime + std::chrono::minutes(15))
                 {
                     sessionIterator = ipAddrIterator->second.erase(sessionIterator);
                 }

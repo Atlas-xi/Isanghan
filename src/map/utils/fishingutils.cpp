@@ -1975,7 +1975,7 @@ namespace fishingutils
         }
         else
         {
-            auto secs = timer::getSeconds(utc_clock::now().time_since_epoch());
+            auto secs = timer::get_seconds(utc_clock::now().time_since_epoch());
             PChar->setCharVar("[Fish]LastCastTime", secs);
             PChar->lastCastTime = vanaTime;
             PChar->nextFishTime = PChar->lastCastTime + 5;

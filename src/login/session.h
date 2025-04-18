@@ -41,5 +41,5 @@ struct session_t
     bool        justCreatedNewChar        = false;
     bool        versionMismatch           = false;
 
-    timer::time_point authorizedTime = timer::clock::now();
+    timer::time_point authorizedTime = timer::now();
 };

@@ -646,7 +646,7 @@ void CZone::UpdateWeather()
     luautils::OnZoneWeatherChange(GetID(), Weather);
 
     // clang-format off
-    CTaskManager::getInstance()->AddTask("zone_update_weather", timer::clock::now() + std::chrono::seconds(WeatherNextUpdate), this, CTaskManager::TASK_ONCE, 1s,
+    CTaskManager::getInstance()->AddTask("zone_update_weather", timer::now() + std::chrono::seconds(WeatherNextUpdate), this, CTaskManager::TASK_ONCE, 1s,
     [](timer::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
@@ -696,7 +696,7 @@ void CZone::DecreaseZoneCounter(CCharEntity* PChar)
 
     if (m_zoneEntities->CharListEmpty())
     {
-        m_timeZoneEmpty = timer::clock::now();
+        m_timeZoneEmpty = timer::now();
     }
     else
     {
@@ -855,7 +855,7 @@ void CZone::ZoneServer(timer::time_point tick)
         m_BattlefieldHandler->HandleBattlefields(tick);
     }
 
-    if (ZoneTimer && m_zoneEntities->CharListEmpty() && m_timeZoneEmpty + 5s < timer::clock::now() && CheckMobsPathedBack())
+    if (ZoneTimer && m_zoneEntities->CharListEmpty() && m_timeZoneEmpty + 5s < timer::now() && CheckMobsPathedBack())
     {
         ZoneTimer->m_type = CTaskManager::TASK_REMOVE;
         ZoneTimer         = nullptr;
@@ -954,7 +954,7 @@ void CZone::createZoneTimers()
     TracyZoneScoped;
 
     // clang-format off
-    ZoneTimer = CTaskManager::getInstance()->AddTask(m_zoneName, timer::clock::now(), this, CTaskManager::TASK_INTERVAL, kLogicUpdateInterval,
+    ZoneTimer = CTaskManager::getInstance()->AddTask(m_zoneName, timer::now(), this, CTaskManager::TASK_INTERVAL, kLogicUpdateInterval,
     [](timer::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
@@ -962,7 +962,7 @@ void CZone::createZoneTimers()
         return 0;
     });
 
-    ZoneTimerTriggerAreas = CTaskManager::getInstance()->AddTask(m_zoneName + "TriggerAreas", timer::clock::now(), this, CTaskManager::TASK_INTERVAL, kTriggerAreaInterval,
+    ZoneTimerTriggerAreas = CTaskManager::getInstance()->AddTask(m_zoneName + "TriggerAreas", timer::now(), this, CTaskManager::TASK_INTERVAL, kTriggerAreaInterval,
     [](timer::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);

@@ -53,7 +53,7 @@ CBaseEntity::CBaseEntity()
 , PAI(nullptr)
 , PBattlefield(nullptr)
 , PInstance(nullptr)
-, m_nextUpdateTimer(timer::clock::now())
+, m_nextUpdateTimer(timer::now())
 {
     TracyZoneScoped;
     speed          = baseSpeed;

@@ -56,8 +56,8 @@ public:
     CWeaponSkill* getLastWeaponSkill();
 
 protected:
-    timer::time_point m_lastAttackTime{ timer::clock::now() };
-    timer::time_point m_errMsgTime{ timer::clock::now() };
+    timer::time_point m_lastAttackTime{ timer::now() };
+    timer::time_point m_errMsgTime{ timer::now() };
     CWeaponSkill*     m_lastWeaponSkill{ nullptr };
 };
 

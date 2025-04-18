@@ -877,16 +877,16 @@ void CCharEntity::setBlockingAid(bool isBlockingAid)
 void CCharEntity::SetPlayTime(uint32 playTime)
 {
     m_PlayTime = playTime;
-    m_SaveTime = timer::clock::now();
+    m_SaveTime = timer::now();
 }
 
 uint32 CCharEntity::GetPlayTime(bool needUpdate)
 {
     if (needUpdate)
     {
-        auto currentTime = timer::clock::now();
+        auto currentTime = timer::now();
 
-        m_PlayTime += static_cast<uint32>(timer::getSeconds(currentTime - m_SaveTime));
+        m_PlayTime += static_cast<uint32>(timer::get_seconds(currentTime - m_SaveTime));
         m_SaveTime = currentTime;
     }
 
@@ -1091,7 +1091,7 @@ void CCharEntity::PostTick()
         m_EffectsChanged = false;
     }
 
-    timer::time_point now = timer::clock::now();
+    timer::time_point now = timer::now();
 
     if (updatemask && now > m_nextUpdateTimer)
     {
@@ -1271,7 +1271,7 @@ bool CCharEntity::OnAttack(CAttackState& state, action_t& action)
 {
     TracyZoneScoped;
     auto* controller{ static_cast<CPlayerController*>(PAI->GetController()) };
-    controller->setLastAttackTime(timer::clock::now());
+    controller->setLastAttackTime(timer::now());
     auto ret = CBattleEntity::OnAttack(state, action);
 
     return ret;
@@ -2694,7 +2694,7 @@ void CCharEntity::Die(timer::duration _duration)
         m_weaknessLvl = 0;
     }
 
-    m_deathSyncTime = timer::clock::now() + death_update_frequency;
+    m_deathSyncTime = timer::now() + death_update_frequency;
     PAI->ClearStateStack();
     PAI->Internal_Die(_duration);
 

@@ -2,6 +2,7 @@
 ===========================================================================
 
   Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -29,29 +30,47 @@ namespace timer
 {
     // This clock is not stable across reboots.
     // Use utc_clock if you need real time.
-    // Use timer::toUtc/timer::fromUtc to persist timestamps to the database (status effects).
+    // Use timer::to_utc/timer::from_utc to persist timestamps to the database (status effects).
     using clock      = std::chrono::steady_clock;
     using duration   = clock::duration;
     using time_point = clock::time_point;
 
-    void init();
-    void final();
+    inline const time_point start_time = clock::now();
 
-    time_point getStartTime();
-    duration   getUptime();
+    inline time_point now()
+    {
+        return clock::now();
+    }
+
+    inline duration get_uptime()
+    {
+        return clock::now() - start_time;
+    }
+
+    // https://stackoverflow.com/questions/35282308/convert-between-c11-clocks/35282833#35282833
+    inline utc_clock::time_point to_utc(time_point timer_tp)
+    {
+        auto utc_now   = utc_clock::now();
+        auto timer_now = clock::now();
+        return std::chrono::time_point_cast<utc_clock::duration>(timer_tp - timer_now + utc_now);
+    };
+
+    inline time_point from_utc(utc_clock::time_point utc_tp)
+    {
+        auto timer_now = clock::now();
+        auto utc_now   = utc_clock::now();
+        return utc_tp - utc_now + timer_now;
+    };
 
     template <typename Rep, typename Period>
-    auto getMilliseconds(const std::chrono::duration<Rep, Period>& d) -> int64
+    auto get_milliseconds(const std::chrono::duration<Rep, Period>& d) -> int64
     {
         return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
     };
 
     template <typename Rep, typename Period>
-    auto getSeconds(const std::chrono::duration<Rep, Period>& d) -> int64
+    auto get_seconds(const std::chrono::duration<Rep, Period>& d) -> int64
     {
         return std::chrono::duration_cast<std::chrono::seconds>(d).count();
     };
-
-    utc_clock::time_point toUtc(time_point timerTime);
-    time_point            fromUtc(utc_clock::time_point utcTime);
 }; // namespace timer

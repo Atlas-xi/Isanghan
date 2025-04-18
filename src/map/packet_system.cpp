@@ -1501,7 +1501,7 @@ void SmallPacket0x032(MapSession* const PSession, CCharEntity* const PChar, CBas
             return;
         }
 
-        auto lastTargetTradeTimeSeconds = timer::getSeconds(timer::clock::now() - PTarget->lastTradeInvite);
+        auto lastTargetTradeTimeSeconds = timer::get_seconds(timer::now() - PTarget->lastTradeInvite);
         if ((PTarget->TradePending.targid != 0 && lastTargetTradeTimeSeconds < 60) || PTarget->UContainer->GetType() == UCONTAINER_TRADE)
         {
             // Can't trade with someone who's already got a pending trade before timeout
@@ -1527,11 +1527,11 @@ void SmallPacket0x032(MapSession* const PSession, CCharEntity* const PChar, CBas
             }
         }
 
-        PChar->lastTradeInvite     = timer::clock::now();
+        PChar->lastTradeInvite     = timer::now();
         PChar->TradePending.id     = charid;
         PChar->TradePending.targid = targid;
 
-        PTarget->lastTradeInvite     = timer::clock::now();
+        PTarget->lastTradeInvite     = timer::now();
         PTarget->TradePending.id     = PChar->id;
         PTarget->TradePending.targid = PChar->targid;
         PTarget->pushPacket<CTradeRequestPacket>(PChar);
@@ -1927,7 +1927,7 @@ void SmallPacket0x03A(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     uint8 size = PItemContainer->GetSize();
 
-    if (timer::clock::now() < PItemContainer->LastSortingTime + std::chrono::milliseconds(1000))
+    if (timer::now() < PItemContainer->LastSortingTime + std::chrono::milliseconds(1000))
     {
         if (settings::get<uint8>("map.LIGHTLUGGAGE_BLOCK") == (int32)(++PItemContainer->SortingPacket))
         {
@@ -1939,7 +1939,7 @@ void SmallPacket0x03A(MapSession* const PSession, CCharEntity* const PChar, CBas
     else
     {
         PItemContainer->SortingPacket   = 0;
-        PItemContainer->LastSortingTime = timer::clock::now();
+        PItemContainer->LastSortingTime = timer::now();
     }
     for (uint8 slotID = 1; slotID <= size; ++slotID)
     {
@@ -4161,7 +4161,7 @@ void SmallPacket0x096(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     // Force full synth duration wait no matter the synth animation length
     // Thus players can synth on whatever fps they want
-    if (PChar->m_LastSynthTime + 15s > timer::clock::now())
+    if (PChar->m_LastSynthTime + 15s > timer::now())
     {
         PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 0, 94);
         return;

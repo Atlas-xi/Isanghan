@@ -3173,7 +3173,7 @@ namespace luautils
         }
 
         auto name    = PBattlefield->GetName();
-        auto seconds = timer::getSeconds(PBattlefield->GetTimeInside());
+        auto seconds = timer::get_seconds(PBattlefield->GetTimeInside());
 
         if (invokeBattlefieldEvent(PBattlefield->GetID(), "onBattlefieldTick", PBattlefield, seconds) == 0)
         {

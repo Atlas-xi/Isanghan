@@ -35,7 +35,7 @@ CTreasureFindItemPacket::CTreasureFindItemPacket(TreasurePoolItem* PItem, CBaseE
     ref<uint16>(0x10) = PItem->ID;         // Item ID
     ref<uint8>(0x14)  = PItem->SlotID;     // Treasure Pool Slot
     ref<uint8>(0x15)  = isOldItem ? 1 : 0; // Old Item
-    ref<uint32>(0x18) = static_cast<uint32>(timer::getMilliseconds(PItem->TimeStamp - timer::getStartTime()));
+    ref<uint32>(0x18) = static_cast<uint32>(timer::get_milliseconds(PItem->TimeStamp - timer::start_time));
 
     if (PEntity != nullptr)
     {

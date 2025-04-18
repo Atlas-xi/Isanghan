@@ -60,7 +60,7 @@ CBattlefield::CBattlefield(uint16 id, CZone* PZone, uint8 area, CCharEntity* PIn
 , m_Area(area)
 , m_Record(BattlefieldRecord_t())
 , m_Rules(0)
-, m_StartTime(timer::clock::now())
+, m_StartTime(timer::now())
 , m_LastPromptTime(0s)
 , m_MaxParticipants(8)
 , m_LevelCap(0)
@@ -815,12 +815,12 @@ bool CBattlefield::Cleanup(timer::time_point time, bool force)
         if (rset && rset->rowsCount() && rset->next())
         {
             const auto fastestTime = rset->get<uint32>("fastestTime");
-            updateRecord           = fastestTime > timer::getSeconds(m_Record.time);
+            updateRecord           = fastestTime > timer::get_seconds(m_Record.time);
         }
 
         if (updateRecord)
         {
-            const uint32 timeThing = timer::getSeconds(m_Record.time);
+            const uint32 timeThing = timer::get_seconds(m_Record.time);
 
             db::preparedStmt("UPDATE bcnm_records SET fastestName = ?, fastestTime = ?, fastestPartySize = ? WHERE bcnmId = ? AND zoneid = ?",
                              m_Record.name, timeThing, m_Record.partySize, this->GetID(), GetZoneID());

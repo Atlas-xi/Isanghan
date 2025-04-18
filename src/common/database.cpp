@@ -216,11 +216,11 @@ Synchronized<db::detail::State>& db::detail::getState()
 auto db::detail::timer(std::string const& query) -> xi::final_action<std::function<void()>>
 {
     // clang-format off
-    const auto start = timer::clock::now();
+    const auto start = timer::now();
     return xi::finally<std::function<void()>>([query, start]() -> void
     {
-        const auto end      = timer::clock::now();
-        const auto duration = timer::getMilliseconds(end - start);
+        const auto end      = timer::now();
+        const auto duration = timer::get_milliseconds(end - start);
         if (timersEnabled && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
         {
             if (duration > settings::get<uint32>("logging.SQL_SLOW_QUERY_ERROR_TIME"))

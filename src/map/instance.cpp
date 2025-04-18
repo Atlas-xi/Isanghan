@@ -38,7 +38,7 @@ CInstance::CInstance(CZone* zone, uint32 instanceid)
     TracyZoneScoped;
     LoadInstance();
 
-    m_startTime = timer::clock::now();
+    m_startTime = timer::now();
     m_wipeTimer = m_startTime;
 }
 
@@ -228,7 +228,7 @@ void CInstance::CheckTime(timer::time_point tick)
 {
     if (m_lastTimeCheck + 1s <= tick && !Failed())
     {
-        luautils::OnInstanceTimeUpdate(GetZone(), this, static_cast<uint32>(timer::getMilliseconds(GetElapsedTime(tick))));
+        luautils::OnInstanceTimeUpdate(GetZone(), this, static_cast<uint32>(timer::get_milliseconds(GetElapsedTime(tick))));
         m_lastTimeCheck = tick;
     }
 }

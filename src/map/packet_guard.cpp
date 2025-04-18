@@ -117,7 +117,7 @@ namespace PacketGuard
         using namespace std::chrono;
 
         double lastPacketRecievedTime = static_cast<double>(PChar->m_PacketRecievedTimestamps[SmallPD_Type]);
-        double timeNowSeconds         = static_cast<double>(timer::getSeconds(timer::clock::now().time_since_epoch()));
+        double timeNowSeconds         = static_cast<double>(timer::get_seconds(timer::now().time_since_epoch()));
         double ratelimitTime          = ratelimitList[SmallPD_Type];
 
         PChar->m_PacketRecievedTimestamps[SmallPD_Type] = timeNowSeconds;

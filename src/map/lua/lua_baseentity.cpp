@@ -17510,7 +17510,7 @@ uint32 CLuaBaseEntity::getBattleTime()
         return 0;
     }
 
-    auto seconds = timer::getSeconds(static_cast<CBattleEntity*>(m_PBaseEntity)->GetBattleTime());
+    auto seconds = timer::get_seconds(static_cast<CBattleEntity*>(m_PBaseEntity)->GetBattleTime());
     return static_cast<uint32>(seconds);
 }
 

@@ -152,7 +152,7 @@ void auctionutils::OpenListOfSales(CCharEntity* PChar, uint8 action, uint16 item
 {
     TracyZoneScoped;
 
-    const auto curTick = timer::clock::now();
+    const auto curTick = timer::now();
 
     if (curTick - PChar->m_AHHistoryTimestamp > std::chrono::milliseconds(5000))
     {

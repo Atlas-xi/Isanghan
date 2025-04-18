@@ -62,7 +62,7 @@ timer::time_point CState::GetEntryTime() const
 
 void CState::ResetEntryTime()
 {
-    m_entryTime = timer::clock::now();
+    m_entryTime = timer::now();
 }
 
 void CState::SetTarget(uint16 _targid)

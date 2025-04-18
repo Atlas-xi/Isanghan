@@ -221,7 +221,7 @@ void CTrustController::DoRoamTick(timer::time_point tick)
 
     auto* PMaster              = static_cast<CCharEntity*>(POwner->PMaster);
     auto  masterLastAttackTime = static_cast<CPlayerController*>(PMaster->PAI->GetController())->getLastAttackTime();
-    bool  masterMeleeSwing     = masterLastAttackTime > timer::clock::now() - 1s;
+    bool  masterMeleeSwing     = masterLastAttackTime > timer::now() - 1s;
 
     bool trustEngageCondition = false;
     // NOTE: charvars are now cached, this is essentially a localvar read now.

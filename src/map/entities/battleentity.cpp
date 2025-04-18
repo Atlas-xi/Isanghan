@@ -2319,7 +2319,7 @@ bool CBattleEntity::OnAttack(CAttackState& state, action_t& action)
     }
 
     battleutils::ClaimMob(PTarget, this); // Mobs get claimed whether or not your attack actually is intimidated/paralyzed
-    PTarget->LastAttacked = timer::clock::now();
+    PTarget->LastAttacked = timer::now();
 
     if (battleutils::IsParalyzed(this))
     {
@@ -2706,7 +2706,7 @@ void CBattleEntity::SetBattleStartTime(timer::time_point time)
 
 timer::duration CBattleEntity::GetBattleTime()
 {
-    return timer::clock::now() - m_battleStartTime;
+    return timer::now() - m_battleStartTime;
 }
 
 void CBattleEntity::setBattleID(uint16 battleID)

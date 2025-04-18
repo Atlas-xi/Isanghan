@@ -151,7 +151,7 @@ void CParty::DisbandParty(bool playerInitiated)
             if (sync && sync->GetDuration() == 0)
             {
                 PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 30, MsgStd::LevelSyncRemoveLeftParty);
-                sync->SetStartTime(timer::clock::now());
+                sync->SetStartTime(timer::now());
                 sync->SetDuration(30000);
             }
 
@@ -319,7 +319,7 @@ void CParty::RemoveMember(CBattleEntity* PEntity)
                     if (sync && sync->GetDuration() == 0)
                     {
                         PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 30, MsgStd::LevelSyncRemoveLeftParty);
-                        sync->SetStartTime(timer::clock::now());
+                        sync->SetStartTime(timer::now());
                         sync->SetDuration(30000);
                     }
                     DisableSync();
@@ -332,7 +332,7 @@ void CParty::RemoveMember(CBattleEntity* PEntity)
                         if (sync && sync->GetDuration() == 0)
                         {
                             PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 30, MsgStd::LevelSyncRemoveLeftParty);
-                            sync->SetStartTime(timer::clock::now());
+                            sync->SetStartTime(timer::now());
                             sync->SetDuration(30000);
                         }
                     }
@@ -416,7 +416,7 @@ void CParty::DelMember(CBattleEntity* PEntity)
                     if (sync && sync->GetDuration() == 0)
                     {
                         PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 30, MsgStd::LevelSyncRemoveLeftParty);
-                        sync->SetStartTime(timer::clock::now());
+                        sync->SetStartTime(timer::now());
                         sync->SetDuration(30000);
                     }
                     DisableSync();
@@ -429,7 +429,7 @@ void CParty::DelMember(CBattleEntity* PEntity)
                         if (sync && sync->GetDuration() == 0)
                         {
                             PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 30, MsgStd::LevelSyncRemoveLeftParty);
-                            sync->SetStartTime(timer::clock::now());
+                            sync->SetStartTime(timer::now());
                             sync->SetDuration(30000);
                         }
                     }
@@ -610,7 +610,7 @@ void CParty::AddMember(CBattleEntity* PEntity)
 
         if (PLeader)
         {
-            PLeader->m_LeaderCreatedPartyTime = timer::clock::now();
+            PLeader->m_LeaderCreatedPartyTime = timer::now();
         }
     }
 
@@ -1168,7 +1168,7 @@ void CParty::SetSyncTarget(const std::string& MemberName, MsgStd message)
                         if (sync && sync->GetDuration() == 0)
                         {
                             member->pushPacket<CMessageBasicPacket>(member, member, 0, 30, message);
-                            sync->SetStartTime(timer::clock::now());
+                            sync->SetStartTime(timer::now());
                             sync->SetDuration(30000);
                         }
                     }
@@ -1359,7 +1359,7 @@ uint32 CParty::LoadPartySize() const
 uint32 CParty::GetTimeLastMemberJoined()
 {
     auto* PLeader                    = dynamic_cast<CCharEntity*>(CParty::GetLeader());
-    auto  LeaderMemberLastJoinedTime = timer::clock::now();
+    auto  LeaderMemberLastJoinedTime = timer::now();
 
     if (PLeader)
     {

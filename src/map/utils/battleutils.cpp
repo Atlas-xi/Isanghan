@@ -3768,7 +3768,7 @@ namespace battleutils
             // Chainbound active on target
             if (PCBEffect)
             {
-                if (PCBEffect->GetStartTime() + 2s < timer::clock::now())
+                if (PCBEffect->GetStartTime() + 2s < timer::now())
                 {
                     // Konzen-Ittai
                     if (PCBEffect->GetPower() > 1)
@@ -3793,7 +3793,7 @@ namespace battleutils
                 PSCEffect = PDefender->StatusEffectContainer->GetStatusEffect(EFFECT_SKILLCHAIN, 0);
             }
             // Previous effect exists
-            else if (PSCEffect && PSCEffect->GetStartTime() + 3s < timer::clock::now())
+            else if (PSCEffect && PSCEffect->GetStartTime() + 3s < timer::now())
             {
                 if (PSCEffect->GetTier() == 0)
                 {
@@ -3834,7 +3834,7 @@ namespace battleutils
 
             if (skillchain != SC_NONE)
             {
-                PSCEffect->SetStartTime(timer::clock::now());
+                PSCEffect->SetStartTime(timer::now());
                 PSCEffect->SetDuration(PSCEffect->GetDuration() - 1000);
                 PSCEffect->SetTier(GetSkillchainTier(skillchain));
                 PSCEffect->SetPower(skillchain);
@@ -3854,7 +3854,7 @@ namespace battleutils
                 return (SUBEFFECT)GetSkillchainSubeffect(skillchain);
             }
 
-            PSCEffect->SetStartTime(timer::clock::now());
+            PSCEffect->SetStartTime(timer::now());
             PSCEffect->SetDuration(10000);
             PSCEffect->SetTier(0);
             PSCEffect->SetPower(combined_properties);
@@ -4691,7 +4691,7 @@ namespace battleutils
 
             // set the mobs ai to petAi
             PCharmer->PPet->PAI->SetController(std::make_unique<CPetController>(PMob));
-            PCharmer->PPet->charmTime = timer::clock::now() + charmTime;
+            PCharmer->PPet->charmTime = timer::now() + charmTime;
 
             // this will make him transition back to roaming if sleeping
             PCharmer->PPet->animation = ANIMATION_NONE;

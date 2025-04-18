@@ -214,7 +214,7 @@ namespace utils
 static Synchronized<std::unordered_map<std::string, timer::time_point>> lastExecutionTimes;
 #define RATE_LIMIT(duration, code)                                                    \
 {                                                                                     \
-    const auto currentTime = timer::clock::now();                                     \
+    const auto currentTime = timer::now();                                     \
     const auto key         = std::string(__FILE__) + ":" + std::to_string(__LINE__);  \
     lastExecutionTimes.write([&](auto& lastExecutionTimes)                            \
     {                                                                                 \

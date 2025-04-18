@@ -114,7 +114,7 @@ uint32 CPetEntity::getJugDuration()
         return 0;
     }
 
-    return static_cast<uint32>(timer::getSeconds(m_jugDuration));
+    return static_cast<uint32>(timer::get_seconds(m_jugDuration));
 }
 
 void CPetEntity::setJugDuration(uint32 seconds)
@@ -203,7 +203,7 @@ WYVERN_TYPE CPetEntity::getWyvernType()
 void CPetEntity::PostTick()
 {
     CBattleEntity::PostTick();
-    timer::time_point now = timer::clock::now();
+    timer::time_point now = timer::now();
     if (loc.zone && updatemask && status != STATUS_TYPE::DISAPPEAR && now > m_nextUpdateTimer)
     {
         m_nextUpdateTimer = now + 250ms;
@@ -261,7 +261,7 @@ void CPetEntity::Spawn()
 
     if (m_PetType == PET_TYPE::JUG_PET)
     {
-        m_jugSpawnTime = timer::clock::now();
+        m_jugSpawnTime = timer::now();
     }
 
     // NOTE: This is purposefully calling CBattleEntity's impl.

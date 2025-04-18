@@ -152,8 +152,8 @@ int32 SqlConnection::SetEncoding(const char* encoding)
 void SqlConnection::SetupKeepalive()
 {
     TracyZoneScoped;
-    auto now        = timer::clock::now().time_since_epoch();
-    auto nowSeconds = timer::getSeconds(now);
+    auto now        = timer::now().time_since_epoch();
+    auto nowSeconds = timer::get_seconds(now);
     m_LastPing      = nowSeconds;
 
     // set a default value first
@@ -179,8 +179,8 @@ void SqlConnection::EnableTimers()
 int32 SqlConnection::TryPing()
 {
     TracyZoneScoped;
-    auto now        = timer::clock::now().time_since_epoch();
-    auto nowSeconds = timer::getSeconds(now);
+    auto now        = timer::now().time_since_epoch();
+    auto nowSeconds = timer::get_seconds(now);
 
     if (m_LastPing + m_PingInterval <= nowSeconds)
     {
@@ -236,7 +236,7 @@ int32 SqlConnection::QueryStr(const char* query)
     FreeResult();
     self->buf.clear();
 
-    auto startTime = timer::clock::now();
+    auto startTime = timer::now();
 
     {
         self->buf += query;
@@ -258,7 +258,7 @@ int32 SqlConnection::QueryStr(const char* query)
         }
     }
 
-    auto endTime = timer::clock::now();
+    auto endTime = timer::now();
     auto dTime   = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
     if (m_TimersEnabled && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))

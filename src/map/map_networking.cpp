@@ -150,7 +150,7 @@ auto MapNetworking::doSocketsBlocking(timer::duration next) -> timer::duration
 {
     TracyZoneScoped;
 
-    const auto start = timer::clock::now();
+    const auto start = timer::now();
 
     message::handle_incoming();
 
@@ -161,7 +161,7 @@ auto MapNetworking::doSocketsBlocking(timer::duration next) -> timer::duration
 
     tapStatistics();
 
-    return timer::clock::now() - start;
+    return timer::now() - start;
 }
 
 void MapNetworking::handle_incoming_packet(const std::error_code& ec, std::span<uint8> buffer, IPP ipp)

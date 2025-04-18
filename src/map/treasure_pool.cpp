@@ -254,13 +254,13 @@ uint8 CTreasurePool::addItem(uint16 ItemID, CBaseEntity* PEntity)
 
     if (SlotID == 10)
     {
-        m_PoolItems[FreeSlotID].TimeStamp = timer::getStartTime();
-        checkTreasureItem(timer::clock::now(), FreeSlotID);
+        m_PoolItems[FreeSlotID].TimeStamp = timer::start_time;
+        checkTreasureItem(timer::now(), FreeSlotID);
     }
 
     m_count++;
     m_PoolItems[FreeSlotID].ID        = ItemID;
-    m_PoolItems[FreeSlotID].TimeStamp = timer::clock::now() - treasure_checktime;
+    m_PoolItems[FreeSlotID].TimeStamp = timer::now() - treasure_checktime;
 
     for (const auto& member : m_Members)
     {
@@ -269,7 +269,7 @@ uint8 CTreasurePool::addItem(uint16 ItemID, CBaseEntity* PEntity)
 
     if (memberCount() == 1)
     {
-        checkTreasureItem(timer::clock::now(), FreeSlotID);
+        checkTreasureItem(timer::now(), FreeSlotID);
     }
 
     return m_count;
@@ -296,7 +296,7 @@ void CTreasurePool::flush()
 {
     if (m_count != 0)
     {
-        const auto tick = timer::clock::now() + treasure_checktime + std::chrono::seconds(1);
+        const auto tick = timer::now() + treasure_checktime + std::chrono::seconds(1);
 
         for (uint8 i = 0; i < TREASUREPOOL_SIZE; ++i)
         {
@@ -576,7 +576,7 @@ void CTreasurePool::treasureWon(CCharEntity* winner, uint8 SlotID)
         return;
     }
 
-    m_PoolItems[SlotID].TimeStamp = timer::getStartTime();
+    m_PoolItems[SlotID].TimeStamp = timer::start_time;
 
     roeutils::event(ROE_EVENT::ROE_LOOTITEM, winner, RoeDatagram("itemid", m_PoolItems[SlotID].ID));
 
@@ -598,7 +598,7 @@ void CTreasurePool::treasureError(CCharEntity* winner, uint8 SlotID)
         return;
     }
 
-    m_PoolItems[SlotID].TimeStamp = timer::getStartTime();
+    m_PoolItems[SlotID].TimeStamp = timer::start_time;
 
     for (const auto& member : m_Members)
     {
@@ -618,7 +618,7 @@ void CTreasurePool::treasureLost(uint8 SlotID)
         return;
     }
 
-    m_PoolItems[SlotID].TimeStamp = timer::getStartTime();
+    m_PoolItems[SlotID].TimeStamp = timer::start_time;
 
     for (const auto& member : m_Members)
     {
