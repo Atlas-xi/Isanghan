@@ -1,5 +1,5 @@
 -----------------------------------
--- Spell: Drain
+-- Spell: Drain III
 -----------------------------------
 ---@type TSpell
 local spellObject = {}
