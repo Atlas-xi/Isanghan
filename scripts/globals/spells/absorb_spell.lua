@@ -10,12 +10,7 @@ xi.spells = xi.spells or {}
 xi.spells.absorb = xi.spells.absorb or {}
 -----------------------------------
 
--- https://www.bg-wiki.com/ffxi/Category:Absorb_Spell
--- Base Absorbed   = Floor(3 + (Job Level / 5))
--- Total Absorbed  = floor(floor(Base Absorbed * SUM(Equipment Bonuses) * Liberator Bonus) * Nether Void)
--- Absorb Duration = DRK Main: (180 + floor((Dark Magic Skill - 490.5)/10)*2)(1 + Dark Magic Duration %)(1 + "Absorb" effect duration %) -- Tested up to 630, no cap found so far.
-
-local absorbData =
+local absorbStatData =
 {
     [xi.magic.spell.ABSORB_STR] = { boostEffect = xi.effect.STR_BOOST,      downEffect = xi.effect.STR_DOWN,      msg = xi.msg.basic.MAGIC_ABSORB_STR },
     [xi.magic.spell.ABSORB_DEX] = { boostEffect = xi.effect.DEX_BOOST,      downEffect = xi.effect.DEX_DOWN,      msg = xi.msg.basic.MAGIC_ABSORB_DEX },
@@ -30,8 +25,8 @@ local absorbData =
 -- https://www.bg-wiki.com/ffxi/Category:Absorb_Spell
 xi.spells.absorb.doAbsorbStatSpell = function(caster, target, spell)
     local spellId          = spell:getID()
-    local enhancingEffect  = absorbData[spellId].boostEffect
-    local enfeeblingEffect = absorbData[spellId].downEffect
+    local enhancingEffect  = absorbStatData[spellId].boostEffect
+    local enfeeblingEffect = absorbStatData[spellId].downEffect
 
     -- Calculate resistance (2 state effects: Either No resist, half resist or full resist)
     local resist = xi.combat.magicHitRate.calculateResistRate(caster, target, xi.magic.spellGroup.BLACK, xi.skill.DARK_MAGIC, 0, xi.element.DARK, xi.mod.INT, enfeeblingEffect, 0)
@@ -67,7 +62,7 @@ xi.spells.absorb.doAbsorbStatSpell = function(caster, target, spell)
     -- Apply debuff and buff if needed. Absorb effects can be overwriten via higher potency.
     if target:addStatusEffect(enfeeblingEffect, finalPotency, 0, finalDuration) then
         -- Set associated message.
-        spell:setMsg(absorbData[spellId].msg)
+        spell:setMsg(absorbStatData[spellId].msg)
 
         -- Force-overwrite associated buff.
         caster:delStatusEffect(enhancingEffect)
@@ -80,51 +75,57 @@ xi.spells.absorb.doAbsorbStatSpell = function(caster, target, spell)
 end
 
 xi.spells.absorb.doAbsorbTPSpell = function(caster, target, spell)
-    local cap = 1200
-    local dmg = math.random(100, 1200)
+    local finalDamage = 0
 
-    --get resist multiplier (1x if no resist)
-    local params = {}
-    params.attribute = xi.mod.INT
-    params.skillType = xi.skill.DARK_MAGIC
-    local resist = applyResistanceEffect(caster, target, spell, params)
-
-    --get the resisted damage
-    dmg = dmg * resist
-
-    --add on bonuses (staff/day/weather/jas/mab/etc all go in this function)
-    dmg = addBonuses(caster, spell, target, dmg)
-
-    --add in target adjustment
-    dmg = dmg * xi.spells.damage.calculateNukeAbsorbOrNullify(target, spell:getElement())
-
-    --add in final adjustments
-    if resist <= 0.125 then
+    -- Early return: Target absorbs or nullifies dark.
+    if xi.spells.damage.calculateNukeAbsorbOrNullify(target, xi.element.DARK) then
         spell:setMsg(xi.msg.basic.MAGIC_RESIST)
-        dmg = 0
-    else
-        spell:setMsg(xi.msg.basic.MAGIC_ABSORB_TP)
-
-        dmg = dmg * ((100 + caster:getMod(xi.mod.AUGMENTS_ABSORB)) / 100)
-
-        if target:getTP() < dmg then
-            dmg = target:getTP()
-        end
-
-        if dmg > cap then
-            dmg = cap
-        end
-
-        -- drain
-        caster:addTP(dmg)
-        target:addTP(-dmg)
+        return finalDamage
     end
 
-    return dmg
+    -- Early return: Target doesn't have TP to absorb.
+    local targetTP = target:getTP()
+    if targetTP == 0 then
+        spell:setMsg(xi.msg.basic.NO_EFFECT)
+        return finalDamage
+    end
+
+    -- Base damage.
+    local baseDamage = targetTP * 30 / 100
+
+    -- Multipliers.
+    local resistTier           = xi.combat.magicHitRate.calculateResistRate(caster, target, xi.magic.spellGroup.BLACK, xi.skill.DARK_MAGIC, 0, xi.element.DARK, xi.mod.INT, 0, 0)
+    local additionalResistTier = xi.spells.damage.calculateAdditionalResistTier(caster, target, xi.element.DARK)
+    local sdt                  = xi.spells.damage.calculateSDT(target, xi.element.DARK)
+    local elementalStaffBonus  = xi.spells.damage.calculateElementalStaffBonus(caster, xi.element.DARK)
+    local dayAndWeather        = xi.spells.damage.calculateDayAndWeather(caster, xi.element.DARK, false)
+    local absorbMultiplier     = 1 + caster:getMod(xi.mod.AUGMENTS_ABSORB) / 100
+    local liberatorMultiplier  = 1 + caster:getMod(xi.mod.AUGMENTS_ABSORB_LIBERATOR) / 100
+
+    -- Operations.
+    finalDamage = math.floor(baseDamage * resistTier)
+    finalDamage = math.floor(finalDamage * additionalResistTier)
+    finalDamage = math.floor(finalDamage * sdt)
+    finalDamage = math.floor(finalDamage * elementalStaffBonus)
+    finalDamage = math.floor(finalDamage * dayAndWeather)
+    finalDamage = math.floor(finalDamage * absorbMultiplier)
+    finalDamage = math.floor(finalDamage * liberatorMultiplier)
+
+    -- Clamp
+    finalDamage = utils.clamp(finalDamage, 0, 3000)
+
+    -- Set proper message.
+    spell:setMsg(xi.msg.basic.MAGIC_ABSORB_TP)
+
+    -- Perform drain.
+    caster:addTP(finalDamage)
+    target:addTP(-finalDamage)
+
+    return finalDamage
 end
 
 xi.spells.absorb.doAbsorbAttriSpell = function(caster, target, spell)
-    local count = 0
+    local count       = 0
     local effectFirst = caster:stealStatusEffect(target, xi.effectFlag.DISPELABLE)
 
     if effectFirst ~= 0 then
@@ -141,7 +142,7 @@ xi.spells.absorb.doAbsorbAttriSpell = function(caster, target, spell)
 
         return count
     else
-        spell:setMsg(xi.msg.basic.MAGIC_NO_EFFECT) -- no effect
+        spell:setMsg(xi.msg.basic.MAGIC_NO_EFFECT) -- No effect
     end
 
     return count
