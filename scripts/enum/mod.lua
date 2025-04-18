@@ -91,23 +91,14 @@ xi.mod =
     LIGHT_MACC                      = 46,
     DARK_MACC                       = 47,
 
-    FIRE_AFFINITY_DMG               = 347, -- Elemental staves bonus (Damage).
-    ICE_AFFINITY_DMG                = 348, -- Elemental staves bonus (Damage).
-    WIND_AFFINITY_DMG               = 349, -- Elemental staves bonus (Damage).
-    EARTH_AFFINITY_DMG              = 350, -- Elemental staves bonus (Damage).
-    THUNDER_AFFINITY_DMG            = 351, -- Elemental staves bonus (Damage).
-    WATER_AFFINITY_DMG              = 352, -- Elemental staves bonus (Damage).
-    LIGHT_AFFINITY_DMG              = 353, -- Elemental staves bonus (Damage).
-    DARK_AFFINITY_DMG               = 354, -- Elemental staves bonus (Damage).
-
-    FIRE_AFFINITY_ACC               = 544, -- Elemental staves bonus (Magic accuracy).
-    ICE_AFFINITY_ACC                = 545, -- Elemental staves bonus (Magic accuracy).
-    WIND_AFFINITY_ACC               = 546, -- Elemental staves bonus (Magic accuracy).
-    EARTH_AFFINITY_ACC              = 547, -- Elemental staves bonus (Magic accuracy).
-    THUNDER_AFFINITY_ACC            = 548, -- Elemental staves bonus (Magic accuracy).
-    WATER_AFFINITY_ACC              = 549, -- Elemental staves bonus (Magic accuracy).
-    LIGHT_AFFINITY_ACC              = 550, -- Elemental staves bonus (Magic accuracy).
-    DARK_AFFINITY_ACC               = 551, -- Elemental staves bonus (Magic accuracy).
+    FIRE_STAFF_BONUS                = 347, -- Elemental staff bonus (DMG and MACC).
+    ICE_STAFF_BONUS                 = 348, -- Elemental staff bonus (DMG and MACC).
+    WIND_STAFF_BONUS                = 349, -- Elemental staff bonus (DMG and MACC).
+    EARTH_STAFF_BONUS               = 350, -- Elemental staff bonus (DMG and MACC).
+    THUNDER_STAFF_BONUS             = 351, -- Elemental staff bonus (DMG and MACC).
+    WATER_STAFF_BONUS               = 352, -- Elemental staff bonus (DMG and MACC).
+    LIGHT_STAFF_BONUS               = 353, -- Elemental staff bonus (DMG and MACC).
+    DARK_STAFF_BONUS                = 354, -- Elemental staff bonus (DMG and MACC).
 
     FIRE_AFFINITY_PERP              = 553,
     ICE_AFFINITY_PERP               = 554,
@@ -830,7 +821,7 @@ xi.mod =
     AUTO_RANGED_DAMAGEP             = 1002, -- Increases Automaton Ranged Weapon damage by a %
 
     -- Mythic Weapon Mods
-    AUGMENTS_ABSORB                 = 521, -- Direct Absorb spell increase while Liberator is equipped (percentage based)
+    AUGMENTS_ABSORB_LIBERATOR       = 521, -- Direct Absorb spell increase while Liberator is equipped (percentage based) (Augments "Absorb" spells)
     AOE_NA                          = 524, -- Set to 1 to make -na spells/erase always AoE w/ Divine Veil
     AUGMENTS_CONVERT                = 525, -- Convert HP to MP Ratio Multiplier. Value = MP multiplier rate.
     AUGMENTS_SA                     = 526, -- Adds Critical Attack Bonus to Sneak Attack, percentage based.
@@ -1030,6 +1021,10 @@ xi.mod =
     DESPAWN_TIME_REDUCTION = 1134, -- Reduction in seconds. 1 = 1 second less to despawn.
 
     PARRY_HP_RECOVERY = 1135, -- Recover <Mod Value> HP on successful parry.
+
+    ENHANCES_ABSORB_EFFECTS = 1136, -- Absorb Spell duration +x seconds (Enhances "Absorb" effects)
+    AUGMENTS_ABSORB         = 1337, -- Non-Liberator Absorb Spell potency +x% (Augments "Absorb" effects)
+    ABSORB_EFFECT_DURATION  = 1138, -- Absorb Spell duration +% ("Absorb" effect duration +x%)
 
     -- IF YOU ADD ANY NEW MODIFIER HERE, ADD IT IN src/map/modifier.h ASWELL!
 
