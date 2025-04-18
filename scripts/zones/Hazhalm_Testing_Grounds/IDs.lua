@@ -98,8 +98,8 @@ zones[xi.zone.HAZHALM_TESTING_GROUNDS] =
         ANDHRIMNIR      = GetFirstID('Andhrimnir'),
         ARIRI_SAMARIRI  = GetFirstID('Ariri_Samariri'),
         BALRAHN         = GetFirstID('Balrahn'),
-        HRUNGNIR        = GetFirstID('Hrungnir'),
-        HRUNGNIR_CLONE  = GetFirstID('Hrungnir_clone'),
+        HRUNGNIR        = GetTableOfIDs('Hrungnir')[1],
+        HRUNGNIR_CLONE  = GetTableOfIDs('Hrungnir')[2],
         MOKKURALFI      = GetFirstID('Mokkuralfi'),
         TANNGRISNIR     = GetFirstID('Tanngrisnir'),
 

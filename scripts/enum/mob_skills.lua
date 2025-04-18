@@ -38,6 +38,8 @@ xi.mobSkill =
 
     RANGED_ATTACK_2          =  412,
 
+    DANSE_MACABRE            =  533,
+
     VULTURE_3                =  626,
 
     DISPELLING_WIND          =  813,
@@ -134,6 +136,10 @@ xi.mobSkill =
     MANDIBULAR_BITE_2        = 1845,
 
     RANGED_ATTACK_15         = 1949,
+
+    WATER_BOMB               = 1959,
+
+    IMMORTAL_SHIELD          = 1965,
 
     ECLOSION                 = 1970, -- Unique entry.
 
