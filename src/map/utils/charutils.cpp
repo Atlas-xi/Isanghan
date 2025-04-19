@@ -434,7 +434,7 @@ namespace charutils
             PChar->profile.campaign_allegiance = rset->get<uint8>("campaign_allegiance");
             PChar->setStyleLocked(rset->get<uint32>("isstylelocked") == 1);
             PChar->SetMoghancement(rset->get<uint16>("moghancement"));
-            PChar->lastOnline      = rset->get<uint32>("lastonline");
+            PChar->lastOnline      = earth_time::time_point(std::chrono::seconds(rset->get<uint32>("lastonline")));
             PChar->search.language = rset->get<uint8>("languages");
 
             PChar->m_GMlevel          = rset->get<uint8>("gmlevel");
@@ -706,7 +706,7 @@ namespace charutils
                 PChar->petZoningInfo.petLevel     = rset->get<uint8>("pet_level");
                 PChar->petZoningInfo.respawnPet   = true;
                 auto jugTimestamp                 = static_cast<uint32>(PChar->getCharVar("jugpet-spawn-time"));
-                PChar->petZoningInfo.jugSpawnTime = timer::from_utc(utc_clock::time_point(std::chrono::seconds(jugTimestamp)));
+                PChar->petZoningInfo.jugSpawnTime = timer::from_utc(earth_time::time_point(std::chrono::seconds(jugTimestamp)));
                 PChar->petZoningInfo.jugDuration  = static_cast<uint32>(PChar->getCharVar("jugpet-duration-seconds"));
 
                 // clear the charvars used for jug state
@@ -5512,7 +5512,7 @@ namespace charutils
 
         // These two are jug only variables. We should probably move pet char stats into its own table, but in the meantime
         // we use charvars for jug specific things
-        auto jugTimestamp = std::chrono::time_point_cast<std::chrono::seconds>(timer::to_utc(PChar->petZoningInfo.jugSpawnTime)).time_since_epoch().count();
+        auto jugTimestamp = earth_time::timestamp(timer::to_utc(PChar->petZoningInfo.jugSpawnTime));
         PChar->setCharVar("jugpet-spawn-time", jugTimestamp);
         PChar->setCharVar("jugpet-duration-seconds", static_cast<int32>(PChar->petZoningInfo.jugDuration));
     }
@@ -6785,9 +6785,7 @@ namespace charutils
             value  = rset->get<int32>(0);
             expiry = rset->get<uint32>(1);
 
-            uint32 currentTimestamp = CVanaTime::getInstance()->getSysTime();
-
-            if (expiry > 0 && expiry <= currentTimestamp)
+            if (expiry > 0 && expiry <= earth_time::timestamp())
             {
                 value = 0;
                 db::preparedStmt("DELETE FROM char_vars WHERE charid = ? AND varname = ?", charId, varName);

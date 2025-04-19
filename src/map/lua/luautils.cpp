@@ -1546,7 +1546,7 @@ namespace luautils
     uint32 GetSystemTime()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getSysTime();
+        return earth_time::timestamp();
     }
 
     /************************************************************************
@@ -1558,7 +1558,8 @@ namespace luautils
     uint32 JstMidnight()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getJstMidnight();
+        auto jstMidnight = earth_time::jst::get_next_midnight();
+        return earth_time::timestamp(jstMidnight);
     }
 
     /************************************************************************
@@ -1570,7 +1571,7 @@ namespace luautils
     uint32 JstWeekday()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getJstWeekDay();
+        return earth_time::jst::get_weekday(earth_time::now());
     }
 
     /************************************************************************
@@ -1586,7 +1587,7 @@ namespace luautils
         uint32 numPassed        = timeElapsed / intervalSeconds;
         uint32 secondsRemaining = intervalSeconds - (timeElapsed - (numPassed * intervalSeconds));
 
-        return CVanaTime::getInstance()->getSysTime() + secondsRemaining;
+        return static_cast<uint32>(earth_time::timestamp() + secondsRemaining);
     }
 
     // NOTE: NextJstDay is also defined, and maps to JstMidnight
@@ -1594,13 +1595,7 @@ namespace luautils
     uint32 NextJstWeek()
     {
         TracyZoneScoped;
-        uint32 jstWeekday      = (CVanaTime::getInstance()->getJstWeekDay() + 6) % 7;
-        uint32 nextJstMidnight = CVanaTime::getInstance()->getJstMidnight();
-
-        // Start with the "Next" Midnight, and apply N days worth of time to it
-        // jstWeekday is offset by 1 here, so that Monday (JST) is the reference.
-
-        return nextJstMidnight + (6 - jstWeekday) * 60 * 60 * 24;
+        return earth_time::timestamp(earth_time::get_next_game_week());
     }
 
     // NOTE: NextConquestTally exists for clarity, and is bound to the above function
@@ -4571,7 +4566,7 @@ namespace luautils
     {
         uint32 varTimestamp = expiry.is<uint32>() ? expiry.as<uint32>() : 0;
 
-        if (varTimestamp > 0 && varTimestamp <= CVanaTime::getInstance()->getSysTime())
+        if (varTimestamp > 0 && varTimestamp <= earth_time::timestamp())
         {
             ShowWarning(fmt::format("Attempting to set variable '{}' with an expired time: {}", name, varTimestamp));
             return;
@@ -4589,7 +4584,7 @@ namespace luautils
     {
         uint32 varTimestamp = expiry.is<uint32>() ? expiry.as<uint32>() : 0;
 
-        if (varTimestamp > 0 && varTimestamp <= CVanaTime::getInstance()->getSysTime())
+        if (varTimestamp > 0 && varTimestamp <= earth_time::timestamp())
         {
             ShowWarning(fmt::format("Attempting to set variable '{}' with an expired time: {}", varName, varTimestamp));
             return;
@@ -4608,7 +4603,7 @@ namespace luautils
     {
         uint32 varTimestamp = expiry.is<uint32>() ? expiry.as<uint32>() : 0;
 
-        if (varTimestamp > 0 && varTimestamp <= CVanaTime::getInstance()->getSysTime())
+        if (varTimestamp > 0 && varTimestamp <= earth_time::timestamp())
         {
             ShowWarning(fmt::format("Attempting to set variable '{}' with an expired time: {}", varName, varTimestamp));
             return;

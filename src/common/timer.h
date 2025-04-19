@@ -25,11 +25,12 @@
 #include <chrono>
 
 #include "cbasetypes.h"
+#include "earth_time.h"
 
 namespace timer
 {
     // This clock is not stable across reboots.
-    // Use utc_clock if you need real time.
+    // Use earth_time if you need real time.
     // Use timer::to_utc/timer::from_utc to persist timestamps to the database (status effects).
     using clock      = std::chrono::steady_clock;
     using duration   = clock::duration;
@@ -48,17 +49,17 @@ namespace timer
     }
 
     // https://stackoverflow.com/questions/35282308/convert-between-c11-clocks/35282833#35282833
-    inline utc_clock::time_point to_utc(time_point timer_tp)
+    inline earth_time::time_point to_utc(time_point timer_tp)
     {
-        auto utc_now   = utc_clock::now();
+        auto utc_now   = earth_time::now();
         auto timer_now = clock::now();
-        return std::chrono::time_point_cast<utc_clock::duration>(timer_tp - timer_now + utc_now);
+        return std::chrono::time_point_cast<earth_time::duration>(timer_tp - timer_now + utc_now);
     };
 
-    inline time_point from_utc(utc_clock::time_point utc_tp)
+    inline time_point from_utc(earth_time::time_point utc_tp)
     {
         auto timer_now = clock::now();
-        auto utc_now   = utc_clock::now();
+        auto utc_now   = earth_time::now();
         return utc_tp - utc_now + timer_now;
     };
 

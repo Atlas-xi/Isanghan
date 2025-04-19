@@ -259,13 +259,14 @@ public:
 
     SAVE_CONF playerConfig{}; // Various settings such as chat filter, display head flag, new adventurer, autotarget, etc.
 
-    uint32 lastOnline{ 0 };              // UTC Unix Timestamp of the last time char zoned or logged out
-    bool   isNewPlayer() const;          // Checks if new player bit is unset.
-    bool   isSeekingParty() const;       // is seeking party or not
-    bool   isAnon() const;               // is /anon
-    bool   isAway() const;               // is /away (tells will not go through)
-    bool   isMentor() const;             // If player is a mentor or not.
-    bool   hasAutoTargetEnabled() const; // has autotarget enabled
+    earth_time::time_point lastOnline{}; // UTC time of the last time char zoned or logged out
+
+    bool isNewPlayer() const;          // Checks if new player bit is unset.
+    bool isSeekingParty() const;       // is seeking party or not
+    bool isAnon() const;               // is /anon
+    bool isAway() const;               // is /away (tells will not go through)
+    bool isMentor() const;             // If player is a mentor or not.
+    bool hasAutoTargetEnabled() const; // has autotarget enabled
 
     profile_t       profile{};
     capacityChain_t capacityChain{};
@@ -516,8 +517,8 @@ public:
     std::vector<GearSetMod_t>     m_GearSetMods; // The list of gear set mods currently applied to the character.
     std::vector<AuctionHistory_t> m_ah_history;  // AH history list (in the future consider using UContainer)
 
-    std::unordered_map<uint16, uint32> m_PacketRecievedTimestamps;
-    uint16                             m_LastPacketType{};
+    std::unordered_map<uint16, timer::time_point> m_PacketRecievedTimestamps;
+    uint16                                        m_LastPacketType{};
 
     void   SetPlayTime(uint32 playTime);        // Set playtime
     uint32 GetPlayTime(bool needUpdate = true); // Get playtime
@@ -563,7 +564,8 @@ public:
     int32 GetSecondsElapsedSinceDeath() const;
     int32 GetTimeRemainingUntilDeathHomepoint() const;
 
-    int32 GetTimeCreated();
+    earth_time::time_point GetTimeCreated();
+
     uint8 getHighestJobLevel();
 
     bool isInTriggerArea(uint32 triggerAreaId);

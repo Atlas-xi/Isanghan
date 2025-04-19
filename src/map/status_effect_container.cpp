@@ -1639,12 +1639,13 @@ void CStatusEffectContainer::LoadStatusEffects()
 
             if (flags & EFFECTFLAG_OFFLINE_TICK)
             {
-                auto timestamp = rset->get<uint32>("timestamp");
-                auto startTime = utc_clock::time_point(std::chrono::seconds(timestamp));
-                auto endTime   = startTime + std::chrono::seconds(duration);
-                if (utc_clock::now() < endTime)
+                auto timestamp   = rset->get<uint32>("timestamp");
+                auto startTime   = earth_time::time_point(std::chrono::seconds(timestamp));
+                auto endTime     = startTime + std::chrono::seconds(duration);
+                auto currentTime = earth_time::now();
+                if (currentTime < endTime)
                 {
-                    duration = static_cast<uint32>(timer::get_seconds(endTime - utc_clock::now()));
+                    duration = static_cast<uint32>(timer::get_seconds(endTime - currentTime));
                 }
                 else if (effectID == EFFECT::EFFECT_VISITANT)
                 {
@@ -1766,7 +1767,7 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
                     }
                 }
             }
-            auto timestamp = std::chrono::time_point_cast<std::chrono::seconds>(timer::to_utc(PStatusEffect->GetStartTime())).time_since_epoch().count();
+            auto timestamp = earth_time::timestamp(timer::to_utc(PStatusEffect->GetStartTime()));
             _sql->Query(Query, m_POwner->id, PStatusEffect->GetStatusID(), PStatusEffect->GetIcon(), PStatusEffect->GetPower(), tick, duration,
                         PStatusEffect->GetSubID(), PStatusEffect->GetSubPower(), PStatusEffect->GetTier(), PStatusEffect->GetEffectFlags(),
                         timestamp);

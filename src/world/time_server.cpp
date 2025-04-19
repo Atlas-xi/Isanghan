@@ -36,11 +36,15 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 
     TIMETYPE     VanadielTOTD = CVanaTime::getInstance()->SyncTime();
     WorldServer* worldServer  = std::any_cast<WorldServer*>(PTask->m_data);
+    auto         currentTime  = earth_time::now();
+    auto         jstMinute    = earth_time::jst::get_minute(currentTime);
+    auto         jstHour      = earth_time::jst::get_hour(currentTime);
+    auto         jstWeekday   = earth_time::jst::get_weekday(currentTime);
 
     // Weekly update for conquest (sunday at midnight)
     static timer::time_point lastConquestTally  = tick - 1h;
     static timer::time_point lastConquestUpdate = tick - 1h;
-    if (CVanaTime::getInstance()->getJstWeekDay() == 1 && CVanaTime::getInstance()->getJstHour() == 0 && CVanaTime::getInstance()->getJstMinute() == 0)
+    if (jstWeekday == 1 && jstHour == 0 && jstMinute == 0)
     {
         if (tick > (lastConquestTally + 1h))
         {
@@ -49,7 +53,7 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
         }
     }
     // Hourly conquest update
-    else if (CVanaTime::getInstance()->getJstMinute() == 0)
+    else if (jstMinute == 0)
     {
         if (tick > (lastConquestUpdate + 1h))
         {
@@ -71,7 +75,7 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 
     // JST Midnight
     static timer::time_point lastTickedJstMidnight = tick - 1h;
-    if (CVanaTime::getInstance()->getJstHour() == 0 && CVanaTime::getInstance()->getJstMinute() == 0)
+    if (jstHour == 0 && jstMinute == 0)
     {
         if (tick > (lastTickedJstMidnight + 1h))
         {
@@ -86,7 +90,7 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 
     // 4-hour RoE Timed blocks
     static timer::time_point lastTickedRoeBlock = tick - 1h;
-    if (CVanaTime::getInstance()->getJstHour() % 4 == 0 && CVanaTime::getInstance()->getJstMinute() == 0)
+    if (jstHour % 4 == 0 && jstMinute == 0)
     {
         if (tick > (lastTickedRoeBlock + 1h))
         {

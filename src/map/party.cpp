@@ -1356,7 +1356,7 @@ uint32 CParty::LoadPartySize() const
     return 0;
 }
 
-uint32 CParty::GetTimeLastMemberJoined()
+timer::time_point CParty::GetTimeLastMemberJoined()
 {
     auto* PLeader                    = dynamic_cast<CCharEntity*>(CParty::GetLeader());
     auto  LeaderMemberLastJoinedTime = timer::now();
@@ -1366,7 +1366,7 @@ uint32 CParty::GetTimeLastMemberJoined()
         LeaderMemberLastJoinedTime = PLeader->m_LeaderCreatedPartyTime;
     }
 
-    return (uint32)std::chrono::time_point_cast<std::chrono::seconds>(LeaderMemberLastJoinedTime).time_since_epoch().count();
+    return LeaderMemberLastJoinedTime;
 }
 
 bool CParty::HasTrusts()

@@ -80,8 +80,8 @@ SqlConnection::SqlConnection(const char* user, const char* passwd, const char* h
     m_Db     = db;
 
     // these members will be set up in SetupKeepalive(), they need to be init'd here to appease clang-tidy
-    m_PingInterval = 0;
-    m_LastPing     = 0;
+    m_PingInterval = std::chrono::seconds(0);
+    m_LastPing     = timer::time_point::min();
 
     m_TimersEnabled = false;
 
@@ -152,9 +152,7 @@ int32 SqlConnection::SetEncoding(const char* encoding)
 void SqlConnection::SetupKeepalive()
 {
     TracyZoneScoped;
-    auto now        = timer::now().time_since_epoch();
-    auto nowSeconds = timer::get_seconds(now);
-    m_LastPing      = nowSeconds;
+    m_LastPing = timer::now();
 
     // set a default value first
     uint32 timeout = 7200; // 2 hours
@@ -169,7 +167,7 @@ void SqlConnection::SetupKeepalive()
 
     // 30-second reserve
     uint8 reserve  = 30;
-    m_PingInterval = timeout + reserve;
+    m_PingInterval = std::chrono::seconds(timeout + reserve);
 }
 
 void SqlConnection::EnableTimers()
@@ -179,14 +177,13 @@ void SqlConnection::EnableTimers()
 int32 SqlConnection::TryPing()
 {
     TracyZoneScoped;
-    auto now        = timer::now().time_since_epoch();
-    auto nowSeconds = timer::get_seconds(now);
+    auto now = timer::now();
 
-    if (m_LastPing + m_PingInterval <= nowSeconds)
+    if (m_LastPing + m_PingInterval <= now)
     {
         ShowInfo("(C) Pinging SQL server to keep connection alive");
 
-        m_LastPing = nowSeconds;
+        m_LastPing = now;
 
         auto startId = mysql_thread_id(&self->handle);
         try
@@ -259,17 +256,17 @@ int32 SqlConnection::QueryStr(const char* query)
     }
 
     auto endTime = timer::now();
-    auto dTime   = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    auto dTimeMs = timer::get_milliseconds(endTime - startTime);
 
     if (m_TimersEnabled && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
     {
-        if (dTime > std::chrono::milliseconds(settings::get<uint32>("logging.SQL_SLOW_QUERY_ERROR_TIME")))
+        if (dTimeMs > settings::get<uint32>("logging.SQL_SLOW_QUERY_ERROR_TIME"))
         {
-            ShowError(fmt::format("SQL query took {}ms: {}", dTime.count(), self->buf));
+            ShowError(fmt::format("SQL query took {}ms: {}", dTimeMs, self->buf));
         }
-        else if (dTime > std::chrono::milliseconds(settings::get<uint32>("logging.SQL_SLOW_QUERY_WARNING_TIME")))
+        else if (dTimeMs > settings::get<uint32>("logging.SQL_SLOW_QUERY_WARNING_TIME"))
         {
-            ShowWarning(fmt::format("SQL query took {}ms: {}", dTime.count(), self->buf));
+            ShowWarning(fmt::format("SQL query took {}ms: {}", dTimeMs, self->buf));
         }
     }
 

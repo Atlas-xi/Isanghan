@@ -78,19 +78,6 @@ public:
     uint8  getMoonDirection() const;
     uint8  getRSERace() const;
     uint8  getRSELocation() const;
-    uint32 getSysTime();
-    uint32 getSysHour();
-    uint32 getSysMinute();
-    uint32 getSysSecond();
-    uint32 getSysWeekDay(); // Number of day since sunday
-    uint32 getSysYearDay(); // Number of day since 1st january
-    uint32 getJstHour();
-    uint32 getJstMinute();
-    uint32 getJstSecond();
-    uint32 getJstWeekDay(); // Number of day since sunday
-    uint32 getJstDayOfMonth();
-    uint32 getJstYearDay();  // Number of day since 1st january
-    uint32 getJstMidnight(); // Upcoming JST midnight in unix timestamp
 
     uint32 getVanaTime() const;
     uint32 getEpoch() const;

@@ -342,7 +342,7 @@ public:
     void  setAnimationSpeed(uint8 speedVal);
 
     uint32 getPlaytime(sol::object const& shouldUpdate);
-    int32  getTimeCreated();
+    uint32 getTimeCreated();
 
     // Player Jobs and Levels
     uint8 getMainJob();

@@ -611,12 +611,16 @@ namespace conquest
      *                                                                       *
      ************************************************************************/
 
-    uint8 GetNexTally()
+    uint8 GetNextTally()
     {
-        auto  weekday    = CVanaTime::getInstance()->getSysWeekDay();
-        uint8 dayspassed = (weekday == 0 ? 6 : weekday - 1) * 25;
-        dayspassed += ((CVanaTime::getInstance()->getSysHour() * 60 + CVanaTime::getInstance()->getSysMinute()) * 25) / 1440;
-        return (uint8)(175 - dayspassed);
+        auto currentTime       = earth_time::now();
+        auto nextWeek          = earth_time::get_next_game_week(currentTime);
+        auto secondsUntilTally = timer::get_seconds(nextWeek - currentTime);
+
+        // 3456 Earth seconds in 1 Vana'diel day.
+        uint8 vanaDaysUntilTally = static_cast<uint8>(1 + (secondsUntilTally / 3456));
+
+        return vanaDaysUntilTally;
     }
 
     /************************************************************************

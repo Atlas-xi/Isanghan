@@ -157,15 +157,6 @@ namespace fishingutils
      *                             CALCULATIONS                              *
      *                                                                       *
      ************************************************************************/
-    uint32 GetSundayMidnightTimestamp()
-    {
-        uint32 timestamp = (uint32)time(nullptr);
-        uint32 day       = 6 - CVanaTime::getInstance()->getSysWeekDay();
-        uint32 hour      = 23 - CVanaTime::getInstance()->getSysHour();
-        uint32 mins      = 59 - CVanaTime::getInstance()->getSysMinute();
-        uint32 secs      = 59 - CVanaTime::getInstance()->getSysSecond();
-        return timestamp + secs + (mins * 60) + (hour * 3600) + (day * 86400) + 1;
-    }
 
     uint8 GetMoonPhase()
     {
@@ -1975,8 +1966,7 @@ namespace fishingutils
         }
         else
         {
-            auto secs = timer::get_seconds(utc_clock::now().time_since_epoch());
-            PChar->setCharVar("[Fish]LastCastTime", secs);
+            PChar->setCharVar("[Fish]LastCastTime", earth_time::timestamp());
             PChar->lastCastTime = vanaTime;
             PChar->nextFishTime = PChar->lastCastTime + 5;
         }

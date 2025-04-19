@@ -125,7 +125,7 @@ namespace fishingcontest
             return;
         }
 
-        uint32 currentTime = CVanaTime::getInstance()->getSysTime();
+        uint32 currentTime = earth_time::timestamp();
         if (currentTime > CurrentFishingContest.changeTime)
         {
             FISHING_CONTEST_STATUS newStatus = static_cast<FISHING_CONTEST_STATUS>((static_cast<int>(CurrentFishingContest.status) + 1) % static_cast<int>(FISHING_CONTEST_STATUS::CLOSED));
@@ -653,7 +653,7 @@ namespace fishingcontest
         SetContestFish(fishId);
         SetContestCriteria(criteria);
         SetContestMeasure(measure);
-        SetContestStartTime(CVanaTime::getInstance()->getSysTime());
+        SetContestStartTime(earth_time::timestamp());
         SetContestChangeTime(GetStageChangeTime(FISHING_CONTEST_STATUS::CONTESTING, CurrentFishingContest.startTime));
         SetContestStatus(FISHING_CONTEST_STATUS::CONTESTING);
 

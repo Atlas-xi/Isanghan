@@ -4788,7 +4788,7 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                         else if (!isInYellCooldown)
                         {
                             // CharVar will self-expire and set to zero after the cooldown period
-                            PChar->setCharVar("[YELL]Cooldown", 1, CVanaTime::getInstance()->getSysTime() + yellCooldownTime);
+                            PChar->setCharVar("[YELL]Cooldown", 1, static_cast<uint32>(earth_time::timestamp() + yellCooldownTime));
 
                             message::send(ipc::ChatMessageYell{
                                 .senderId   = PChar->id,

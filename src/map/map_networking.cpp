@@ -454,7 +454,7 @@ int32 MapNetworking::parse(uint8* buff, size_t* buffsize, MapSession* map_sessio
     {
         // Update the time we last got a char sync packet
         // The client can spam some other packets when trying to zone, preventing timely session deletions
-        map_session_data->last_update = time(nullptr);
+        map_session_data->last_update = timer::now();
     }
 
     for (uint8* SmallPD_ptr = PacketData_Begin; SmallPD_ptr + (ref<uint8>(SmallPD_ptr, 1) & 0xFE) * 2 <= PacketData_End && (ref<uint8>(SmallPD_ptr, 1) & 0xFE);

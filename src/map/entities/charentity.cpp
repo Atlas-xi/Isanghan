@@ -2754,7 +2754,7 @@ int32 CCharEntity::GetTimeRemainingUntilDeathHomepoint() const
     return 0x0003A020 - (60 * GetSecondsElapsedSinceDeath());
 }
 
-int32 CCharEntity::GetTimeCreated()
+earth_time::time_point CCharEntity::GetTimeCreated()
 {
     TracyZoneScoped;
 
@@ -2762,10 +2762,10 @@ int32 CCharEntity::GetTimeCreated()
 
     if (rset && rset->rowsCount() && rset->next())
     {
-        return rset->get<int32>(0);
+        return earth_time::time_point(std::chrono::seconds(rset->get<uint32>("UNIX_TIMESTAMP(timecreated)")));
     }
 
-    return 0;
+    return earth_time::time_point::min();
 }
 
 uint8 CCharEntity::getHighestJobLevel()
@@ -3310,12 +3310,11 @@ int32 CCharEntity::getCharVar(std::string const& charVarName)
 {
     if (auto charVar = charVarCache.find(charVarName); charVar != charVarCache.end())
     {
-        std::pair cachedVarData    = charVar->second;
-        uint32    currentTimestamp = CVanaTime::getInstance()->getSysTime();
+        std::pair cachedVarData = charVar->second;
 
         // If the cached variable is not expired, return it.  Else, fall through so that the
         // database can be cleaned up.
-        if (cachedVarData.second == 0 || cachedVarData.second > currentTimestamp)
+        if (cachedVarData.second == 0 || cachedVarData.second > earth_time::timestamp())
         {
             return cachedVarData.first;
         }
@@ -3329,7 +3328,7 @@ int32 CCharEntity::getCharVar(std::string const& charVarName)
 
 auto CCharEntity::getCharVarsWithPrefix(std::string const& prefix) -> std::vector<std::pair<std::string, int32>>
 {
-    const uint32 currentTimestamp = CVanaTime::getInstance()->getSysTime();
+    const auto currentTimestamp = earth_time::timestamp();
 
     std::vector<std::pair<std::string, int32>> charVars;
 

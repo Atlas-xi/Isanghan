@@ -74,10 +74,6 @@ inline void destroy_arr(T*& ptr)
 
 using namespace std::literals::chrono_literals;
 
-// UTC clock. Use sparingly as this is nonmonotonic and susceptible to e.g. NTP time changes.
-// Use timer.h timer namespace for duration measurements.
-using utc_clock = std::chrono::system_clock;
-
 template <class T>
 using MinHeap = std::priority_queue<T, std::vector<T>, std::greater<T>>;
 
