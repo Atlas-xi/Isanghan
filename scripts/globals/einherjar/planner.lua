@@ -58,7 +58,7 @@ local mobPool =
     [xi.einherjar.wing.WING_3] =
     {
         ID.mob.AUDHUMBLA,
-        ID.mob.BERSERKR,
+        utils.appendArrays(ID.mob.BERSERKR_WAR, utils.appendArrays(ID.mob.BERSERKR_BLM, ID.mob.BERSERKR_DRK)),
         ID.mob.CORRUPT_EINHERJAR,
         ID.mob.DJIGGA,
         ID.mob.EXPERIMENTAL_POROGGO,
@@ -73,12 +73,13 @@ local mobPool =
         ID.mob.MANTICORE_X,
         ID.mob.ODINS_JESTER,
         ID.mob.ORMR,
+        ID.mob.SJOKRAKJEN,
         ID.mob.SOULFLAYER,
         ID.mob.UTGARTH_BAT,
         ID.mob.UTGARTH_BATS,
         ID.mob.UTGARTH_LEECH,
         ID.mob.VAMPYR_DOG,
-        ID.mob.VANQUISHED_EINHERJAR,
+        utils.appendArrays(ID.mob.VANQUISHED_EINHERJAR_THF, utils.appendArrays(ID.mob.VANQUISHED_EINHERJAR_BLM, ID.mob.VANQUISHED_EINHERJAR_DRK)),
         ID.mob.WIVRE_X,
     },
 }

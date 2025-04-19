@@ -419,6 +419,22 @@ function utils.any(tbl, predicate)
     return false
 end
 
+-- Returns true if all members of the given table pass the given
+-- predicate function
+---@nodiscard
+---@param tbl table
+---@param predicate function
+---@return boolean
+function utils.all(tbl, predicate)
+    for k, v in pairs(tbl) do
+        if not predicate(k, v) then
+            return false
+        end
+    end
+
+    return true
+end
+
 -- Returns the sum of applying the given function to each element of the given table
 -- e.g: utils.sum({ 1, 2, 3 }, function(k, v) return v end)  --> 6
 ---@nodiscard
