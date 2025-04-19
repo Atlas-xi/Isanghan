@@ -1659,7 +1659,19 @@ namespace battleutils
         float pDIF = 1.0;
 
         auto* targ_weapon = dynamic_cast<CItemWeapon*>(PAttacker->m_Weapons[SLOT_RANGED]);
-        uint8 weaponType  = targ_weapon ? targ_weapon->getSkillType() : static_cast<uint8>(SKILL_MARKSMANSHIP); // TODO: does the no-weapon case actually hit?
+        if (!targ_weapon)
+        {
+            // No ranged weapon, check ammo slot for throwing
+            targ_weapon = dynamic_cast<CItemWeapon*>(PAttacker->m_Weapons[SLOT_AMMO]);
+
+            if (!targ_weapon)
+            {
+                ShowError("battleutils::GetRangedDamageRatio(): No ranged weapon or ammo");
+                return pDIF;
+            }
+        }
+
+        uint8 weaponType = targ_weapon->getSkillType();
 
         auto levelCorrectionFunc = lua["xi"]["combat"]["levelCorrection"]["isLevelCorrectedZone"];
         auto rangedPDIFFunc      = lua["xi"]["combat"]["physical"]["calculateRangedPDIF"];
