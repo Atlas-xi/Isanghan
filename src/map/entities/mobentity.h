@@ -185,9 +185,9 @@ public:
     virtual void FadeOut() override;
     virtual bool isWideScannable() override;
 
-    bool   m_AllowRespawn; // if true, allow respawn
-    uint32 m_RespawnTime;  // respawn time
-    uint32 m_DropItemTime; // time until monster death animation
+    bool            m_AllowRespawn; // if true, allow respawn
+    timer::duration m_RespawnTime;  // respawn time
+    timer::duration m_DropItemTime; // time until monster death animation
 
     uint32 m_DropID; // dropid of items to be dropped. dropid in Database (mob_droplist)
 

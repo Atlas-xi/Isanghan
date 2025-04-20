@@ -217,7 +217,7 @@ void CZoneInstance::IncreaseZoneCounter(CCharEntity* PChar)
 
         if (PChar->PInstance->GetLevelCap() > 0)
         {
-            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_RESTRICTION, EFFECT_LEVEL_RESTRICTION, PChar->PInstance->GetLevelCap(), 0, 0));
+            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_RESTRICTION, EFFECT_LEVEL_RESTRICTION, PChar->PInstance->GetLevelCap(), 0s, 0s));
         }
 
         if (PChar->PInstance->CheckFirstEntry(PChar->id))

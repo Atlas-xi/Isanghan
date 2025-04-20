@@ -45,9 +45,9 @@ bool CRespawnState::Update(timer::time_point tick)
         }
         else
         {
-            if (std::chrono::milliseconds(PMob->m_RespawnTime) != m_spawnTime)
+            if (PMob->m_RespawnTime != m_spawnTime)
             {
-                m_spawnTime = std::chrono::milliseconds(PMob->m_RespawnTime);
+                m_spawnTime = PMob->m_RespawnTime;
             }
         }
     }

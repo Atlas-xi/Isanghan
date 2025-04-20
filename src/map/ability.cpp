@@ -38,7 +38,7 @@ CAbility::CAbility(uint16 id)
 , m_validTarget(0)
 , m_addType(0)
 , m_message(0)
-, m_recastTime(0)
+, m_recastTime(0s)
 , m_recastId(0)
 , m_CE(0)
 , m_VE(0)
@@ -168,12 +168,12 @@ timer::duration CAbility::getCastTime()
     return m_castTime;
 }
 
-void CAbility::setRecastTime(uint16 recastTime)
+void CAbility::setRecastTime(timer::duration recastTime)
 {
-    m_recastTime = (uint16)(recastTime * settings::get<float>("map.ABILITY_RECAST_MULTIPLIER"));
+    m_recastTime = std::chrono::floor<std::chrono::milliseconds>(recastTime * settings::get<float>("map.ABILITY_RECAST_MULTIPLIER"));
 }
 
-uint16 CAbility::getRecastTime() const
+timer::duration CAbility::getRecastTime() const
 {
     return m_recastTime;
 }
@@ -399,7 +399,7 @@ namespace ability
                 PAbility->setJob(static_cast<JOBTYPE>(rset->get<uint8>("job")));
                 PAbility->setLevel(rset->get<uint8>("level"));
                 PAbility->setValidTarget(rset->get<uint16>("validTarget"));
-                PAbility->setRecastTime(rset->get<uint16>("recastTime"));
+                PAbility->setRecastTime(std::chrono::seconds(rset->get<uint16>("recastTime")));
                 PAbility->setMessage(rset->get<uint16>("message1"));
                 // Unused - message2
                 PAbility->setAnimationID(rset->get<uint16>("animation"));
@@ -435,7 +435,7 @@ namespace ability
                 PCharge->job        = static_cast<JOBTYPE>(rset2->get<uint8>("job"));
                 PCharge->level      = rset2->get<uint8>("level");
                 PCharge->maxCharges = rset2->get<uint8>("maxCharges");
-                PCharge->chargeTime = rset2->get<uint32>("chargeTime");
+                PCharge->chargeTime = std::chrono::seconds(rset2->get<uint32>("chargeTime"));
                 PCharge->merit      = rset2->get<uint16>("meritModId");
 
                 PChargesList.emplace_back(std::move(PCharge));

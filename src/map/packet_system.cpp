@@ -1060,7 +1060,7 @@ void SmallPacket0x01A(MapSession* const PSession, CCharEntity* const PChar, CBas
             }
             else if (charutils::hasKeyItem(PChar, 3072 + MountID))
             {
-                if (PChar->PRecastContainer->HasRecast(RECAST_ABILITY, 256, 60))
+                if (PChar->PRecastContainer->HasRecast(RECAST_ABILITY, 256, 60s))
                 {
                     PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 0, 94);
 
@@ -1079,13 +1079,13 @@ void SmallPacket0x01A(MapSession* const PSession, CCharEntity* const PChar, CBas
                                                                   EFFECT_MOUNTED,
                                                                   EFFECT_MOUNTED,
                                                                   MountID ? ++MountID : 0,
-                                                                  0,
-                                                                  1800,
+                                                                  0s,
+                                                                  30min,
                                                                   0,
                                                                   0x40), // previously known as nameflag "FLAG_CHOCOBO"
                                                               EffectNotice::Silent);
 
-                PChar->PRecastContainer->Add(RECAST_ABILITY, 256, 60);
+                PChar->PRecastContainer->Add(RECAST_ABILITY, 256, 60s);
                 PChar->pushPacket<CCharRecastPacket>(PChar);
 
                 luautils::OnPlayerMount(PChar);
@@ -5856,9 +5856,9 @@ void SmallPacket0x0E7(MapSession* const PSession, CCharEntity* const PChar, CBas
 
         if (PChar->PPet == nullptr || (PChar->PPet->m_EcoSystem != ECOSYSTEM::AVATAR && PChar->PPet->m_EcoSystem != ECOSYSTEM::ELEMENTAL))
         {
-            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, settings::get<uint8>("map.HEALING_TICK_DELAY"), 0));
+            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, std::chrono::seconds(settings::get<uint8>("map.HEALING_TICK_DELAY")), 0s));
         }
-        PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEAVEGAME, 0, ExitType, 5, 0));
+        PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEAVEGAME, 0, ExitType, 5s, 0s));
     }
     else if (PChar->animation == ANIMATION_HEALING)
     {
@@ -5870,7 +5870,7 @@ void SmallPacket0x0E7(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             uint8 ExitType = (data.ref<uint8>(0x06) == 1 ? 7 : 35);
 
-            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEAVEGAME, 0, ExitType, 5, 0));
+            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEAVEGAME, 0, ExitType, 5s, 0s));
         }
     }
 }
@@ -5912,7 +5912,7 @@ void SmallPacket0x0E8(MapSession* const PSession, CCharEntity* const PChar, CBas
                 {
                     PChar->PPet->PAI->Disengage();
                 }
-                PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, settings::get<uint8>("map.HEALING_TICK_DELAY"), 0));
+                PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, std::chrono::seconds(settings::get<uint8>("map.HEALING_TICK_DELAY")), 0s));
                 return;
             }
             PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 0, 345);
@@ -6895,7 +6895,7 @@ void SmallPacket0x102(MapSession* const PSession, CCharEntity* const PChar, CBas
                 auto* PSpell  = spell::GetSpell(spellId);
                 if (CBlueSpell* PBlueSpell = dynamic_cast<CBlueSpell*>(PSpell))
                 {
-                    PChar->PRecastContainer->Add(RECAST_MAGIC, static_cast<uint16>(PBlueSpell->getID()), 60);
+                    PChar->PRecastContainer->Add(RECAST_MAGIC, static_cast<uint16>(PBlueSpell->getID()), 60s);
                 }
             }
         }

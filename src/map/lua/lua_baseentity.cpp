@@ -11116,7 +11116,7 @@ void CLuaBaseEntity::addPartyEffect(sol::variadic_args va)
     }
 
     CStatusEffect* PEffect =
-        new CStatusEffect(static_cast<EFFECT>(args[0]), args[1], args[2], args[3], args[4], args[5], args[6]);
+        new CStatusEffect(static_cast<EFFECT>(args[0]), args[1], args[2], std::chrono::seconds(args[3]), std::chrono::seconds(args[4]), args[5], args[6]);
 
     CBattleEntity* PEntity = ((CBattleEntity*)m_PBaseEntity);
 
@@ -12282,7 +12282,7 @@ void CLuaBaseEntity::addRecast(uint8 recastCont, uint16 recastID, uint32 duratio
     {
         RECASTTYPE recastContainer = static_cast<RECASTTYPE>(recastCont);
 
-        PBattleEntity->PRecastContainer->Add(recastContainer, recastID, duration);
+        PBattleEntity->PRecastContainer->Add(recastContainer, recastID, std::chrono::seconds(duration));
         if (PBattleEntity->objtype == TYPE_PC)
         {
             CCharEntity* PChar = (CCharEntity*)m_PBaseEntity;
@@ -12307,7 +12307,7 @@ bool CLuaBaseEntity::hasRecast(uint8 rType, uint16 recastID, sol::object const& 
     if (PBattleEntity)
     {
         RECASTTYPE recastContainer = static_cast<RECASTTYPE>(rType);
-        uint32     recast          = (arg2 != sol::lua_nil) ? arg2.as<uint32>() : 0;
+        auto       recast          = (arg2 != sol::lua_nil) ? std::chrono::seconds(arg2.as<uint32>()) : 0s;
 
         hasRecast = PBattleEntity->PRecastContainer->HasRecast(recastContainer, recastID, recast);
     }
@@ -12334,7 +12334,7 @@ void CLuaBaseEntity::resetRecast(uint8 rType, uint16 recastID)
         if (PChar->PRecastContainer->Has(recastContainer, recastID))
         {
             PChar->PRecastContainer->Del(recastContainer, recastID);
-            PChar->PRecastContainer->Add(recastContainer, recastID, 0);
+            PChar->PRecastContainer->Add(recastContainer, recastID, 0s);
         }
 
         PChar->pushPacket<CCharSkillsPacket>(PChar);
@@ -13244,8 +13244,8 @@ bool CLuaBaseEntity::addStatusEffect(sol::variadic_args va)
         CStatusEffect* PEffect = new CStatusEffect(effectID,
                                                    effectIcon,
                                                    power,
-                                                   tick,
-                                                   duration,
+                                                   std::chrono::seconds(tick),
+                                                   std::chrono::seconds(duration),
                                                    subType,
                                                    subPower,
                                                    tier);
@@ -13260,7 +13260,7 @@ bool CLuaBaseEntity::addStatusEffect(sol::variadic_args va)
             int16 durationModifier = PBattleEntity->getMod(Mod::FOOD_DURATION);
             if (durationModifier)
             {
-                PEffect->SetDuration((uint32)(PEffect->GetDuration() + PEffect->GetDuration() * (durationModifier / 100.0f)));
+                PEffect->SetDuration(PEffect->GetDuration() + std::chrono::floor<std::chrono::milliseconds>(PEffect->GetDuration() * (durationModifier / 100.0f)));
             }
         }
 
@@ -13311,8 +13311,8 @@ bool CLuaBaseEntity::addStatusEffectEx(sol::variadic_args va)
         new CStatusEffect(effectID,
                           effectIcon,
                           power,
-                          tick,
-                          duration,
+                          std::chrono::seconds(tick),
+                          std::chrono::seconds(duration),
                           subType,
                           subPower,
                           tier,
@@ -13470,7 +13470,7 @@ bool CLuaBaseEntity::canGainStatusEffect(uint16 effect, sol::object const& power
         return false;
     }
 
-    CStatusEffect statusEffect(static_cast<EFFECT>(effect), 0, power, 0, 0);
+    CStatusEffect statusEffect(static_cast<EFFECT>(effect), 0, power, 0s, 0s);
 
     return PBattleEntity->StatusEffectContainer->CanGainStatusEffect(&statusEffect);
 }
@@ -14107,8 +14107,8 @@ bool CLuaBaseEntity::addCorsairRoll(uint8 casterJob, uint8 bustDuration, uint16 
     CStatusEffect* PEffect = new CStatusEffect(static_cast<EFFECT>(effectID),                  // Effect ID
                                                effectID,                                       // Effect Icon (Associated with ID)
                                                power,                                          // Power
-                                               tick,                                           // Tick
-                                               duration,                                       // Duration
+                                               std::chrono::seconds(tick),                     // Tick
+                                               std::chrono::seconds(duration),                 // Duration
                                                (arg6 != sol::lua_nil) ? arg6.as<uint32>() : 0, // SubType or 0
                                                (arg7 != sol::lua_nil) ? arg7.as<uint16>() : 0, // SubPower or 0
                                                (arg8 != sol::lua_nil) ? arg8.as<uint16>() : 0  // Tier or 0
@@ -14215,14 +14215,14 @@ bool CLuaBaseEntity::addBardSong(CLuaBaseEntity* PEntity, uint16 effectID, uint1
         return false;
     }
 
-    CStatusEffect* PEffect = new CStatusEffect(static_cast<EFFECT>(effectID), // Effect ID
-                                               effectID,                      // Effect Icon (Associated with ID)
-                                               power,                         // Power
-                                               tick,                          // Tick
-                                               duration,                      // Duration
-                                               subType,                       // SubType
-                                               subPower,                      // SubPower
-                                               tier                           // Tier
+    CStatusEffect* PEffect = new CStatusEffect(static_cast<EFFECT>(effectID),  // Effect ID
+                                               effectID,                       // Effect Icon (Associated with ID)
+                                               power,                          // Power
+                                               std::chrono::seconds(tick),     // Tick
+                                               std::chrono::seconds(duration), // Duration
+                                               subType,                        // SubType
+                                               subPower,                       // SubPower
+                                               tier                            // Tier
     );
 
     uint8 maxSongs = 2;
@@ -16898,7 +16898,7 @@ void CLuaBaseEntity::spawn(sol::object const& despawnSec, sol::object const& res
 
     if (respawnSec != sol::lua_nil)
     {
-        PMob->m_RespawnTime  = respawnSec.as<uint32>() * 1000;
+        PMob->m_RespawnTime  = std::chrono::seconds(respawnSec.as<uint32>());
         PMob->m_AllowRespawn = true;
     }
     else
@@ -17008,7 +17008,7 @@ uint32 CLuaBaseEntity::getRespawnTime()
 
     if (PMob->m_AllowRespawn)
     {
-        return PMob->m_RespawnTime;
+        return static_cast<uint32>(timer::get_seconds(PMob->m_RespawnTime));
     }
 
     return 0;
@@ -17037,7 +17037,7 @@ void CLuaBaseEntity::setRespawnTime(uint32 seconds)
 
     auto* PMob = static_cast<CMobEntity*>(m_PBaseEntity);
 
-    PMob->m_RespawnTime = seconds * 1000;
+    PMob->m_RespawnTime = std::chrono::seconds(seconds);
     if (PMob->PAI->IsCurrentState<CRespawnState>())
     {
         PMob->PAI->GetCurrentState()->ResetEntryTime();

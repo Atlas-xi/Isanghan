@@ -85,14 +85,14 @@ namespace
     };
     // clang-format on
 
-    constexpr int RECAST_SEAL           = 1;
-    constexpr int RECAST_GEODE          = 2;
-    constexpr int SPECIAL_DROP_COOLDOWN = 300; // 5 minutes between special drops
+    constexpr int             RECAST_SEAL           = 1;
+    constexpr int             RECAST_GEODE          = 2;
+    constexpr timer::duration SPECIAL_DROP_COOLDOWN = 5min; // 5 minutes between special drops
 } // namespace
 
 CMobEntity::CMobEntity()
 : m_AllowRespawn(false)
-, m_RespawnTime(300)
+, m_RespawnTime(5min)
 , m_DropItemTime(0)
 , m_DropID(0)
 , m_minLevel(1)
@@ -600,7 +600,7 @@ void CMobEntity::Spawn()
     m_THLvl         = 0;
     m_ItemStolen    = false;
     m_ItemDespoiled = false;
-    m_DropItemTime  = 1000;
+    m_DropItemTime  = 1000ms;
     animationsub    = (uint8)getMobMod(MOBMOD_SPAWN_ANIMATIONSUB);
     SetCallForHelpFlag(false);
 
@@ -1143,7 +1143,7 @@ void CMobEntity::OnDespawn(CDespawnState& /*unused*/)
 {
     TracyZoneScoped;
     FadeOut();
-    PAI->Internal_Respawn(std::chrono::milliseconds(m_RespawnTime));
+    PAI->Internal_Respawn(m_RespawnTime);
     luautils::OnMobDespawn(this);
     // #event despawn
     PAI->EventHandler.triggerListener("DESPAWN", this);
@@ -1168,7 +1168,7 @@ void CMobEntity::Die()
     CBattleEntity::Die();
 
     // clang-format off
-    PAI->QueueAction(queueAction_t(std::chrono::milliseconds(m_DropItemTime), false, [this](CBaseEntity* PEntity)
+    PAI->QueueAction(queueAction_t(m_DropItemTime, false, [this](CBaseEntity* PEntity)
     {
         if (static_cast<CMobEntity*>(PEntity)->isDead())
         {

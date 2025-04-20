@@ -678,12 +678,12 @@ enum ABILITY
 
 struct Charge_t
 {
-    uint16  ID;         // recastId
-    JOBTYPE job;        // job
-    uint8   level;      // level
-    uint8   maxCharges; // maximum number of stored charges
-    uint32  chargeTime; // time required to restore one charge
-    uint16  merit;
+    uint16          ID;         // recastId
+    JOBTYPE         job;        // job
+    uint8           level;      // level
+    uint8           maxCharges; // maximum number of stored charges
+    timer::duration chargeTime; // time required to restore one charge
+    uint16          merit;
 };
 
 /************************************************************************
@@ -714,7 +714,7 @@ public:
     uint16          getAddType() const;
     uint16          getMessage() const;
     uint16          getAoEMsg() const;
-    uint16          getRecastTime() const;
+    timer::duration getRecastTime() const;
     uint16          getRecastId() const;
     int32           getCE() const;
     int32           getVE() const;
@@ -734,7 +734,7 @@ public:
     void setValidTarget(uint16 validTarget);
     void setAddType(uint16 addtype);
     void setMessage(uint16 message);
-    void setRecastTime(uint16 recastTime);
+    void setRecastTime(timer::duration recastTime);
     void setRecastId(uint16 recastId);
     void setCE(int32 CE);
     void setVE(int32 VE);
@@ -757,7 +757,7 @@ private:
     uint16          m_validTarget;
     uint16          m_addType;
     uint16          m_message;
-    uint16          m_recastTime;
+    timer::duration m_recastTime{};
     uint16          m_recastId;
     int32           m_CE;
     int32           m_VE;

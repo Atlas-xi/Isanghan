@@ -53,10 +53,10 @@ public:
     CSpell*      GetSpell();
     virtual void TryInterrupt(CBattleEntity* PAttacker) override;
 
-    void   SpendCost();
-    uint32 GetRecast();
-    void   ApplyEnmity(CBattleEntity* PTarget, int ce, int ve);
-    void   ApplyMagicCoverEnmity(CBattleEntity* PCoverAbilityTarget, CBattleEntity* PCoverAbilityUser, CMobEntity* PMob);
+    void            SpendCost();
+    timer::duration GetRecast();
+    void            ApplyEnmity(CBattleEntity* PTarget, int ce, int ve);
+    void            ApplyMagicCoverEnmity(CBattleEntity* PCoverAbilityTarget, CBattleEntity* PCoverAbilityUser, CMobEntity* PMob);
 
     void SetInstantCast(bool const bInstantCast)
     {

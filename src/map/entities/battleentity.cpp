@@ -1969,7 +1969,7 @@ void CBattleEntity::OnCastInterrupted(CMagicState& state, action_t& action, MSGB
     {
         action.id         = id;
         action.spellgroup = PSpell->getSpellGroup();
-        action.recast     = 0;
+        action.recast     = 0s;
         action.actiontype = ACTION_MAGIC_INTERRUPT;
 
         actionList_t& actionList  = action.getNewActionList();
@@ -2517,7 +2517,7 @@ bool CBattleEntity::OnAttack(CAttackState& state, action_t& action)
                 // Apply Feint
                 if (CStatusEffect* PFeintEffect = StatusEffectContainer->GetStatusEffect(EFFECT_FEINT))
                 {
-                    if (PTarget->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_EVASION_DOWN, EFFECT_EVASION_DOWN, PFeintEffect->GetPower(), 3, 30)))
+                    if (PTarget->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_EVASION_DOWN, EFFECT_EVASION_DOWN, PFeintEffect->GetPower(), 3s, 30s)))
                     {
                         auto PEffect = PTarget->StatusEffectContainer->GetStatusEffect(EFFECT_EVASION_DOWN);
 

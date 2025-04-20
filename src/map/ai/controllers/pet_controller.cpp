@@ -141,7 +141,7 @@ bool CPetController::PetIsHealing()
     {
         // animation down
         PPet->animation = ANIMATION_HEALING;
-        PPet->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, settings::get<uint8>("map.HEALING_TICK_DELAY"), 0));
+        PPet->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, std::chrono::seconds(settings::get<uint8>("map.HEALING_TICK_DELAY")), 0s));
         PPet->updatemask |= UPDATE_HP;
         return true;
     }

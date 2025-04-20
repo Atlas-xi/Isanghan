@@ -720,7 +720,7 @@ bool CAutomatonController::TryEnfeeble(const CurrentManeuvers& maneuvers)
             // clang-format off
             PTarget->StatusEffectContainer->ForEachEffect([&dispel](CStatusEffect* PStatus)
             {
-                if (!dispel && PStatus->GetDuration() > 0)
+                if (!dispel && PStatus->GetDuration() > 0s)
                 {
                     if (PStatus->HasEffectFlag(EFFECTFLAG_DISPELABLE))
                     {
@@ -1083,7 +1083,7 @@ bool CAutomatonController::TryStatusRemoval(const CurrentManeuvers& maneuvers)
     // clang-format off
     PAutomaton->PMaster->StatusEffectContainer->ForEachEffect([&castPriority](CStatusEffect* PStatus)
     {
-        if (PStatus->GetDuration() > 0)
+        if (PStatus->GetDuration() > 0s)
         {
             auto id = automaton::FindNaSpell(PStatus);
             if (id.has_value())
@@ -1107,7 +1107,7 @@ bool CAutomatonController::TryStatusRemoval(const CurrentManeuvers& maneuvers)
     // clang-format off
     PAutomaton->StatusEffectContainer->ForEachEffect([&castPriority](CStatusEffect* PStatus)
     {
-        if (PStatus->GetDuration() > 0)
+        if (PStatus->GetDuration() > 0s)
         {
             auto id = automaton::FindNaSpell(PStatus);
             if (id.has_value())
@@ -1137,7 +1137,7 @@ bool CAutomatonController::TryStatusRemoval(const CurrentManeuvers& maneuvers)
                 // clang-format off
                 member->StatusEffectContainer->ForEachEffect([&castPriority](CStatusEffect* PStatus)
                 {
-                    if (PStatus->GetDuration() > 0)
+                    if (PStatus->GetDuration() > 0s)
                     {
                         auto id = automaton::FindNaSpell(PStatus);
                         if (id.has_value())
@@ -1217,7 +1217,7 @@ bool CAutomatonController::TryEnhance()
         PAutomaton->PMaster->StatusEffectContainer->ForEachEffect(
             [&protect, &protectcount, &shell, &shellcount, &haste, &stoneskin, &phalanx](CStatusEffect* PStatus)
             {
-                if (PStatus->GetDuration() > 0)
+                if (PStatus->GetDuration() > 0s)
                 {
                     if (PStatus->GetStatusID() == EFFECT_PROTECT)
                     {
@@ -1297,7 +1297,7 @@ bool CAutomatonController::TryEnhance()
     // clang-format off
     PAutomaton->StatusEffectContainer->ForEachEffect([&protect, &shell, &haste](CStatusEffect* PStatus)
     {
-        if (PStatus->GetDuration() > 0)
+        if (PStatus->GetDuration() > 0s)
         {
             if (PStatus->GetStatusID() == EFFECT_PROTECT)
             {
@@ -1370,7 +1370,7 @@ bool CAutomatonController::TryEnhance()
 
                 PMember->StatusEffectContainer->ForEachEffect([&protect, &protectcount, &shell, &shellcount, &haste](CStatusEffect* PStatus)
                 {
-                    if (PStatus->GetDuration() > 0)
+                    if (PStatus->GetDuration() > 0s)
                     {
                         if (PStatus->GetStatusID() == EFFECT_PROTECT)
                         {
@@ -1615,7 +1615,7 @@ bool CAutomatonController::CanCastSpells()
 
 bool CAutomatonController::Cast(uint16 targid, SpellID spellid)
 {
-    if (!automaton::CanUseSpell(PAutomaton, spellid) || PAutomaton->PRecastContainer->HasRecast(RECAST_MAGIC, static_cast<uint16>(spellid), 0))
+    if (!automaton::CanUseSpell(PAutomaton, spellid) || PAutomaton->PRecastContainer->HasRecast(RECAST_MAGIC, static_cast<uint16>(spellid), 0s))
     {
         return false;
     }
@@ -1625,7 +1625,7 @@ bool CAutomatonController::Cast(uint16 targid, SpellID spellid)
 
 bool CAutomatonController::MobSkill(uint16 targid, uint16 wsid)
 {
-    if (PAutomaton->PRecastContainer->HasRecast(RECAST_ABILITY, wsid, 0))
+    if (PAutomaton->PRecastContainer->HasRecast(RECAST_ABILITY, wsid, 0s))
     {
         return false;
     }

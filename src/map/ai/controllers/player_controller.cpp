@@ -48,7 +48,7 @@ void CPlayerController::Tick(timer::time_point /*tick*/)
 bool CPlayerController::Cast(uint16 targid, SpellID spellid)
 {
     auto* PChar = static_cast<CCharEntity*>(POwner);
-    if (!PChar->PRecastContainer->HasRecast(RECAST_MAGIC, static_cast<uint16>(spellid), 0))
+    if (!PChar->PRecastContainer->HasRecast(RECAST_MAGIC, static_cast<uint16>(spellid), 0s))
     {
         if (auto target = PChar->GetEntity(targid); target && target->PAI->IsUntargetable())
         {
@@ -126,15 +126,15 @@ bool CPlayerController::Ability(uint16 targid, uint16 abilityid)
             Recast_t* recast = PChar->PRecastContainer->GetRecast(RECAST_ABILITY, PAbility->getRecastId());
             // Set recast time in seconds to the normal recast time minus any charge time with the difference of the current time minus when the recast was set.
             // Abilities without a charge will have zero chargeTime
-            uint32 recastSeconds = recast->RecastTime - ((uint32)time(nullptr) - recast->TimeStamp);
+            timer::duration currentRecast = timer::now() - recast->TimeStamp - recast->RecastTime;
             // Abilities with a single charge (low-level scholoar stratagems) behave like abilities without a charge
             if (recast->maxCharges > 1)
             {
-                recastSeconds -= (recast->maxCharges - 1) * recast->chargeTime;
+                currentRecast -= recast->chargeTime * (recast->maxCharges - 1);
             }
 
             PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 0, MSGBASIC_UNABLE_TO_USE_JA2);
-            PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, recastSeconds, 0, MSGBASIC_TIME_LEFT);
+            PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, timer::get_seconds(currentRecast), 0, MSGBASIC_TIME_LEFT);
             return false;
         }
         if (auto target = PChar->GetEntity(targid); target && target->PAI->IsUntargetable())

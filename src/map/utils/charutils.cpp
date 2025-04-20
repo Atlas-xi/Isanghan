@@ -736,12 +736,12 @@ namespace charutils
         {
             while (rset->next())
             {
-                uint32    cast_time  = rset->get<uint32>("time");
-                uint32    recast     = rset->get<uint32>("recast");
-                time_t    now        = time(nullptr);
-                uint32    chargeTime = 0;
-                uint8     maxCharges = 0;
-                Charge_t* charge     = ability::GetCharge(PChar, rset->get<uint32>("id"));
+                auto            now        = timer::now();
+                auto            cast_time  = timer::from_utc(earth_time::time_point(std::chrono::seconds(rset->get<uint32>("time"))));
+                auto            recast     = std::chrono::seconds(rset->get<uint32>("recast"));
+                timer::duration chargeTime = 0s;
+                uint8           maxCharges = 0;
+                Charge_t*       charge     = ability::GetCharge(PChar, rset->get<uint32>("id"));
                 if (charge != nullptr)
                 {
                     chargeTime = charge->chargeTime;
@@ -749,7 +749,7 @@ namespace charutils
                 }
                 if (now < cast_time + recast)
                 {
-                    PChar->PRecastContainer->Load(RECAST_ABILITY, rset->get<uint32>("id"), (cast_time + recast - (uint32)now), chargeTime, maxCharges);
+                    PChar->PRecastContainer->Load(RECAST_ABILITY, rset->get<uint32>("id"), (cast_time + recast - now), chargeTime, maxCharges);
                 }
             }
         }
@@ -2756,7 +2756,7 @@ namespace charutils
                     {
                         PItem->setAssignTime(CVanaTime::getInstance()->getVanaTime());
                         PChar->PRecastContainer->Add(RECAST_ITEM, slotID << 8 | containerID,
-                                                     PItem->getReuseTime() / 1000); // add recast timer to Recast List from any bag
+                                                     std::chrono::milliseconds(PItem->getReuseTime())); // add recast timer to Recast List from any bag
 
                         // Do not forget to update the timer when equipping the subject
 
@@ -3098,17 +3098,17 @@ namespace charutils
                 if (PAbility->getID() < ABILITY_HEALING_RUBY && PAbility->getID() != ABILITY_PET_COMMANDS && CheckAbilityAddtype(PChar, PAbility))
                 {
                     addAbility(PChar, PAbility->getID());
-                    Charge_t* charge     = ability::GetCharge(PChar, PAbility->getRecastId());
-                    auto      chargeTime = 0;
-                    auto      maxCharges = 0;
+                    Charge_t*       charge     = ability::GetCharge(PChar, PAbility->getRecastId());
+                    timer::duration chargeTime = 0s;
+                    auto            maxCharges = 0;
                     if (charge)
                     {
-                        chargeTime = charge->chargeTime - PChar->PMeritPoints->GetMeritValue((MERIT_TYPE)charge->merit, PChar);
+                        chargeTime = charge->chargeTime - std::chrono::seconds(PChar->PMeritPoints->GetMeritValue((MERIT_TYPE)charge->merit, PChar));
                         maxCharges = charge->maxCharges;
                     }
                     if (!PChar->PRecastContainer->Has(RECAST_ABILITY, PAbility->getRecastId()))
                     {
-                        PChar->PRecastContainer->Add(RECAST_ABILITY, PAbility->getRecastId(), 0, chargeTime, maxCharges);
+                        PChar->PRecastContainer->Add(RECAST_ABILITY, PAbility->getRecastId(), 0s, chargeTime, maxCharges);
                     }
                 }
             }
@@ -3138,17 +3138,17 @@ namespace charutils
                     if (PAbility->getID() != ABILITY_PET_COMMANDS && CheckAbilityAddtype(PChar, PAbility) && !(PAbility->getAddType() & ADDTYPE_MAIN_ONLY))
                     {
                         addAbility(PChar, PAbility->getID());
-                        Charge_t* charge     = ability::GetCharge(PChar, PAbility->getRecastId());
-                        auto      chargeTime = 0;
-                        auto      maxCharges = 0;
+                        Charge_t*       charge     = ability::GetCharge(PChar, PAbility->getRecastId());
+                        timer::duration chargeTime = 0s;
+                        auto            maxCharges = 0;
                         if (charge)
                         {
-                            chargeTime = charge->chargeTime - PChar->PMeritPoints->GetMeritValue((MERIT_TYPE)charge->merit, PChar);
+                            chargeTime = charge->chargeTime - std::chrono::seconds(PChar->PMeritPoints->GetMeritValue((MERIT_TYPE)charge->merit, PChar));
                             maxCharges = charge->maxCharges;
                         }
                         if (!PChar->PRecastContainer->Has(RECAST_ABILITY, PAbility->getRecastId()))
                         {
-                            PChar->PRecastContainer->Add(RECAST_ABILITY, PAbility->getRecastId(), 0, chargeTime, maxCharges);
+                            PChar->PRecastContainer->Add(RECAST_ABILITY, PAbility->getRecastId(), 0s, chargeTime, maxCharges);
                         }
                     }
                 }
@@ -6353,10 +6353,10 @@ namespace charutils
             CBattleEntity* PSyncTarget = PChar->PParty->GetSyncTarget();
             if (PSyncTarget && PChar->getZone() == PSyncTarget->getZone() && !(PChar->StatusEffectContainer->HasStatusEffect(EFFECT_LEVEL_SYNC)) &&
                 PSyncTarget->StatusEffectContainer->HasStatusEffect(EFFECT_LEVEL_SYNC) &&
-                PSyncTarget->StatusEffectContainer->GetStatusEffect(EFFECT_LEVEL_SYNC)->GetDuration() == 0)
+                PSyncTarget->StatusEffectContainer->GetStatusEffect(EFFECT_LEVEL_SYNC)->GetDuration() == 0s)
             {
                 PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, PSyncTarget->GetMLevel(), 540);
-                PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_SYNC, EFFECT_LEVEL_SYNC, PSyncTarget->GetMLevel(), 0, 0), EffectNotice::Silent);
+                PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_SYNC, EFFECT_LEVEL_SYNC, PSyncTarget->GetMLevel(), 0s, 0s), EffectNotice::Silent);
                 PChar->StatusEffectContainer->DelStatusEffectsByFlag(EFFECTFLAG_DISPELABLE);
             }
 

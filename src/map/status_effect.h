@@ -793,8 +793,8 @@ public:
     uint16           GetEffectType() const;
     uint8            GetEffectSlot() const;
 
-    uint32            GetTickTime() const;
-    uint32            GetDuration() const;
+    timer::duration   GetTickTime() const;
+    timer::duration   GetDuration() const;
     int               GetElapsedTickCount() const;
     timer::time_point GetStartTime();
     CBattleEntity*    GetOwner();
@@ -810,9 +810,9 @@ public:
     void SetPower(uint16 Power);
     void SetSubPower(uint16 subPower);
     void SetTier(uint16 tier);
-    void SetDuration(uint32 Duration);
+    void SetDuration(timer::duration Duration);
     void SetOwner(CBattleEntity* Owner);
-    void SetTickTime(uint32 tick);
+    void SetTickTime(timer::duration tick);
 
     void IncrementElapsedTickCount();
     void SetStartTime(timer::time_point StartTime);
@@ -827,7 +827,7 @@ public:
     std::vector<CModifier> modList; // List of modifiers
     bool                   deleted{ false };
 
-    CStatusEffect(EFFECT id, uint16 icon, uint16 power, uint32 tick, uint32 duration, uint32 subid = 0, uint16 subPower = 0, uint16 tier = 0, uint32 flags = 0);
+    CStatusEffect(EFFECT id, uint16 icon, uint16 power, timer::duration tick, timer::duration duration, uint32 subid = 0, uint16 subPower = 0, uint16 tier = 0, uint32 flags = 0);
 
     ~CStatusEffect();
 
@@ -846,10 +846,10 @@ private:
     uint16           m_Type{ 0 };                                   // Used to enforce only one
     uint8            m_Slot{ 0 };                                   // Used to determine slot order for songs/rolls
 
-    uint32            m_TickTime{ 0 };  // Effect repetition time (ms)
-    uint32            m_Duration{ 0 };  // Duration of effect (ms)
-    timer::time_point m_StartTime;      // Time to obtain effect (ms)
-    int               m_tickCount{ 0 }; // Time of last effect execution (ms)
+    timer::duration   m_TickTime{ 0ms }; // Effect repetition time
+    timer::duration   m_Duration{ 0ms }; // Duration of effect
+    timer::time_point m_StartTime;       // Time to obtain effect
+    int               m_tickCount{ 0 };  // Elapsed ticks
 
     std::string m_Name; // Effect name for scripts
 };

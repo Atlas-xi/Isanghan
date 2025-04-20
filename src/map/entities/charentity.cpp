@@ -1415,7 +1415,7 @@ void CCharEntity::OnCastFinished(CMagicState& state, action_t& action)
                     auto scEffect = PTarget->StatusEffectContainer->GetStatusEffect(EFFECT_SKILLCHAIN, 0);
                     if (isHelix && scEffect)
                     {
-                        scEffect->SetDuration(scEffect->GetDuration() + 2000);
+                        scEffect->SetDuration(scEffect->GetDuration() + 2s);
                     }
                 }
             }
@@ -1721,17 +1721,22 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
         }
 
         // get any available merit recast reduction
-        uint8 meritRecastReduction = 0;
+        auto meritRecastReduction = 0s;
 
         if (PAbility->getMeritModID() > 0 && !(PAbility->getAddType() & ADDTYPE_MERIT))
         {
-            meritRecastReduction = PMeritPoints->GetMeritValue((MERIT_TYPE)PAbility->getMeritModID(), this);
+            meritRecastReduction = std::chrono::seconds(PMeritPoints->GetMeritValue((MERIT_TYPE)PAbility->getMeritModID(), this));
         }
 
         auto* charge = ability::GetCharge(this, PAbility->getRecastId());
         if (charge && PAbility->getID() != ABILITY_SIC)
         {
-            action.recast = charge->chargeTime * PAbility->getRecastTime() - meritRecastReduction;
+            // TODO: this is bad
+            // "recast" 1-4 = sic/ready
+            // "recast" 1 = quickdraw, stratagems
+            auto crypticRecastSecondsAsType = timer::get_seconds(PAbility->getRecastTime());
+
+            action.recast = charge->chargeTime * crypticRecastSecondsAsType - meritRecastReduction;
         }
         else
         {
@@ -1742,7 +1747,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
         {
             if (this->StatusEffectContainer->HasStatusEffect(EFFECT_TABULA_RASA))
             {
-                action.recast = 0;
+                action.recast = 0s;
             }
         }
         else if (PAbility->getRecastId() == 173 || PAbility->getRecastId() == 174) // BP rage, BP ward
@@ -1762,10 +1767,10 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
 
             // Localvar will set the BP ability timer when the move consumes MP
             // The delay is snapshot when the player uses the ability: https://www.bg-wiki.com/ffxi/Blood_Pact_Ability_Delay
-            this->SetLocalVar("bpRecastTime", static_cast<uint16>(std::max<int16>(0, action.recast - bloodPactDelayReduction)));
+            this->SetLocalVar("bpRecastTime", static_cast<uint16>(timer::get_seconds(std::max<timer::duration>(0s, action.recast - std::chrono::seconds(bloodPactDelayReduction)))));
 
             // Recast is actually triggered when the bp goes off (no recast packet at all on using a bp and the target moving out of range of the pet)
-            action.recast = 0;
+            action.recast = 0s;
         }
 
         // remove invisible if aggressive
@@ -1799,12 +1804,12 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             {
                 // TODO: Transform this into an item Mod::REWARD_RECAST perhaps ?
                 // The Bison/Brave's Warbonnet & Khimaira/Stout Bonnet reduces recast time by 10 seconds.
-                action.recast -= 10; // remove 10 seconds
+                action.recast -= 10s; // remove 10 seconds
             }
         }
         else if (PAbility->getID() == ABILITY_READY || PAbility->getID() == ABILITY_SIC)
         {
-            action.recast = static_cast<uint16>(std::max<int16>(0, action.recast - getMod(Mod::SIC_READY_RECAST)));
+            action.recast = std::max<timer::duration>(0s, action.recast - std::chrono::seconds(getMod(Mod::SIC_READY_RECAST)));
         }
 
         action.id         = this->id;
@@ -1895,7 +1900,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
                     addMP((int32)-mpCost);
                     if (this->GetLocalVar("bpRecastTime") > 0) // This will go away when all smn petskills are handled via jobutils/summoner.lua
                     {
-                        action.recast = this->GetLocalVar("bpRecastTime");
+                        action.recast = std::chrono::seconds(this->GetLocalVar("bpRecastTime"));
                     }
 
                     if (PAbility->getValidTarget() == TARGET_SELF)
@@ -2446,15 +2451,15 @@ void CCharEntity::OnRaise()
         // add weakness effect (75% reduction in HP/MP)
         if (GetLocalVar("MijinGakure") == 0)
         {
-            uint32 weaknessTime = 300;
+            auto weaknessTime = 5min;
 
             // Arise has a reduced weakness time of 3 mins
             if (m_hasArise)
             {
-                weaknessTime = 180;
+                weaknessTime = 3min;
             }
 
-            CStatusEffect* PWeaknessEffect = new CStatusEffect(EFFECT_WEAKNESS, EFFECT_WEAKNESS, m_weaknessLvl, 0, weaknessTime);
+            CStatusEffect* PWeaknessEffect = new CStatusEffect(EFFECT_WEAKNESS, EFFECT_WEAKNESS, m_weaknessLvl, 0s, weaknessTime);
             StatusEffectContainer->AddStatusEffect(PWeaknessEffect);
         }
 
@@ -2519,7 +2524,7 @@ void CCharEntity::OnRaise()
         // If Arise was used then apply a reraise 3 effect on the target
         if (m_hasArise)
         {
-            CStatusEffect* PReraiseEffect = new CStatusEffect(EFFECT_RERAISE, EFFECT_RERAISE, 3, 0, 3600);
+            CStatusEffect* PReraiseEffect = new CStatusEffect(EFFECT_RERAISE, EFFECT_RERAISE, 3, 0s, 1h);
             StatusEffectContainer->AddStatusEffect(PReraiseEffect);
         }
 
@@ -2588,7 +2593,7 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
         if (PItem->getCurrentCharges() != 0)
         {
             this->PRecastContainer->Add(RECAST_ITEM, PItem->getSlotID() << 8 | PItem->getLocationID(),
-                                        PItem->getReuseTime() / 1000); // add recast timer to Recast List from any bag
+                                        std::chrono::milliseconds(PItem->getReuseTime())); // add recast timer to Recast List from any bag
         }
     }
     else // unlock all items except equipment

@@ -44,13 +44,9 @@ CStatusEffectPacket::CStatusEffectPacket(CCharEntity* PChar)
             ref<uint16>(0x08 + (i * 0x02)) = PEffect->GetIcon();
             // this value overflows, but the client expects the overflowed timestamp and corrects it
             ref<uint32>(0x48 + (i * 0x04)) =
-                PEffect->GetDuration() == 0 || (PEffect->HasEffectFlag(EFFECTFLAG_HIDE_TIMER))
+                PEffect->GetDuration() == 0s || (PEffect->HasEffectFlag(EFFECTFLAG_HIDE_TIMER))
                     ? 0x7FFFFFFF
-                    : (((PEffect->GetDuration() -
-                         static_cast<uint32>(timer::get_milliseconds(timer::now() - PEffect->GetStartTime()))) /
-                        1000) +
-                       CVanaTime::getInstance()->getVanaTime()) *
-                          60;
+                    : (timer::get_seconds(timer::now() - PEffect->GetStartTime() - PEffect->GetDuration()) + CVanaTime::getInstance()->getVanaTime()) * 60;
             ++i;
         }
     });

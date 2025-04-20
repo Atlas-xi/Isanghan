@@ -1731,7 +1731,7 @@ namespace luautils
 
             if (arg3.is<uint32>())
             {
-                PMob->m_RespawnTime  = arg3.as<uint32>() * 1000;
+                PMob->m_RespawnTime  = std::chrono::seconds(arg3.as<uint32>());
                 PMob->m_AllowRespawn = true;
             }
             else
@@ -4843,7 +4843,7 @@ namespace luautils
 
         if (PMob != nullptr)
         {
-            return PMob->m_RespawnTime / 1000;
+            return static_cast<uint32>(timer::get_seconds(PMob->m_RespawnTime));
         }
 
         ShowError("luautils::GetMobAction: mob <%u> was not found", mobid);
@@ -5535,7 +5535,7 @@ namespace luautils
             const auto respawn = table["respawn"].get_or<uint32>(0);
             if (respawn > 0)
             {
-                PMob->m_RespawnTime  = respawn * 1000;
+                PMob->m_RespawnTime  = std::chrono::seconds(respawn);
                 PMob->m_AllowRespawn = true;
             }
             else
