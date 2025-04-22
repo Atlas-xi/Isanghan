@@ -2,9 +2,11 @@
 -- Blue Magic utilities
 -- Used for Blue Magic spells.
 -----------------------------------
+require('scripts/globals/combat/physical_utilities')
+require('scripts/globals/combat/magic_hit_rate')
 require('scripts/globals/magic')
 require('scripts/globals/mobskills')
-require('scripts/globals/combat/physical_utilities')
+require('scripts/globals/spells/damage_spell')
 -----------------------------------
 xi = xi or {}
 xi.spells = xi.spells or {}
@@ -416,11 +418,15 @@ xi.spells.blue.useDrainSpell = function(caster, target, spell, params, damageCap
     return finalDamage
 end
 
--- Get the damage and resistance for a breath Blue Magic spell
-xi.spells.blue.useBreathSpell = function(caster, target, spell, params, isConal)
-    local results = {}
-    results[1] = 0 -- damage
-    results[2] = 0 -- resistance (used in spell to determine added effect resistance)
+-- Breath-type blue magic spells.
+xi.spells.blue.useBreathSpell = function(caster, target, spell, params)
+    -- Early return.
+    if
+        parmas.isConal and               -- Conal breath spells
+        not target:isInfront(caster, 32) -- Conal check (45° cone)
+    then
+        return 0
+    end
 
     -- Initial damage
     local dmg = caster:getHP() / params.hpMod
@@ -428,39 +434,87 @@ xi.spells.blue.useBreathSpell = function(caster, target, spell, params, isConal)
         dmg = dmg + caster:getMainLvl() / params.lvlMod
     end
 
-    -- Conal breath spells
-    if isConal then
-        -- Conal check (45° cone)
-        local isInCone = 0
-        if target:isInfront(caster, 32) then
-            isInCone = 1
-        end
+    -- Parameters
+    local spellId      = spell:getID() or 0
+    local spellFamily  = spell:getSpellFamily() or 0
+    local spellElement = spell:getElement() or 0
 
-        dmg = dmg * isInCone
+    -- Multipliers
+    local correlationMultiplier       = 1 + calculateCorrelation(params.ecosystem, target:getEcosystem(), caster:getMerit(xi.merit.MONSTER_CORRELATION))
+    local breathSDT                   = 1 + caster:getMod(xi.mod.BREATH_DMG_DEALT) / 100)
+
+    local targetMagicDamageAdjustment = xi.spells.damage.calculateTMDA(target, spellElement)
+    local multipleTargetReduction     = xi.spells.damage.calculateMTDR(spell)
+    local elementalStaffBonus         = xi.spells.damage.calculateElementalStaffBonus(caster, spellElement)
+    local elementalAffinityBonus      = xi.spells.damage.calculateElementalAffinityBonus(caster, spellElement)
+    local resistTier                  = xi.combat.magicHitRate.calculateResistRate(caster, target, spellFamily, xi.skill.BLUE_MAGIC, 0, spellElement, 0, 0, 0)
+    local additionalResistTier        = xi.spells.damage.calculateAdditionalResistTier(caster, target, spellElement)
+    local elementalSDT                = xi.spells.damage.calculateSDT(target, spellElement)
+    local dayAndWeather               = xi.spells.damage.calculateDayAndWeather(caster, spellElement, false)
+    local magicBonusDiff              = xi.spells.damage.calculateMagicBonusDiff(caster, target, spellId, xi.skill.BLUE_MAGIC, spellElement)
+    local skillTypeMultiplier         = xi.spells.damage.calculateSkillTypeMultiplier(xi.skill.BLUE_MAGIC)
+    local ninFutaeBonus               = xi.spells.damage.calculateNinFutaeBonus(caster, xi.skill.BLUE_MAGIC)
+    local ninjutsuMultiplier          = xi.spells.damage.calculateNinjutsuMultiplier(caster, target, xi.skill.BLUE_MAGIC)
+    local scarletDeliriumMultiplier   = xi.spells.damage.calculateScarletDeliriumMultiplier(caster)
+    local areaOfEffectResistance      = xi.spells.damage.calculateAreaOfEffectResistance(target, spell)
+
+    dmg = math.floor(dmg * correlationMultiplier)
+    dmg = math.floor(dmg * breathSDT)
+    dmg = math.floor(dmg * targetMagicDamageAdjustment)
+    dmg = math.floor(dmg * multipleTargetReduction)
+    dmg = math.floor(dmg * elementalStaffBonus)
+    dmg = math.floor(dmg * elementalAffinityBonus)
+    dmg = math.floor(dmg * resistTier)
+    dmg = math.floor(dmg * additionalResistTier)
+    dmg = math.floor(dmg * elementalSDT)
+    dmg = math.floor(dmg * dayAndWeather)
+    dmg = math.floor(dmg * magicBonusDiff)
+    dmg = math.floor(dmg * skillTypeMultiplier)
+    dmg = math.floor(dmg * ninFutaeBonus)
+    dmg = math.floor(dmg * ninjutsuMultiplier)
+    dmg = math.floor(dmg * scarletDeliriumMultiplier)
+    dmg = math.floor(dmg * areaOfEffectResistance)
+
+    -- Handle "Nuke Wall". It must be handled after all previous calculations, but before clamp.
+    if nukeAbsorbOrNullify > 0 then
+        local nukeWallFactor = xi.spells.damage.calculateNukeWallFactor(target, spellElement, dmg)
+        dmg          = math.floor(finalDamage * nukeWallFactor)
     end
 
-    -- Monster correlation
-    local correlationMultiplier = calculateCorrelation(params.ecosystem, target:getEcosystem(), caster:getMerit(xi.merit.MONSTER_CORRELATION))
-    dmg = math.floor(dmg * (1 + correlationMultiplier))
-
-    -- Monster elemental adjustments
-    local mobEleAdjustments = xi.spells.damage.calculateSDT(target, spell:getElement())
-    dmg = math.floor(dmg * mobEleAdjustments)
-
-    -- Modifiers
-    dmg = math.floor(dmg * (1 + caster:getMod(xi.mod.BREATH_DMG_DEALT) / 100))
-
-    -- Resistance
-    local resistance = applyResistanceEffect(caster, target, spell, params)
-    dmg = math.floor(dmg * resistance)
-
-    -- Final damage
+    -- Apply damage
     dmg = target:breathDmgTaken(dmg)
 
-    results[1] = xi.spells.blue.applySpellDamage(caster, target, spell, dmg, params, nil)
-    results[2] = resistance
+    -- Handle Magic Absorb message and HP recovery.
+    if dmg < 0 then
+        dmg = target:addHP(-dmg)
+        spell:setMsg(xi.msg.basic.MAGIC_RECOVERS_HP)
 
-    return results
+        return dmg
+    end
+
+    -- Final adjustments.
+    if dmg > 0 then
+        dmg = utils.clamp(dmg - target:getMod(xi.mod.PHALANX), 0, 99999)
+        dmg = utils.clamp(utils.oneforall(target, dmg), 0, 99999)
+        dmg = utils.clamp(utils.stoneskin(target, dmg), -99999, 99999)
+        dmg = utils.clamp(dmg, 0, target:getHP())
+        dmg = target:checkDamageCap(dmg)
+    end
+
+    target:takeSpellDamage(caster, spell, dmg, attackType, damageType)
+
+    -- Handle TP
+    local tpHits        = params.tphitslanded or 0
+    local extraTPGained = xi.combat.tp.calculateTPGainOnMagicalDamage(dmg, caster, target) * math.max(tpHits - 1, 0) -- Calculate extra TP gained from multihits. takeSpellDamage accounts for one already.
+    target:addTP(extraTPGained)
+
+    -- Handle Afflatus Misery.
+    target:handleAfflatusMiseryDamage(finalDamage)
+
+    -- Handle Enmity.
+    target:updateEnmityFromDamage(caster, finalDamage)
+
+    return dmg
 end
 
 -- Apply spell damage
@@ -624,6 +678,34 @@ xi.spells.blue.useMagicalSpellAddedEffect = function(caster, target, spell, para
 
     if resist >= 0.5 then
         target:addStatusEffect(params.effect, power, tick, duration * resist)
+    end
+end
+
+xi.spells.blue.applyBlueAdditionalEffect = function(caster, target, params, effectTable)
+    -- Sanitize parameters.
+    local element = params.damageType and params.damageType - 5 or 0
+    local stat    = params.attribute and params.attribute or xi.mod.NONE
+
+    -- Calculate resist and early return.
+    local resist = xi.combat.magicHitRate.calculateResistRate(caster, target, 0, xi.skill.BLUE_MAGIC, 0, element, stat, 0, 0)
+
+    if resist <= 0.25 then
+        return
+    end
+
+    for entry = 1, #effectTable do
+        local effect   = effectTable[entry][1]
+        local power    = effectTable[entry][2]
+        local tick     = effectTable[entry][3]
+        local duration = effectTable[entry][4]
+
+        if
+            not xi.combat.statusEffect.isTargetImmune(target, effect, element) and   -- Target isn't immune.
+            not xi.combat.statusEffect.isTargetResistant(caster, target, effect) and -- Target didn't trigger a job trait resistance.
+            not xi.combat.statusEffect.isEffectNullified(target, effect)             -- Target doesn't have an status effect that nullifies current.
+        then
+            target:addStatusEffect(effect, power, tick, math.floor(duration * resist))
+        end
     end
 end
 

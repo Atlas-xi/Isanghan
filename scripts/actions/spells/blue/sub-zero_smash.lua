@@ -48,7 +48,9 @@ spellObject.onSpellCast = function(caster, target, spell)
     local duration = 180
 
     local damage = xi.spells.blue.usePhysicalSpell(caster, target, spell, params)
-    xi.spells.blue.usePhysicalSpellAddedEffect(caster, target, spell, params, damage, power, tick, duration)
+    if damage > 0 then
+        xi.spells.blue.usePhysicalSpellAddedEffect(caster, target, spell, params, damage, power, tick, duration)
+    end
 
     return damage
 end
