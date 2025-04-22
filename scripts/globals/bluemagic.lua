@@ -668,19 +668,6 @@ xi.spells.blue.usePhysicalSpellAddedEffect = function(caster, target, spell, par
     end
 end
 
--- Inflict an added enfeebling effect (after a magical spell)
-xi.spells.blue.useMagicalSpellAddedEffect = function(caster, target, spell, params, power, tick, duration)
-    -- Blue Magic skill + whichever attribute the spell uses will be used as resistance modifiers
-    params.diff      = caster:getStat(params.attribute) - target:getStat(params.attribute)
-    params.skillType = xi.skill.BLUE_MAGIC
-    params.effect    = params.addedEffect -- renamed to avoid magical spells' dmg resistance check being influenced by this
-    local resist     = applyResistanceEffect(caster, target, spell, params)
-
-    if resist >= 0.5 then
-        target:addStatusEffect(params.effect, power, tick, duration * resist)
-    end
-end
-
 xi.spells.blue.applyBlueAdditionalEffect = function(caster, target, params, effectTable)
     -- Sanitize parameters.
     local element = params.damageType and params.damageType - 5 or 0
