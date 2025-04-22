@@ -40,14 +40,16 @@ end
 
 -- Get WSC
 local function calculateWSC(attacker, params)
-    local wsc = calculateAlpha(attacker:getMainLvl()) *
-    (attacker:getStat(xi.mod.STR) * params.str_wsc +
-    attacker:getStat(xi.mod.DEX) * params.dex_wsc +
-    attacker:getStat(xi.mod.VIT) * params.vit_wsc +
-    attacker:getStat(xi.mod.AGI) * params.agi_wsc +
-    attacker:getStat(xi.mod.INT) * params.int_wsc +
-    attacker:getStat(xi.mod.MND) * params.mnd_wsc +
-    attacker:getStat(xi.mod.CHR) * params.chr_wsc)
+    local alpha  = calculateAlpha(attacker:getMainLvl())
+    local wscSTR = attacker:getStat(xi.mod.STR) * params.str_wsc
+    local wscDEX = attacker:getStat(xi.mod.DEX) * params.dex_wsc
+    local wscVIT = attacker:getStat(xi.mod.VIT) * params.vit_wsc
+    local wscAGI = attacker:getStat(xi.mod.AGI) * params.agi_wsc
+    local wscINT = attacker:getStat(xi.mod.INT) * params.int_wsc
+    local wscMND = attacker:getStat(xi.mod.MND) * params.mnd_wsc
+    local wscCHR = attacker:getStat(xi.mod.CHR) * params.chr_wsc
+
+    local wsc = (wscSTR + wscDEX + wscVIT + wscAGI + wscINT + wscMND + wscCHR) * alpha
 
     return wsc
 end
@@ -180,7 +182,7 @@ xi.spells.blue.usePhysicalSpell = function(caster, target, spell, params)
     local bonusWSC   = 0
 
     -- BLU AF3 bonus (triples the base WSC when it procs)
-    if caster:getMod(xi.mod.AUGMENT_BLU_MAGIC) > math.random(0, 99) then
+    if  math.random(1, 100) <= caster:getMod(xi.mod.AUGMENT_BLU_MAGIC) then
         bonusWSC = 2
     end
 
@@ -302,7 +304,7 @@ xi.spells.blue.usePhysicalSpell = function(caster, target, spell, params)
     return xi.spells.blue.applySpellDamage(caster, target, spell, finaldmg, params, trickAttackTarget)
 end
 
--- Get the damage for a magical Blue Magic spell
+-- Get the damage for a magical Blue Magic spell. Called from spell scripts.
 xi.spells.blue.useMagicalSpell = function(caster, target, spell, params)
     -- In individual magical spells, don't use params.effect for the added effect
     -- This would affect the resistance check for damage here
@@ -314,20 +316,19 @@ xi.spells.blue.useMagicalSpell = function(caster, target, spell, params)
     params.skillType = xi.skill.BLUE_MAGIC
 
     -- WSC
-    local wsc = calculateWSC(caster, params)
-    local bonusWSC = 0
+    local wsc           = calculateWSC(caster, params)
+    local wscMultiplier = 1
 
     -- BLU AF3 bonus (triples the base WSC when it procs)
-    if caster:getMod(xi.mod.AUGMENT_BLU_MAGIC) > math.random(0, 99) then
-        bonusWSC = 2
+    if math.random(1, 100) <= caster:getMod(xi.mod.AUGMENT_BLU_MAGIC) then
+        wscMultiplier = wscMultiplier + 1
     end
 
     if caster:hasStatusEffect(xi.effect.BURST_AFFINITY) then
-        bonusWSC = bonusWSC + 1 -- Burst Affinity doubles base WSC
-        bonusWSC = bonusWSC + (caster:getMod(xi.mod.ENHANCES_BURST_AFFINITY) / 100)
+        wscMultiplier = wscMultiplier + 1 + caster:getMod(xi.mod.ENHANCES_BURST_AFFINITY) / 100
     end
 
-    wsc = wsc * (1 + bonusWSC) -- Bonus WSC from AF3/BA
+    wsc = wsc * wscMultiplier -- Bonus WSC from AF3/BA
 
     -- INT/MND/CHR dmg bonuses
     params.diff     = caster:getStat(params.attribute) - target:getStat(params.attribute)
