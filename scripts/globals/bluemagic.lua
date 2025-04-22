@@ -206,6 +206,8 @@ xi.spells.blue.usePhysicalSpell = function(caster, target, spell, params)
 
     -- Final D
     local finalD = math.floor(initialD + fStr + wsc)
+    -- TODO: Implement ENHANCES_CHAIN_AFFINITY. Increase base damage of spell, but not limited to spell's damage cap
+    -- ENHANCES_CHAIN_AFFINITY should also not modify skillchain damage
 
     ----------------------------------------------
     -- Get the possible pDIF range and hit rate --
@@ -313,9 +315,19 @@ xi.spells.blue.useMagicalSpell = function(caster, target, spell, params)
 
     -- WSC
     local wsc = calculateWSC(caster, params)
-    if caster:hasStatusEffect(xi.effect.BURST_AFFINITY) then
-        wsc = wsc * 2
+    local bonusWSC = 0
+
+    -- BLU AF3 bonus (triples the base WSC when it procs)
+    if caster:getMod(xi.mod.AUGMENT_BLU_MAGIC) > math.random(0, 99) then
+        bonusWSC = 2
     end
+
+    if caster:hasStatusEffect(xi.effect.BURST_AFFINITY) then
+        bonusWSC = bonusWSC + 1 -- Burst Affinity doubles base WSC
+        bonusWSC = bonusWSC + (caster:getMod(xi.mod.ENHANCES_BURST_AFFINITY) / 100)
+    end
+
+    wsc = wsc * (1 + bonusWSC) -- Bonus WSC from AF3/BA
 
     -- INT/MND/CHR dmg bonuses
     params.diff     = caster:getStat(params.attribute) - target:getStat(params.attribute)
