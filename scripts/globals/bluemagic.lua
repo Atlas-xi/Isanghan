@@ -422,7 +422,7 @@ end
 xi.spells.blue.useBreathSpell = function(caster, target, spell, params)
     -- Early return.
     if
-        parmas.isConal and               -- Conal breath spells
+        params.isConal and               -- Conal breath spells
         not target:isInfront(caster, 32) -- Conal check (45° cone)
     then
         return 0
@@ -438,11 +438,14 @@ xi.spells.blue.useBreathSpell = function(caster, target, spell, params)
     local spellId      = spell:getID() or 0
     local spellFamily  = spell:getSpellFamily() or 0
     local spellElement = spell:getElement() or 0
+    local attackType   = params.attackType or xi.attackType.NONE
+    local damageType   = params.damageType or xi.damageType.NONE
 
     -- Multipliers
     local correlationMultiplier       = 1 + calculateCorrelation(params.ecosystem, target:getEcosystem(), caster:getMerit(xi.merit.MONSTER_CORRELATION))
-    local breathSDT                   = 1 + caster:getMod(xi.mod.BREATH_DMG_DEALT) / 100)
+    local breathSDT                   = 1 + caster:getMod(xi.mod.BREATH_DMG_DEALT) / 100
 
+    local nukeAbsorbOrNullify         = xi.spells.damage.calculateNukeAbsorbOrNullify(target, spellElement)
     local targetMagicDamageAdjustment = xi.spells.damage.calculateTMDA(target, spellElement)
     local multipleTargetReduction     = xi.spells.damage.calculateMTDR(spell)
     local elementalStaffBonus         = xi.spells.damage.calculateElementalStaffBonus(caster, spellElement)
@@ -478,7 +481,7 @@ xi.spells.blue.useBreathSpell = function(caster, target, spell, params)
     -- Handle "Nuke Wall". It must be handled after all previous calculations, but before clamp.
     if nukeAbsorbOrNullify > 0 then
         local nukeWallFactor = xi.spells.damage.calculateNukeWallFactor(target, spellElement, dmg)
-        dmg          = math.floor(finalDamage * nukeWallFactor)
+        dmg          = math.floor(dmg * nukeWallFactor)
     end
 
     -- Apply damage
@@ -509,10 +512,10 @@ xi.spells.blue.useBreathSpell = function(caster, target, spell, params)
     target:addTP(extraTPGained)
 
     -- Handle Afflatus Misery.
-    target:handleAfflatusMiseryDamage(finalDamage)
+    target:handleAfflatusMiseryDamage(dmg)
 
     -- Handle Enmity.
-    target:updateEnmityFromDamage(caster, finalDamage)
+    target:updateEnmityFromDamage(caster, dmg)
 
     return dmg
 end
@@ -653,25 +656,13 @@ xi.spells.blue.useCuringSpell = function(caster, target, spell, params)
     return final
 end
 
--- Inflict an added enfeebling effect (after a physical spell)
-xi.spells.blue.usePhysicalSpellAddedEffect = function(caster, target, spell, params, damage, power, tick, duration)
-    -- Physical spell needs to do damage before added effect can hit
-    if damage > 0 then
-        -- INT and Blue Magic skill are the default resistance modifiers
-        params.diff      = caster:getStat(xi.mod.INT) - target:getStat(xi.mod.INT)
-        params.skillType = xi.skill.BLUE_MAGIC
-        local resist     = applyResistanceEffect(caster, target, spell, params)
-
-        if resist >= 0.5 then
-            target:addStatusEffect(params.effect, power, tick, duration * resist)
-        end
-    end
-end
-
 xi.spells.blue.applyBlueAdditionalEffect = function(caster, target, params, effectTable)
     -- Sanitize parameters.
     local element = params.damageType and params.damageType - 5 or 0
-    local stat    = params.attribute and params.attribute or xi.mod.NONE
+    local stat    = params.attribute and params.attribute or xi.mod.INT
+    if params.attackType == xi.attackType.BREATH then
+        stat = 0
+    end
 
     -- Calculate resist and early return.
     local resist = xi.combat.magicHitRate.calculateResistRate(caster, target, 0, xi.skill.BLUE_MAGIC, 0, element, stat, 0, 0)

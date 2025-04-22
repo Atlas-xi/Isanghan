@@ -28,7 +28,7 @@ spellObject.onSpellCast = function(caster, target, spell)
     params.skillType  = xi.skill.BLUE_MAGIC
     params.hpMod      = 6
     params.lvlMod     = 1.875
-    parmas.isConal    = true
+    params.isConal    = true
 
     -- Handle damage.
     local damage = xi.spells.blue.useBreathSpell(caster, target, spell, params)

@@ -28,7 +28,7 @@ spellObject.onSpellCast = function(caster, target, spell)
     params.skillType  = xi.skill.BLUE_MAGIC
     params.hpMod      = 2
     params.lvlMod     = 0
-    parmas.isConal    = true
+    params.isConal    = true
 
     return xi.spells.blue.useBreathSpell(caster, target, spell, params)
 end
