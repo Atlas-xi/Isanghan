@@ -589,36 +589,65 @@ xi.spells.blue.calculateDurationWithDiffusion = function(caster, duration)
 end
 
 -- Perform an enfeebling Blue Magic spell
-xi.spells.blue.useEnfeeblingSpell = function(caster, target, spell, params, power, tick, duration, resistThreshold, isGaze, isConal)
-    -- INT and Blue Magic skill are the default resistance modifiers
-    params.diff      = caster:getStat(xi.mod.INT) - target:getStat(xi.mod.INT)
-    params.skillType = xi.skill.BLUE_MAGIC
-    local resist     = applyResistanceEffect(caster, target, spell, params)
+xi.spells.blue.useEnfeeblingSpell = function(caster, target, spell, params)
+    local spellElement = spell:getElement()
 
-    -- If unresisted
-    if resist >= resistThreshold then
+    -- Early return: Out of cone.
+    if
+        params.isConal and
+        not target:isInfront(caster, 64)
+    then
         spell:setMsg(xi.msg.basic.MAGIC_NO_EFFECT)
+        return params.effect
+    end
 
-        -- If this is a conal move, target needs to be in front of caster
-        if
-            not isConal or
-            (isConal and target:isInfront(caster, 64))
-        then
+    -- Early return: Out of gaze.
+    if
+        params.isGaze and
+        (not target:isFacing(caster) or not caster:isFacing(target))
+    then
+        spell:setMsg(xi.msg.basic.MAGIC_NO_EFFECT)
+        return params.effect
+    end
 
-            -- If this is a gaze move, entities need to face each other
-            if
-                not isGaze or
-                (isGaze and target:isFacing(caster) and caster:isFacing(target))
-            then
+    -- Early return: Target is immune.
+    if xi.combat.statusEffect.isTargetImmune(target, params.effect, spellElement) then
+        spell:setMsg(xi.msg.basic.MAGIC_COMPLETE_RESIST)
+        return params.effect
+    end
 
-                -- If status effect was inflicted
-                if target:addStatusEffect(params.effect, power, tick, duration * resist) then
-                    spell:setMsg(xi.msg.basic.MAGIC_ENFEEB_IS)
-                end
-            end
+    -- Early return: Trait nullification trigger.
+    if xi.combat.statusEffect.isTargetResistant(caster, target, params.effect) then
+        spell:setModifier(xi.msg.actionModifier.RESIST)
+        spell:setMsg(xi.msg.basic.MAGIC_RESIST)
+        return params.effect
+    end
+
+    -- Early return: Target already has an status effect that nullifies current.
+    if xi.combat.statusEffect.isEffectNullified(target, params.effect) then
+        spell:setMsg(xi.msg.basic.MAGIC_NO_EFFECT)
+        return params.effect
+    end
+
+    -- Early return: Regular resist.
+    local resist = xi.combat.magicHitRate.calculateResistRate(caster, target, 0, xi.skill.BLUE_MAGIC, 0, spellElement, xi.mod.INT, 0, 0)
+    if resist < params.resistThreshold then
+        spell:setMsg(xi.msg.basic.MAGIC_RESIST)
+        return params.effect
+    end
+
+    if target:addStatusEffect(params.effect, params.power, params.tick, math.floor(params.duration * resist)) then
+        -- Add "Magic Burst!" message
+        local _, skillchainCount = xi.magicburst.formMagicBurst(spellElement, target) -- External function. Not present in magic.lua.
+
+        if skillchainCount > 0 then
+            spell:setMsg(xi.msg.basic.MAGIC_BURST_ENFEEB_IS)
+            caster:triggerRoeEvent(xi.roeTrigger.MAGIC_BURST)
+        else
+            spell:setMsg(xi.msg.basic.MAGIC_ENFEEB_IS)
         end
     else
-        spell:setMsg(xi.msg.basic.MAGIC_RESIST)
+        spell:setMsg(xi.msg.basic.MAGIC_NO_EFFECT)
     end
 
     return params.effect
