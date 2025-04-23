@@ -2754,7 +2754,7 @@ namespace charutils
                     }
                     if (PItem->isType(ITEM_USABLE) && ((CItemUsable*)PItem)->getCurrentCharges() != 0)
                     {
-                        PItem->setAssignTime(CVanaTime::getInstance()->getVanaTime());
+                        PItem->setAssignTime(earth_time::vanadiel_timestamp());
                         PChar->PRecastContainer->Add(RECAST_ITEM, slotID << 8 | containerID,
                                                      std::chrono::milliseconds(PItem->getReuseTime())); // add recast timer to Recast List from any bag
 
@@ -6025,7 +6025,7 @@ namespace charutils
     {
         TracyZoneScoped;
         auto tstamp = static_cast<uint32>(PChar->getCharVar("mog-locker-expiry-timestamp"));
-        if (CVanaTime::getInstance()->getVanaTime() < tstamp)
+        if (earth_time::vanadiel_timestamp() < tstamp)
         {
             return true;
         }

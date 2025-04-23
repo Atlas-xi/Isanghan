@@ -296,7 +296,7 @@ void CTreasurePool::flush()
 {
     if (m_count != 0)
     {
-        const auto tick = timer::now() + treasure_checktime + std::chrono::seconds(1);
+        const auto tick = timer::now() + treasure_checktime + 1s;
 
         for (uint8 i = 0; i < TREASUREPOOL_SIZE; ++i)
         {

@@ -244,7 +244,7 @@ bool CRecastContainer::HasRecast(RECASTTYPE type, uint16 id, timer::duration rec
                     return true;
                 }
 
-                auto  currentRecast    = timer::now() - i.TimeStamp - i.RecastTime;
+                auto  currentRecast    = i.TimeStamp - timer::now() + i.RecastTime;
                 uint8 availableCharges = static_cast<uint8>(currentRecast / i.chargeTime);
                 auto  charges          = i.maxCharges - availableCharges - 1;
 

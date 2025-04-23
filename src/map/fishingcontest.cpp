@@ -490,7 +490,7 @@ namespace fishingcontest
         entry.allegiance  = (uint8)PChar->allegiance;
         entry.fishRank    = PChar->RealSkills.rank[SKILLTYPE::SKILL_FISHING];
         entry.score       = score;
-        entry.submitTime  = CVanaTime::getInstance()->getVanaTime();
+        entry.submitTime  = earth_time::vanadiel_timestamp();
         entry.contestRank = 0;
         entry.share       = 0;
         entry.dataset_b   = 0;

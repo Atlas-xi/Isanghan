@@ -228,7 +228,7 @@ CCharStatusPacket::CCharStatusPacket(CCharEntity* PChar)
     }
 
     packet->dead_counter1     = PChar->GetTimeRemainingUntilDeathHomepoint();
-    packet->dead_counter2     = CVanaTime::getInstance()->getVanaTime() + packet->dead_counter1 / 60;
+    packet->dead_counter2     = earth_time::vanadiel_timestamp() + packet->dead_counter1 / 60;
     packet->costume_id        = PChar->m_Costume;
     packet->model_hitbox_size = 4; // TODO: verify this
     packet->mount_id          = 0;

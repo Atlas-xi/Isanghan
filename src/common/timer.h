@@ -63,12 +63,14 @@ namespace timer
         return utc_tp - utc_now + timer_now;
     };
 
+    // Gets the Earth milliseconds of a duration.
     template <typename Rep, typename Period>
     auto get_milliseconds(const std::chrono::duration<Rep, Period>& d) -> int64
     {
         return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
     };
 
+    // Gets the Earth seconds of a duration.
     template <typename Rep, typename Period>
     auto get_seconds(const std::chrono::duration<Rep, Period>& d) -> int64
     {

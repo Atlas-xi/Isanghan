@@ -360,8 +360,6 @@ void MapServer::do_init()
 
     monstrosity::LoadStaticData();
 
-    CVanaTime::getInstance()->setCustomEpoch(settings::get<int32>("map.VANADIEL_TIME_EPOCH"));
-
     zoneutils::InitializeWeather(); // Need VanaTime initialized
 
     CTransportHandler::getInstance()->InitializeTransport(mapIPP);
@@ -371,7 +369,7 @@ void MapServer::do_init()
     CTaskManager::getInstance()->AddTask("garbage_collect", timer::now(), nullptr, CTaskManager::TASK_INTERVAL, 15min, std::bind(&MapServer::map_garbage_collect, this, std::placeholders::_1, std::placeholders::_2));
     CTaskManager::getInstance()->AddTask("persist_server_vars", timer::now(), nullptr, CTaskManager::TASK_INTERVAL, 1min, serverutils::PersistVolatileServerVars);
 
-    zoneutils::TOTDChange(CVanaTime::getInstance()->GetCurrentTOTD()); // This tells the zones to spawn stuff based on time of day conditions (such as undead at night)
+    zoneutils::TOTDChange(vanadiel_time::get_totd()); // This tells the zones to spawn stuff based on time of day conditions (such as undead at night)
 
     ShowInfo("do_init: Removing expired database variables");
     uint32 currentTimestamp = earth_time::timestamp();
@@ -413,7 +411,6 @@ void MapServer::do_final()
     zoneutils::FreeZoneList();
 
     CTaskManager::delInstance();
-    CVanaTime::delInstance();
     Async::delInstance();
 
     luautils::cleanup();

@@ -297,7 +297,6 @@ namespace luautils
         lua.set_function("VanadielMoonDirection", &luautils::VanadielMoonDirection);
         lua.set_function("VanadielRSERace", &luautils::VanadielRSERace);
         lua.set_function("VanadielRSELocation", &luautils::VanadielRSELocation);
-        lua.set_function("SetVanadielTimeOffset", &luautils::SetVanadielTimeOffset);
         lua.set_function("IsMoonNew", &luautils::IsMoonNew);
         lua.set_function("IsMoonFull", &luautils::IsMoonFull);
         lua.set_function("RunElevator", &luautils::StartElevator);
@@ -1439,28 +1438,28 @@ namespace luautils
     {
         TracyZoneScoped;
 
-        return CVanaTime::getInstance()->getVanaTime();
+        return earth_time::vanadiel_timestamp();
     }
 
     uint8 VanadielTOTD()
     {
         TracyZoneScoped;
 
-        return static_cast<uint8>(CVanaTime::getInstance()->GetCurrentTOTD());
+        return static_cast<uint8>(vanadiel_time::get_totd());
     }
 
     uint32 VanadielYear()
     {
         TracyZoneScoped;
 
-        return CVanaTime::getInstance()->getYear();
+        return vanadiel_time::get_year(vanadiel_time::now());
     }
 
     uint32 VanadielMonth()
     {
         TracyZoneScoped;
 
-        return CVanaTime::getInstance()->getMonth();
+        return vanadiel_time::get_month(vanadiel_time::now());
     }
 
     /************************************************************************
@@ -1472,28 +1471,19 @@ namespace luautils
     uint32 VanadielUniqueDay()
     {
         TracyZoneScoped;
-
-        int32 day   = CVanaTime::getInstance()->getDayOfTheMonth();
-        int32 month = CVanaTime::getInstance()->getMonth();
-        int32 year  = CVanaTime::getInstance()->getYear();
-
-        return (year * 360) + (month * 30 - 30) + day;
+        return vanadiel_time::count_days(vanadiel_time::now().time_since_epoch());
     }
 
     uint32 VanadielDayOfTheYear()
     {
         TracyZoneScoped;
-
-        int32 day   = CVanaTime::getInstance()->getDayOfTheMonth();
-        int32 month = CVanaTime::getInstance()->getMonth();
-
-        return (month * 30 - 30) + day;
+        return vanadiel_time::get_yearday(vanadiel_time::now());
     }
 
     uint32 VanadielDayOfTheMonth()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getDayOfTheMonth();
+        return vanadiel_time::get_monthday(vanadiel_time::now());
     }
 
     /************************************************************************
@@ -1508,19 +1498,19 @@ namespace luautils
     uint32 VanadielDayOfTheWeek()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getWeekday();
+        return vanadiel_time::get_weekday(vanadiel_time::now());
     }
 
     uint32 VanadielHour()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getHour();
+        return vanadiel_time::get_hour(vanadiel_time::now());
     }
 
     uint32 VanadielMinute()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getMinute();
+        return vanadiel_time::get_minute(vanadiel_time::now());
     }
 
     /************************************************************************
@@ -1583,11 +1573,11 @@ namespace luautils
     uint32 NextGameTime(uint32 intervalSeconds)
     {
         TracyZoneScoped;
-        uint32 timeElapsed      = CVanaTime::getInstance()->getVanaTime();
-        uint32 numPassed        = timeElapsed / intervalSeconds;
-        uint32 secondsRemaining = intervalSeconds - (timeElapsed - (numPassed * intervalSeconds));
+        uint32 vanaTimestamp = earth_time::vanadiel_timestamp();
+        uint32 secondsMod    = vanaTimestamp % intervalSeconds;
+        auto   nextInterval  = std::chrono::seconds(vanaTimestamp - secondsMod + intervalSeconds);
 
-        return static_cast<uint32>(earth_time::timestamp() + secondsRemaining);
+        return earth_time::timestamp(earth_time::time_point(nextInterval));
     }
 
     // NOTE: NextJstDay is also defined, and maps to JstMidnight
@@ -1603,33 +1593,25 @@ namespace luautils
     uint32 VanadielMoonPhase()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getMoonPhase();
-    }
-
-    bool SetVanadielTimeOffset(int32 offset)
-    {
-        TracyZoneScoped;
-        uint32 custom = CVanaTime::getInstance()->getCustomEpoch();
-        CVanaTime::getInstance()->setCustomEpoch((custom ? custom : VTIME_BASEDATE) - offset);
-        return true;
+        return vanadiel_time::moon::get_phase();
     }
 
     uint8 VanadielMoonDirection()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getMoonDirection();
+        return vanadiel_time::moon::get_direction();
     }
 
     uint8 VanadielRSERace()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getRSERace();
+        return vanadiel_time::rse::get_race();
     }
 
     uint8 VanadielRSELocation()
     {
         TracyZoneScoped;
-        return CVanaTime::getInstance()->getRSELocation();
+        return vanadiel_time::rse::get_location();
     }
 
     bool IsMoonNew()
@@ -1639,9 +1621,10 @@ namespace luautils
         // Waning (decreasing) from 10% to 0%,
         // Waxing (increasing) from 0% to 5%.
 
-        uint8 phase = CVanaTime::getInstance()->getMoonPhase();
+        vanadiel_time::time_point currentVanaTime = vanadiel_time::now();
+        auto                      phase           = vanadiel_time::moon::get_phase(currentVanaTime);
 
-        switch (CVanaTime::getInstance()->getMoonDirection())
+        switch (vanadiel_time::moon::get_direction(currentVanaTime))
         {
             case 0: // None
                 if (phase == 0)
@@ -1673,9 +1656,10 @@ namespace luautils
         // Waxing (increasing) from 90% to 100%,
         // Waning (decending) from 100% to 95%.
 
-        uint8 phase = CVanaTime::getInstance()->getMoonPhase();
+        vanadiel_time::time_point currentVanaTime = vanadiel_time::now();
+        auto                      phase           = vanadiel_time::moon::get_phase(currentVanaTime);
 
-        switch (CVanaTime::getInstance()->getMoonDirection())
+        switch (vanadiel_time::moon::get_direction(currentVanaTime))
         {
             case 0: // None
                 if (phase == 100)

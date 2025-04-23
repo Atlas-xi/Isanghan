@@ -24,11 +24,11 @@
 #include "common/logging.h"
 #include "common/vana_time.h"
 
-#include "common/vana_time.h"
 #include "daily_system.h"
 #include "entities/charentity.h"
 #include "latent_effect_container.h"
 #include "lua/luautils.h"
+#include "map_constants.h"
 #include "roe.h"
 #include "timetriggers.h"
 #include "transport.h"
@@ -40,105 +40,88 @@
 int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 {
     TracyZoneScoped;
-    TIMETYPE VanadielTOTD = CVanaTime::getInstance()->SyncTime();
-    auto     currentTime  = earth_time::now();
-    auto     jstMinute    = earth_time::jst::get_minute(currentTime);
-    auto     jstHour      = earth_time::jst::get_hour(currentTime);
-    auto     jstWeekday   = earth_time::jst::get_weekday(currentTime);
-    // uint8 WeekDay = (uint8)CVanaTime::getInstance()->getWeekday();
+    // Track elapsed ticks.
+    static auto tickNum = 0;
+    ++tickNum;
 
-    // Weekly update for conquest (sunday at midnight)
-    static timer::time_point lastConquestTally  = tick - 1h;
-    static timer::time_point lastConquestUpdate = tick - 1h;
-    static timer::time_point lastZnmPriceDecay  = tick - 1h;
+    // Earth time points
+    const auto jstTime    = earth_time::time_point(timer::to_utc(tick));
+    const auto jstHour    = earth_time::jst::get_hour(jstTime);
+    const auto jstWeekday = earth_time::jst::get_weekday(jstTime);
 
-    if (jstWeekday == 1 && jstHour == 0 && jstMinute == 0)
+    // Static variable for the next tick
+    static auto nextHourlyTick = std::chrono::ceil<std::chrono::hours>(jstTime);
+
+    // Hourly ticks
+    if (jstTime >= nextHourlyTick)
     {
-        if (tick > (lastConquestTally + 1h))
+        ShowDebugFmt("1-hour tick... (current tick: {})", tickNum);
+        if (jstHour == 0)
         {
-            roeutils::CycleWeeklyRecords();
-            roeutils::CycleUnityRankings();
-            lastConquestTally = tick;
-        }
-    }
-    // Hourly conquest update
-    else if (jstMinute == 0)
-    {
-        if (tick > (lastConquestUpdate + 1h))
-        {
-            roeutils::UpdateUnityRankings();
-            lastConquestUpdate = tick;
-        }
-
-        // ZNM Pop-Item Prices Decay every 2 hours
-        if (jstHour % 2 == 0)
-        {
-            if (tick > (lastZnmPriceDecay + 1h))
+            // Daily tick (midnight JST)
+            ShowDebugFmt("Daily tick... (current tick: {})", tickNum);
+            if (jstWeekday == 1)
             {
-                luautils::ZNMPopPriceDecay();
-                lastZnmPriceDecay = tick;
+                // Weekly tick (Monday JST)
+                ShowDebugFmt("Weekly tick... (current tick: {})", tickNum);
+                roeutils::CycleWeeklyRecords();
+                roeutils::CycleUnityRankings();
             }
-        }
-    }
-
-    // Vanadiel Hour
-    static timer::time_point lastVHourlyUpdate = tick - 4800ms;
-    if (CVanaTime::getInstance()->getMinute() == 0)
-    {
-        if (tick > (lastVHourlyUpdate + 4800ms))
-        {
-            // clang-format off
-            zoneutils::ForEachZone([](CZone* PZone)
-            {
-                luautils::OnGameHour(PZone);
-                PZone->ForEachChar([](CCharEntity* PChar)
-                {
-                    PChar->PLatentEffectContainer->CheckLatentsHours();
-                    PChar->PLatentEffectContainer->CheckLatentsMoonPhase();
-                });
-            });
-            // clang-format on
-
-            lastVHourlyUpdate = tick;
-        }
-    }
-
-    // JST Midnight
-    static timer::time_point lastTickedJstMidnight = tick - 1h;
-    if (jstHour == 0 && jstMinute == 0)
-    {
-        if (tick > (lastTickedJstMidnight + 1h))
-        {
-            if (settings::get<bool>("main.ENABLE_ROE"))
-            {
-                roeutils::CycleDailyRecords();
-            }
-
+            roeutils::CycleDailyRecords();
             guildutils::UpdateGuildPointsPattern();
             luautils::OnJSTMidnight();
             luautils::UpdateSanrakusMobs();
-            lastTickedJstMidnight = tick;
         }
+        // 1-hour tick
+        roeutils::UpdateUnityRankings();
+
+        if (jstHour % 2 == 0)
+        {
+            // 2-hour tick
+            ShowDebugFmt("2-hour tick... (current tick: {})", tickNum);
+            luautils::ZNMPopPriceDecay();
+            if (jstHour % 4 == 0)
+            {
+                // 4-hour tick
+                ShowDebugFmt("4-hour tick... (current tick: {})", tickNum);
+                roeutils::CycleTimedRecords();
+            }
+        }
+
+        nextHourlyTick = std::chrono::ceil<std::chrono::hours>(jstTime);
     }
 
-    // 4-hour RoE Timed blocks
-    static timer::time_point lastTickedRoeBlock = tick - 1h;
-    if (jstHour % 4 == 0 && jstMinute == 0)
-    {
-        if (tick > (lastTickedRoeBlock + 1h))
-        {
-            roeutils::CycleTimedRecords();
-            lastTickedRoeBlock = tick;
-        }
-    }
+    // Vana'diel time points
+    const auto vanaTime = vanadiel_time::from_earth_time(jstTime);
+    const auto vanaTotd = vanadiel_time::get_totd(vanaTime);
+    const auto vanaHour = vanadiel_time::get_hour(vanaTime);
 
-    // Vanadiel Day
-    static timer::time_point lastVDailyUpdate = tick - 4800ms;
-    if (CVanaTime::getInstance()->getHour() == 0 && CVanaTime::getInstance()->getMinute() == 0)
+    // Static variables for the next tick
+    static auto nextVHourlyUpdate = std::chrono::ceil<xi::vanadiel_clock::hours>(vanaTime);
+    static auto prevTotd          = vanadiel_time::TOTD::NONE;
+
+    if (vanaTime >= nextVHourlyUpdate)
     {
-        TracyZoneScoped;
-        if (tick > (lastVDailyUpdate + 4800ms))
+        // Vana'diel Hour
+        ShowDebugFmt("Vana'diel hour tick... (current tick: {})", tickNum);
+
+        // clang-format off
+        zoneutils::ForEachZone([](CZone* PZone)
         {
+            luautils::OnGameHour(PZone);
+            PZone->ForEachChar([](CCharEntity* PChar)
+            {
+                PChar->PLatentEffectContainer->CheckLatentsHours();
+                PChar->PLatentEffectContainer->CheckLatentsMoonPhase();
+            });
+        });
+        // clang-format on
+
+        if (vanaHour == 0)
+        {
+            // Vana'diel Day
+            TracyZoneScoped;
+            ShowDebugFmt("Vana'diel day tick... (current tick: {})", tickNum);
             // clang-format off
             zoneutils::ForEachZone([](CZone* PZone)
             {
@@ -149,32 +132,34 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
                 });
             });
             // clang-format on
-
             guildutils::UpdateGuildsStock();
             zoneutils::SavePlayTime();
-
-            lastVDailyUpdate = tick;
         }
-    }
 
-    // Some notable time-event has occurred. -- CVanaTime::SyncTime() has hit a time of day where latents trigger
-    if (VanadielTOTD != TIME_NONE)
-    {
-        TracyZoneScoped;
-        zoneutils::TOTDChange(VanadielTOTD);
-
-        // clang-format off
-        zoneutils::ForEachZone([](CZone* PZone)
+        if (vanaTotd != prevTotd)
         {
-            PZone->ForEachChar([](CCharEntity* PChar)
-            {
-                PChar->PLatentEffectContainer->CheckLatentsDay();
-                PChar->PLatentEffectContainer->CheckLatentsJobLevel(); // Eerie CLoak +1 latent is nighttime + level multiple of 13
-            });
-        });
-        // clang-format on
+            // Some notable time-event has occurred.
+            TracyZoneScoped;
+            ShowDebugFmt("Vana'diel TOTD change. (current tick: {})", tickNum);
+            zoneutils::TOTDChange(vanaTotd);
 
-        fishingutils::RestockFishingAreas();
+            // clang-format off
+            zoneutils::ForEachZone([](CZone* PZone)
+            {
+                PZone->ForEachChar([](CCharEntity* PChar)
+                {
+                    PChar->PLatentEffectContainer->CheckLatentsDay();
+                    PChar->PLatentEffectContainer->CheckLatentsJobLevel(); // Eerie CLoak +1 latent is nighttime + level multiple of 13
+                });
+            });
+            // clang-format on
+
+            fishingutils::RestockFishingAreas();
+
+            prevTotd = vanaTotd;
+        }
+
+        nextVHourlyUpdate = std::chrono::ceil<xi::vanadiel_clock::hours>(vanaTime);
     }
 
     CTriggerHandler::getInstance()->triggerTimer();

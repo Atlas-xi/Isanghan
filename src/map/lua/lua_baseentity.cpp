@@ -1939,7 +1939,7 @@ bool CLuaBaseEntity::pathThrough(sol::table const& pointsTable, sol::object cons
             }
 
             auto wait  = pointData["wait"];
-            point.wait = wait.valid() ? wait.get<uint32>() : 0;
+            point.wait = wait.valid() ? std::chrono::seconds(wait.get<uint32>()) : 0s;
             points.emplace_back(point);
         }
     }
@@ -1948,7 +1948,7 @@ bool CLuaBaseEntity::pathThrough(sol::table const& pointsTable, sol::object cons
         // Grab points from array and store in points array
         for (std::size_t i = 1; i < pointsTable.size(); i += 3)
         {
-            points.emplace_back(pathpoint_t{ { (float)pointsTable[i], (float)pointsTable[i + 1], (float)pointsTable[i + 2], 0, 0 }, 0, false });
+            points.emplace_back(pathpoint_t{ { (float)pointsTable[i], (float)pointsTable[i + 1], (float)pointsTable[i + 2], 0, 0 }, 0s, false });
         }
     }
 
@@ -2239,7 +2239,7 @@ void CLuaBaseEntity::setElevator(uint8 id, uint32 lowerDoor, uint32 upperDoor, u
     elevator.Elevator           = static_cast<CNpcEntity*>(zoneutils::GetEntity(elevatorId, TYPE_NPC));
     elevator.animationsReversed = reversed;
     elevator.state              = STATE_ELEVATOR_BOTTOM;
-    elevator.lastTrigger        = 0;
+    elevator.lastTrigger        = vanadiel_time::time_point::min();
 
     if (!elevator.Elevator || !elevator.LowerDoor || !elevator.UpperDoor)
     {
@@ -2251,8 +2251,8 @@ void CLuaBaseEntity::setElevator(uint8 id, uint32 lowerDoor, uint32 upperDoor, u
     elevator.activated   = elevator.id == 0;
     elevator.isPermanent = elevator.id == 0;
 
-    elevator.movetime = 3;
-    elevator.interval = 8;
+    elevator.movetime = xi::vanadiel_clock::minutes(3);
+    elevator.interval = xi::vanadiel_clock::minutes(8);
 
     elevator.zoneID = m_PBaseEntity->loc.zone->GetID();
 
@@ -2282,8 +2282,8 @@ void CLuaBaseEntity::addPeriodicTrigger(uint8 id, uint16 period, uint16 minOffse
     Trigger_t trigger{};
 
     trigger.id           = id;
-    trigger.period       = period;
-    trigger.minuteOffset = minOffset;
+    trigger.period       = xi::vanadiel_clock::minutes(period);
+    trigger.minuteOffset = xi::vanadiel_clock::minutes(minOffset);
     trigger.npc          = dynamic_cast<CNpcEntity*>(zoneutils::GetEntity(m_PBaseEntity->id, TYPE_NPC));
     trigger.lastTrigger  = 0;
 
@@ -2499,12 +2499,13 @@ bool CLuaBaseEntity::sendGuild(uint16 guildID, uint8 open, uint8 close, uint8 ho
         return GUILD_OPEN;
     }
 
-    uint8 VanadielHour = (uint8)CVanaTime::getInstance()->getHour();
+    vanadiel_time::time_point vanaTime     = vanadiel_time::now();
+    uint8                     VanadielHour = static_cast<uint8>(vanadiel_time::get_hour(vanaTime));
 
     GUILDSTATUS status = GUILD_OPEN;
 
     // Guild holiday - Removed in 2014
-    // uint8 vanadielDay = (uint8)CVanaTime::getInstance()->getWeekday();
+    // uint8 vanadielDay = static_cast<uint8>(vanadiel_time::get_weekday(vanaTime));
     //
     // if (vanadielDay == holiday)
     // {
@@ -2938,7 +2939,7 @@ void CLuaBaseEntity::updateToEntireZone(uint8 statusID, uint8 animation, sol::ob
     // If this flag is high, update the NPC's name to match the current time
     if (updateForTime == true)
     {
-        PNpc->SetLocalVar("TransportTimestamp", CVanaTime::getInstance()->getVanaTime());
+        PNpc->SetLocalVar("TransportTimestamp", earth_time::vanadiel_timestamp());
     }
 
     PNpc->loc.zone->UpdateEntityPacket(PNpc, ENTITY_UPDATE, UPDATE_COMBAT, true);
@@ -4293,7 +4294,7 @@ bool CLuaBaseEntity::addUsedItem(uint16 itemID)
             {
                 auto* PUsable = static_cast<CItemUsable*>(PItem);
                 PUsable->setQuantity(1);
-                PUsable->setLastUseTime(CVanaTime::getInstance()->getVanaTime());
+                PUsable->setLastUseTime(earth_time::vanadiel_timestamp());
                 SlotID = charutils::AddItem(PChar, LOC_INVENTORY, PUsable, false);
             }
             else

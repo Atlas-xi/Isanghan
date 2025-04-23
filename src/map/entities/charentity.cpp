@@ -2583,7 +2583,7 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
         {
             PItem->setCurrentCharges(PItem->getCurrentCharges() - 1);
         }
-        PItem->setLastUseTime(CVanaTime::getInstance()->getVanaTime());
+        PItem->setLastUseTime(earth_time::vanadiel_timestamp());
 
         db::preparedStmt("UPDATE char_inventory "
                          "SET extra = ? "

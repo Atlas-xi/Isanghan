@@ -685,8 +685,6 @@ namespace roeutils
 
         const char* rankingQuery = "UPDATE unity_system SET members_prev = members_current, points_prev = points_current, members_current = 0, points_current = 0";
         _sql->Query(rankingQuery);
-
-        roeutils::UpdateUnityRankings();
     }
 
     void UpdateUnityRankings()

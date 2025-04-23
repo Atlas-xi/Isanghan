@@ -61,7 +61,7 @@ CInventoryItemPacket::CInventoryItemPacket(CItem* PItem, uint8 LocationID, uint8
                 }
                 else
                 {
-                    uint32 CurrentTime = CVanaTime::getInstance()->getVanaTime();
+                    uint32 CurrentTime = earth_time::vanadiel_timestamp();
                     ref<uint32>(0x15)  = ((CItemUsable*)PItem)->getNextUseTime();
 
                     // Not sent if the item is unequipped.

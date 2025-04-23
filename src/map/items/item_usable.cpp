@@ -156,7 +156,7 @@ void CItemUsable::setAssignTime(uint32 VanaTime)
 
 uint32 CItemUsable::getReuseTime()
 {
-    uint32 CurrentTime = CVanaTime::getInstance()->getVanaTime();
+    uint32 CurrentTime = earth_time::vanadiel_timestamp();
     uint32 ReuseTime   = std::max(m_AssignTime + m_UseDelay, getLastUseTime() + m_ReuseDelay);
 
     return (ReuseTime > CurrentTime ? (ReuseTime - CurrentTime) * 1000 : 0);

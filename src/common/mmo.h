@@ -22,6 +22,7 @@
 #pragma once
 
 #include "cbasetypes.h"
+#include "timer.h"
 #include "xi.h"
 
 #include <array>
@@ -350,9 +351,9 @@ struct bazaar_t
 
 struct pathpoint_t
 {
-    position_t position;
-    uint32     wait;
-    bool       setRotation;
+    position_t      position;
+    timer::duration wait;
+    bool            setRotation;
 };
 
 // A comment on the packets below, defined as macros.

@@ -124,9 +124,9 @@ bool CPlayerController::Ability(uint16 targid, uint16 abilityid)
         if (PChar->PRecastContainer->HasRecast(RECAST_ABILITY, PAbility->getRecastId(), PAbility->getRecastTime()))
         {
             Recast_t* recast = PChar->PRecastContainer->GetRecast(RECAST_ABILITY, PAbility->getRecastId());
-            // Set recast time in seconds to the normal recast time minus any charge time with the difference of the current time minus when the recast was set.
+            // Set recast time to the normal recast time minus any charge time.
             // Abilities without a charge will have zero chargeTime
-            timer::duration currentRecast = timer::now() - recast->TimeStamp - recast->RecastTime;
+            timer::duration currentRecast = recast->TimeStamp - timer::now() + recast->RecastTime;
             // Abilities with a single charge (low-level scholoar stratagems) behave like abilities without a charge
             if (recast->maxCharges > 1)
             {

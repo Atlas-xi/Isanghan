@@ -33,6 +33,9 @@ namespace earth_time
     using duration   = clock::duration;
     using time_point = clock::time_point;
 
+    // Unix time of the Vana'diel epoch
+    static constexpr earth_time::time_point vanadiel_epoch{ 1009810800s };
+
     inline std::tm to_utc_tm(const time_point& tp)
     {
         std::time_t time_t_val = clock::to_time_t(tp);
@@ -207,11 +210,21 @@ namespace earth_time
     // Returns a Unix timestamp.
     inline uint32 timestamp(const time_point& tp)
     {
-        return std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
+        return static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count());
     }
     inline uint32 timestamp()
     {
         return timestamp(now());
+    }
+
+    // Returns the number of Earth seconds since the Vana'diel epoch.
+    inline uint32 vanadiel_timestamp(const time_point& tp)
+    {
+        return static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(tp - vanadiel_epoch).count());
+    }
+    inline uint32 vanadiel_timestamp()
+    {
+        return vanadiel_timestamp(now());
     }
 
     // Returns an integer 0-6 representing Monday-Sunday JST.

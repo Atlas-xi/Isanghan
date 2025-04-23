@@ -160,8 +160,9 @@ namespace fishingutils
 
     uint8 GetMoonPhase()
     {
-        uint8 phase     = (uint8)CVanaTime::getInstance()->getMoonPhase();
-        uint8 direction = CVanaTime::getInstance()->getMoonDirection();
+        vanadiel_time::time_point vanaTime  = vanadiel_time::now();
+        uint8                     phase     = static_cast<uint8>(vanadiel_time::moon::get_phase(vanaTime));
+        uint8                     direction = vanadiel_time::moon::get_direction(vanaTime);
 
         if (phase <= 5 || (phase <= 10 && direction == 1)) // New Moon
         {
@@ -202,7 +203,7 @@ namespace fishingutils
     {
         uint8          waitTime  = 13;
         uint8          moonPhase = GetMoonPhase();
-        uint8          hour      = (uint8)CVanaTime::getInstance()->getHour();
+        uint8          hour      = static_cast<uint8>(vanadiel_time::get_hour(vanadiel_time::now()));
         fishing_gear_t gear      = GetFishingGear(PChar);
 
         if (moonPhase == MOONPHASE_NEW || moonPhase == MOONPHASE_FULL)
@@ -226,7 +227,7 @@ namespace fishingutils
     float GetMonthlyTidalInfluence(fish_t* fish) // 0.25 to 1.25
     {
         float modifier = 0.5f;
-        uint8 month    = (uint8)CVanaTime::getInstance()->getMonth();
+        uint8 month    = static_cast<uint8>(vanadiel_time::get_month(vanadiel_time::now()));
 
         switch (fish->monthPattern)
         {
@@ -268,7 +269,7 @@ namespace fishingutils
     float GetHourlyModifier(fish_t* fish)
     { // 0.25 to 1.25
         float modifier = 0.5f;
-        uint8 hour     = (uint8)CVanaTime::getInstance()->getHour();
+        uint8 hour     = static_cast<uint8>(vanadiel_time::get_hour(vanadiel_time::now()));
 
         switch (fish->hourPattern)
         {
@@ -523,7 +524,7 @@ namespace fishingutils
         bonus += (moonModifier * 5) + (moonModifier * xirand::GetRandomNumber(1, 5));
 
         // Time of Day modifier
-        uint32 gameHour = CVanaTime::getInstance()->getHour();
+        uint32 gameHour = vanadiel_time::get_hour(vanadiel_time::now());
 
         if ((gameHour == 6 || gameHour == 7) || (gameHour >= 16 && gameHour <= 18))
         {
@@ -1809,9 +1810,12 @@ namespace fishingutils
         // Configuration multiplier.
         maxChance = maxChance * settings::get<float>("map.FISHING_SKILL_MULTIPLIER");
 
+        vanadiel_time::time_point vanaTime = vanadiel_time::now();
+
         // Moon phase skillup modifiers
-        uint8 phase         = CVanaTime::getInstance()->getMoonPhase();
-        uint8 moonDirection = CVanaTime::getInstance()->getMoonDirection();
+        uint8 phase         = static_cast<uint8>(vanadiel_time::moon::get_phase(vanaTime));
+        uint8 moonDirection = vanadiel_time::moon::get_direction(vanaTime);
+
         switch (moonDirection)
         {
             case 0: // None
@@ -1934,6 +1938,8 @@ namespace fishingutils
 
     void StartFishing(CCharEntity* PChar)
     {
+        auto currentTime = earth_time::now();
+
         if (!settings::get<bool>("map.FISHING_ENABLE"))
         {
             ShowWarning("Fishing is currently disabled");
@@ -1956,7 +1962,7 @@ namespace fishingutils
         CItemWeapon* Rod           = nullptr;
         CItemWeapon* Bait          = nullptr;
         uint8        FishingAreaID = 0;
-        uint32       vanaTime      = CVanaTime::getInstance()->getVanaTime();
+        uint32       vanaTime      = earth_time::vanadiel_timestamp(currentTime);
 
         if (PChar->nextFishTime > vanaTime)
         {
@@ -1966,7 +1972,7 @@ namespace fishingutils
         }
         else
         {
-            PChar->setCharVar("[Fish]LastCastTime", earth_time::timestamp());
+            PChar->setCharVar("[Fish]LastCastTime", earth_time::timestamp(currentTime));
             PChar->lastCastTime = vanaTime;
             PChar->nextFishTime = PChar->lastCastTime + 5;
         }
@@ -2671,7 +2677,7 @@ namespace fishingutils
         }
 
         uint16 MessageOffset = GetMessageOffset(PChar->getZone());
-        uint32 vanaTime      = CVanaTime::getInstance()->getVanaTime();
+        uint32 vanaTime      = earth_time::vanadiel_timestamp();
 
         switch (action)
         {

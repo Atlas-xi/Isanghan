@@ -55,7 +55,7 @@ namespace zoneutils
      *                                                                       *
      ************************************************************************/
 
-    void TOTDChange(TIMETYPE TOTD)
+    void TOTDChange(vanadiel_time::TOTD TOTD)
     {
         for (auto PZone : g_PZoneList)
         {

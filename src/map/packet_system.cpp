@@ -1501,8 +1501,9 @@ void SmallPacket0x032(MapSession* const PSession, CCharEntity* const PChar, CBas
             return;
         }
 
-        auto lastTargetTradeTimeSeconds = timer::get_seconds(timer::now() - PTarget->lastTradeInvite);
-        if ((PTarget->TradePending.targid != 0 && lastTargetTradeTimeSeconds < 60) || PTarget->UContainer->GetType() == UCONTAINER_TRADE)
+        timer::time_point currentTime     = timer::now();
+        auto              lastTargetTrade = currentTime - PTarget->lastTradeInvite;
+        if ((PTarget->TradePending.targid != 0 && lastTargetTrade < 60s) || PTarget->UContainer->GetType() == UCONTAINER_TRADE)
         {
             // Can't trade with someone who's already got a pending trade before timeout
             PChar->pushPacket<CTradeActionPacket>(PTarget, 0x07);
@@ -1527,11 +1528,11 @@ void SmallPacket0x032(MapSession* const PSession, CCharEntity* const PChar, CBas
             }
         }
 
-        PChar->lastTradeInvite     = timer::now();
+        PChar->lastTradeInvite     = currentTime;
         PChar->TradePending.id     = charid;
         PChar->TradePending.targid = targid;
 
-        PTarget->lastTradeInvite     = timer::now();
+        PTarget->lastTradeInvite     = currentTime;
         PTarget->TradePending.id     = PChar->id;
         PTarget->TradePending.targid = PChar->targid;
         PTarget->pushPacket<CTradeRequestPacket>(PChar);
@@ -2351,7 +2352,7 @@ void SmallPacket0x04B(MapSession* const PSession, CCharEntity* const PChar, CBas
                 selfEntry.race       = PChar->mainlook.race;
                 selfEntry.allegiance = static_cast<uint8>(PChar->allegiance);
                 selfEntry.fishRank   = PChar->RealSkills.rank[SKILLTYPE::SKILL_FISHING];
-                selfEntry.submitTime = CVanaTime::getInstance()->getVanaTime();
+                selfEntry.submitTime = earth_time::vanadiel_timestamp();
             }
         }
 
@@ -6427,7 +6428,7 @@ void SmallPacket0x0FC(MapSession* const PSession, CCharEntity* const PChar, CBas
         PChar->pushPacket<CMessageStandardPacket>(itemID, 132); // "Your moogle plants the <seed> in the flowerpot."
         PPotItem->cleanPot();
         PPotItem->setPlant(CItemFlowerpot::getPlantFromSeed(itemID));
-        PPotItem->setPlantTimestamp(CVanaTime::getInstance()->getVanaTime());
+        PPotItem->setPlantTimestamp(earth_time::vanadiel_timestamp());
         PPotItem->setStrength(xirand::GetRandomNumber(33));
         gardenutils::GrowToNextStage(PPotItem);
         updatedPot = true;

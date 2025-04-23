@@ -569,7 +569,7 @@ void CZone::SetWeather(WEATHER weather)
     m_zoneEntities->WeatherChange(weather);
 
     m_Weather           = weather;
-    m_WeatherChangeTime = CVanaTime::getInstance()->getVanaTime();
+    m_WeatherChangeTime = earth_time::vanadiel_timestamp();
 
     m_zoneEntities->PushPacket(nullptr, CHAR_INZONE, std::make_unique<CWeatherPacket>(m_WeatherChangeTime, m_Weather, xirand::GetRandomNumber(4, 28)));
 }
@@ -578,22 +578,19 @@ void CZone::UpdateWeather()
 {
     TracyZoneScoped;
 
-    uint32 CurrentVanaDate   = CVanaTime::getInstance()->getDate();                                  // Current Vanadiel timestamp in minutes
-    uint32 StartFogVanaDate  = (CurrentVanaDate - (CurrentVanaDate % VTIME_DAY)) + (VTIME_HOUR * 2); // Vanadiel timestamp of 2 AM in minutes
-    uint32 EndFogVanaDate    = StartFogVanaDate + (VTIME_HOUR * 5);                                  // Vanadiel timestamp of 7 AM in minutes
-    uint32 WeatherNextUpdate = 0;
-    uint32 WeatherDay        = 0;
-    uint8  WeatherChance     = 0;
+    vanadiel_time::time_point CurrentVanaDate   = vanadiel_time::now(); // Current Vanadiel time
+    vanadiel_time::time_point nextVanaMidnight  = vanadiel_time::get_next_midnight(CurrentVanaDate);
+    vanadiel_time::time_point StartFogVanaDate  = nextVanaMidnight - xi::vanadiel_clock::days(1) + xi::vanadiel_clock::hours(2); // Vanadiel timestamp of 2 AM in minutes
+    vanadiel_time::time_point EndFogVanaDate    = StartFogVanaDate + xi::vanadiel_clock::hours(5);                               // Vanadiel timestamp of 7 AM in minutes
+    vanadiel_time::duration   WeatherNextUpdate = 0s;
+    uint32                    WeatherDay        = 0;
+    uint8                     WeatherChance     = 0;
 
     // Random time between 3 minutes and 30 minutes for the next weather change
-    WeatherNextUpdate = (xirand::GetRandomNumber(180, 1801));
-
-    // Find the timestamp since the start of vanadiel
-    WeatherDay = CVanaTime::getInstance()->getVanaTime();
+    WeatherNextUpdate = xi::vanadiel_clock::seconds(xirand::GetRandomNumber(180, 1801));
 
     // Calculate what day we are on since the start of vanadiel time
-    // 1 Vana'diel Day = 57 minutes 36 seconds or 3456 seconds
-    WeatherDay = WeatherDay / 3456;
+    WeatherDay = vanadiel_time::count_days(CurrentVanaDate.time_since_epoch());
 
     // The weather starts over again every 2160 days
     WeatherDay = WeatherDay % WEATHER_CYCLE;
@@ -638,15 +635,15 @@ void CZone::UpdateWeather()
     {
         Weather = WEATHER_FOG;
         // Force the weather to change by 7 am
-        //  2.4 vanadiel minutes = 1 earth second
-        WeatherNextUpdate = (uint32)((EndFogVanaDate - CurrentVanaDate) * 2.4);
+        WeatherNextUpdate = EndFogVanaDate - CurrentVanaDate;
     }
 
     SetWeather((WEATHER)Weather);
     luautils::OnZoneWeatherChange(GetID(), Weather);
 
     // clang-format off
-    CTaskManager::getInstance()->AddTask("zone_update_weather", timer::now() + std::chrono::seconds(WeatherNextUpdate), this, CTaskManager::TASK_ONCE, 1s,
+    timer::time_point nextWeatherTick = timer::now() + std::chrono::duration_cast<std::chrono::seconds>(WeatherNextUpdate);
+    CTaskManager::getInstance()->AddTask("zone_update_weather", nextWeatherTick, this, CTaskManager::TASK_ONCE, 1s,
     [](timer::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
@@ -790,7 +787,7 @@ CBaseEntity* CZone::GetEntity(uint16 targid, uint8 filter)
  *                                                                       *
  ************************************************************************/
 
-void CZone::TOTDChange(TIMETYPE TOTD)
+void CZone::TOTDChange(vanadiel_time::TOTD TOTD)
 {
     TracyZoneScoped;
 

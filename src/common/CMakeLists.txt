@@ -44,7 +44,6 @@ set(COMMON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/uuid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/uuid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/vana_time.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vana_time.h
     ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp # auto-generated
     ${CMAKE_CURRENT_SOURCE_DIR}/version.h

@@ -44,7 +44,7 @@ CBazaarItemPacket::CBazaarItemPacket(CItem* PItem, uint8 SlotID, uint16 Tax)
 
         if (PItem->isSubType(ITEM_CHARGED) && PItem->isType(ITEM_USABLE))
         {
-            uint32 currentTime = CVanaTime::getInstance()->getVanaTime();
+            uint32 currentTime = earth_time::vanadiel_timestamp();
             uint32 nextUseTime = ((CItemUsable*)PItem)->getLastUseTime() + ((CItemUsable*)PItem)->getReuseDelay();
 
             ref<uint8>(0x11) = 0x01; // ITEM_CHARGED flag

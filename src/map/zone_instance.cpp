@@ -323,7 +323,7 @@ void CZoneInstance::SpawnTransport(CCharEntity* PChar)
     }
 }
 
-void CZoneInstance::TOTDChange(TIMETYPE TOTD)
+void CZoneInstance::TOTDChange(vanadiel_time::TOTD TOTD)
 {
     TracyZoneScoped;
     for (const auto& PInstance : m_InstanceList)

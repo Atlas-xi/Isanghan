@@ -75,7 +75,7 @@ public:
     void FindPartyForMob(CBaseEntity* PEntity);         // looking for a party for the monster
     void TransportDepart(uint16 boundary, uint16 zone); // ship/boat is leaving, passengers need to be collected
 
-    void TOTDChange(TIMETYPE TOTD); // process the world's reactions to changing time of day
+    void TOTDChange(vanadiel_time::TOTD TOTD); // process the world's reactions to changing time of day
     void WeatherChange(WEATHER weather);
     void MusicChange(uint16 BlockID, uint16 MusicTrackID);
 

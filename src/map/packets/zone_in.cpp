@@ -337,10 +337,9 @@ CZoneInPacket::CZoneInPacket(CCharEntity* PChar, const EventInfo* currentEvent)
 
     ref<uint8>(0xAE) = GetMogHouseLeavingFlag(PChar);
 
-    uint32 pktTime = CVanaTime::getInstance()->getVanaTime();
-
-    ref<uint32>(0x38) = pktTime + VTIME_BASEDATE;
-    ref<uint32>(0x3C) = pktTime;
+    auto currentTime  = earth_time::now();
+    ref<uint32>(0x38) = earth_time::timestamp(currentTime);
+    ref<uint32>(0x3C) = earth_time::vanadiel_timestamp(currentTime);
 
     ref<uint32>(0xA4) = PChar->GetTimeRemainingUntilDeathHomepoint();
 

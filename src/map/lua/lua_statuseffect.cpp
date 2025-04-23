@@ -112,8 +112,8 @@ uint32 CLuaStatusEffect::getTimeRemaining()
     uint32 remaining = 0;
     if (m_PLuaStatusEffect->GetDuration() > 0s)
     {
-        auto duration = timer::now() - m_PLuaStatusEffect->GetStartTime();
-        remaining     = static_cast<uint32>(timer::get_milliseconds(std::max<timer::duration>(m_PLuaStatusEffect->GetDuration() - duration, 0s)));
+        auto duration = m_PLuaStatusEffect->GetStartTime() - timer::now() + m_PLuaStatusEffect->GetDuration();
+        remaining     = static_cast<uint32>(timer::get_milliseconds(duration));
     }
 
     return remaining;

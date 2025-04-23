@@ -1,7 +1,7 @@
 ﻿/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,21 +21,11 @@
 
 #pragma once
 
-#ifdef _WIN32
-#define timegm _mkgmtime
-#endif
-
-#define VTIME_BASEDATE 1009810800 // unix epoch - 1009810800 = se epoch (in earth seconds)
-#define VTIME_YEAR     518400     // 360 * GameDay
-#define VTIME_MONTH    43200      // 30 * GameDay
-#define VTIME_WEEK     11520      // 8 * GameDay
-#define VTIME_DAY      1440       // 24 hours * GameHour
-#define VTIME_HOUR     60         // 60 minutes
-
-#define JST_OFFSET 32400 // JST +offset from UTC
+#include <chrono>
+#include <ctime>
 
 #include "cbasetypes.h"
-#include "singleton.h"
+#include "xi.h"
 
 enum DAYTYPE : uint8
 {
@@ -49,55 +39,237 @@ enum DAYTYPE : uint8
     DARKSDAY     = 7
 };
 
-enum TIMETYPE : uint8
+namespace vanadiel_time
 {
-    TIME_NONE     = 0,
-    TIME_MIDNIGHT = 1,
-    TIME_NEWDAY   = 2,
-    TIME_DAWN     = 3,
-    TIME_DAY      = 4,
-    TIME_DUSK     = 5,
-    TIME_EVENING  = 6,
-    TIME_NIGHT    = 7
-};
+    using clock      = xi::vanadiel_clock;
+    using duration   = clock::duration;
+    using time_point = clock::time_point;
 
-class CVanaTime : public Singleton<CVanaTime>
-{
-public:
-    TIMETYPE SyncTime();
-    TIMETYPE GetCurrentTOTD();
+    enum TOTD : uint8
+    {
+        NONE     = 0,
+        MIDNIGHT = 1,
+        NEWDAY   = 2,
+        DAWN     = 3,
+        DAY      = 4,
+        DUSK     = 5,
+        EVENING  = 6,
+        NIGHT    = 7
+    };
 
-    uint32 getDate() const;
-    uint32 getYear() const;
-    uint32 getMonth() const;
-    uint32 getDayOfTheMonth() const;
-    uint32 getHour() const;
-    uint32 getMinute() const;
-    uint32 getWeekday() const;
-    uint32 getMoonPhase() const;
-    uint8  getMoonDirection() const;
-    uint8  getRSERace() const;
-    uint8  getRSELocation() const;
+    inline time_point now()
+    {
+        return clock::now();
+    }
 
-    uint32 getVanaTime() const;
-    uint32 getEpoch() const;
-    uint32 getCustomEpoch() const;
+    inline earth_time::time_point to_earth_time(time_point vanadiel_tp)
+    {
+        earth_time::duration earth_since_epoch = std::chrono::duration_cast<earth_time::duration>(vanadiel_tp.time_since_epoch());
+        return earth_time::time_point(earth_since_epoch + earth_time::vanadiel_epoch);
+    };
 
-    void setCustomEpoch(int32 epoch);
+    inline time_point from_earth_time(earth_time::time_point earth_tp)
+    {
+        clock::duration vanadiel_since_epoch = std::chrono::duration_cast<clock::duration>(earth_tp - earth_time::vanadiel_epoch);
+        return time_point(vanadiel_since_epoch);
+    };
 
-protected:
-    CVanaTime();
+    inline uint32 count_weeks(const duration& d)
+    {
+        clock::weeks total_weeks = std::chrono::duration_cast<clock::weeks>(d);
+        return static_cast<uint32>(total_weeks.count());
+    }
 
-private:
-    uint32 m_vYear{};    // Vanadiel Year
-    uint32 m_vMon{};     // Vanadiel Month
-    uint32 m_vDate{};    // Vanadiel Date (day of the month)
-    uint32 m_vHour{};    // Vanadiel Hour
-    uint32 m_vMin{};     // Vanadiel Minute
-    uint32 m_vDay{};     // Vanadiel day of the week (fire, earth, wind, water, ice, lightning, light, dark)
-    uint32 m_vanaDate{}; // Vanadiel time in integer format
+    inline uint32 count_days(const duration& d)
+    {
+        clock::days total_days = std::chrono::duration_cast<clock::days>(d);
+        return static_cast<uint32>(total_days.count());
+    }
 
-    TIMETYPE m_TimeType{}; // The current type of time
+    inline std::tm to_tm(const time_point& tp)
+    {
+        std::tm  result        = {};
+        duration d_since_epoch = tp.time_since_epoch();
 
-    int32 m_customEpoch{}; // Custom epoch to use instead of VTIME_BASEDATE
-};
+        auto total_days_count = count_days(d_since_epoch);
+        auto days_into_year   = total_days_count % 360;
+
+        result.tm_yday = static_cast<uint32>(days_into_year);
+        result.tm_mday = static_cast<uint32>(days_into_year % 30) + 1;
+        result.tm_wday = static_cast<uint32>(total_days_count % 8);
+
+        // Calculate components by progressively removing larger units.
+        clock::years year = std::chrono::duration_cast<clock::years>(d_since_epoch);
+        d_since_epoch -= year;
+        result.tm_year = static_cast<uint32>(year.count());
+
+        clock::months mon = std::chrono::duration_cast<clock::months>(d_since_epoch);
+        d_since_epoch -= mon;
+        result.tm_mon = static_cast<uint32>(mon.count());
+
+        // Get the time within the day.
+        d_since_epoch = tp.time_since_epoch() - clock::days(total_days_count);
+
+        clock::hours hour = std::chrono::duration_cast<clock::hours>(d_since_epoch);
+        d_since_epoch -= hour;
+        result.tm_hour = static_cast<uint32>(hour.count());
+
+        clock::minutes min = std::chrono::duration_cast<clock::minutes>(d_since_epoch);
+        d_since_epoch -= min;
+        result.tm_min = static_cast<uint32>(min.count());
+
+        clock::seconds sec = std::chrono::duration_cast<clock::seconds>(d_since_epoch);
+        result.tm_sec      = static_cast<uint32>(sec.count());
+
+        return result;
+    }
+
+    // seconds after the minute - [​0​, 60]
+    inline uint32 get_second(const time_point& tp)
+    {
+        return to_tm(tp).tm_sec;
+    }
+    // minutes after the hour – [​0​, 59]
+    inline uint32 get_minute(const time_point& tp)
+    {
+        return to_tm(tp).tm_min;
+    }
+    // hours since midnight – [​0​, 23]
+    inline uint32 get_hour(const time_point& tp)
+    {
+        return to_tm(tp).tm_hour;
+    }
+    // day of the month – [1, 30]
+    inline uint32 get_monthday(const time_point& tp)
+    {
+        return to_tm(tp).tm_mday;
+    }
+    // month – [​0​, 11]
+    inline uint32 get_month(const time_point& tp)
+    {
+        return to_tm(tp).tm_mon;
+    }
+    // years since 886
+    inline uint32 get_year(const time_point& tp)
+    {
+        return to_tm(tp).tm_year;
+    }
+    // days since Firesday – [​0​, 7]
+    inline uint32 get_weekday(const time_point& tp)
+    {
+        return to_tm(tp).tm_wday;
+    }
+    // days since 1st day of year – [​0​, 360]
+    inline uint32 get_yearday(const time_point& tp)
+    {
+        return to_tm(tp).tm_yday;
+    }
+
+    inline time_point get_next_midnight(const time_point& tp)
+    {
+        auto previous_midnight = std::chrono::floor<clock::days>(tp);
+        auto next_midnight     = previous_midnight + clock::days(1);
+        return next_midnight;
+    }
+    inline time_point get_next_midnight()
+    {
+        return get_next_midnight(now());
+    }
+
+    inline TOTD get_totd(const time_point& tp)
+    {
+        auto hour = get_hour(tp);
+
+        if (hour < 4)
+        {
+            return TOTD::MIDNIGHT;
+        }
+        else if (hour >= 4 && hour < 6)
+        {
+            return TOTD::NEWDAY;
+        }
+        else if (hour == 6)
+        {
+            return TOTD::DAWN;
+        }
+        else if (hour >= 7 && hour < 17)
+        {
+            return TOTD::DAY;
+        }
+        else if (hour == 17)
+        {
+            return TOTD::DUSK;
+        }
+        else if (hour >= 18 && hour < 20)
+        {
+            return TOTD::EVENING;
+        }
+        else if (hour >= 20)
+        {
+            return TOTD::NIGHT;
+        }
+        return TOTD::NONE;
+    }
+    inline TOTD get_totd()
+    {
+        return get_totd(now());
+    }
+
+    namespace moon
+    {
+        inline uint32 get_phase(const time_point& tp)
+        {
+            int32  phase   = 0;
+            double daysmod = static_cast<int32>((count_days(tp.time_since_epoch() + clock::years(886)) + 26) % 84);
+
+            if (daysmod >= 42)
+            {
+                phase = static_cast<int32>(100 * ((daysmod - 42) / 42) + 0.5);
+            }
+            else
+            {
+                phase = static_cast<int32>(100 * (1 - (daysmod / 42)) + 0.5);
+            }
+
+            return phase;
+        }
+        inline uint32 get_phase()
+        {
+            return get_phase(now());
+        }
+
+        inline uint8 get_direction(const time_point& tp)
+        {
+            double daysmod = static_cast<int32>((count_days(tp.time_since_epoch() + clock::years(886)) + 26) % 84);
+
+            if (daysmod == 42 || daysmod == 0)
+            {
+                return 0; // neither waxing nor waning
+            }
+            else if (daysmod < 42)
+            {
+                return 1; // waning
+            }
+            else
+            {
+                return 2; // waxing
+            }
+        }
+        inline uint8 get_direction()
+        {
+            return get_direction(now());
+        }
+    } // namespace moon
+
+    namespace rse
+    {
+        inline uint8 get_race()
+        {
+            return static_cast<uint8>(count_weeks(now().time_since_epoch()) % 8 + 1);
+        }
+        inline uint8 get_location()
+        {
+            return static_cast<uint8>(count_weeks(now().time_since_epoch()) % 3);
+        }
+    } // namespace rse
+}; // namespace vanadiel_time

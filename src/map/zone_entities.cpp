@@ -1338,7 +1338,7 @@ CBaseEntity* CZoneEntities::GetEntity(uint16 targid, uint8 filter)
     return nullptr;
 }
 
-void CZoneEntities::TOTDChange(TIMETYPE TOTD)
+void CZoneEntities::TOTDChange(vanadiel_time::TOTD TOTD)
 {
     TracyZoneScoped;
 
@@ -1346,11 +1346,11 @@ void CZoneEntities::TOTDChange(TIMETYPE TOTD)
 
     switch (TOTD)
     {
-        case TIME_MIDNIGHT:
+        case vanadiel_time::TOTD::MIDNIGHT:
         {
         }
         break;
-        case TIME_NEWDAY:
+        case vanadiel_time::TOTD::NEWDAY:
         {
             FOR_EACH_PAIR_CAST_SECOND(CMobEntity*, PMob, m_mobList)
             {
@@ -1362,7 +1362,7 @@ void CZoneEntities::TOTDChange(TIMETYPE TOTD)
             }
         }
         break;
-        case TIME_DAWN:
+        case vanadiel_time::TOTD::DAWN:
         {
             ScriptType = SCRIPT_TIME_DAWN;
 
@@ -1376,17 +1376,17 @@ void CZoneEntities::TOTDChange(TIMETYPE TOTD)
             }
         }
         break;
-        case TIME_DAY:
+        case vanadiel_time::TOTD::DAY:
         {
             ScriptType = SCRIPT_TIME_DAY;
         }
         break;
-        case TIME_DUSK:
+        case vanadiel_time::TOTD::DUSK:
         {
             ScriptType = SCRIPT_TIME_DUSK;
         }
         break;
-        case TIME_EVENING:
+        case vanadiel_time::TOTD::EVENING:
         {
             ScriptType = SCRIPT_TIME_EVENING;
 
@@ -1401,7 +1401,7 @@ void CZoneEntities::TOTDChange(TIMETYPE TOTD)
             }
         }
         break;
-        case TIME_NIGHT:
+        case vanadiel_time::TOTD::NIGHT:
         {
             FOR_EACH_PAIR_CAST_SECOND(CMobEntity*, PMob, m_mobList)
             {

@@ -53,7 +53,7 @@ CCheckPacket::CCheckPacket(CCharEntity* PChar, CCharEntity* PTarget)
 
             if (PItem->isSubType(ITEM_CHARGED))
             {
-                uint32 currentTime = CVanaTime::getInstance()->getVanaTime();
+                uint32 currentTime = earth_time::vanadiel_timestamp();
                 uint32 nextUseTime = ((CItemUsable*)PItem)->getLastUseTime() + ((CItemUsable*)PItem)->getReuseDelay();
 
                 ref<uint8>(size * 2 + 0x04) = 0x01;
