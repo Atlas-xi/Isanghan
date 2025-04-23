@@ -126,6 +126,5 @@ timer::duration CTaskManager::doExpiredTasks(timer::time_point tick) // tick is 
         }
     }
 
-    // We clamp with a minimum to ensure that the network phase doesn't starve
-    return std::clamp<timer::duration>(timer::now() - start, 50ms, 1000ms);
+    return timer::now() - start;
 }

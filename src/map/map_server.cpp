@@ -225,12 +225,12 @@ void MapServer::run()
 
         const auto tickStart = timer::now();
         {
-            tasksDuration   = CTaskManager::getInstance()->doExpiredTasks(tickStart);
-            networkDuration = networking_->doSocketsBlocking(kMainLoopInterval - tasksDuration); // Use tick remainder for networking
-            watchdog_->update();
+            tasksDuration = CTaskManager::getInstance()->doExpiredTasks(tickStart);
+            // Use tick remainder for networking with a maximum to ensure that the network phase
+            // doesn't starve and a minimum to prevent bumping up against the time limit.
+            networkDuration = networking_->doSocketsBlocking(kMainLoopInterval - std::clamp<timer::duration>(tasksDuration, 50ms, 150ms));
         }
-        tickDuration  = timer::now() - tickStart;
-        tasksDuration = tickDuration - networkDuration; // Since we don't measure logic directly, we can calculate it based on the total and network durations
+        tickDuration = timer::now() - tickStart;
 
         const auto tickDiffTime = kMainLoopInterval - tickDuration;
 
@@ -245,6 +245,8 @@ void MapServer::run()
                             timer::get_milliseconds(networkDuration),
                             timer::get_milliseconds(tickDuration),
                             timer::get_milliseconds(tickDiffTime));
+
+        watchdog_->update();
 
         if (tickDiffTime > 0ms)
         {

@@ -154,8 +154,7 @@ auto MapNetworking::doSocketsBlocking(timer::duration next) -> timer::duration
 
     message::handle_incoming();
 
-    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(next - std::chrono::duration_cast<std::chrono::seconds>(next));
-    mapSocket_->recvFor(duration);
+    mapSocket_->recvFor(next);
 
     _sql->TryPing();
 
