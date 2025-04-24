@@ -151,7 +151,7 @@ void MapSessionContainer::cleanupSessions(IPP mapIPP)
         CCharEntity* PChar = map_session_data->PChar;
         auto         now   = timer::now();
 
-        if (now > map_session_data->last_update + std::chrono::seconds(5))
+        if (now > map_session_data->last_update + 5s)
         {
             if (PChar != nullptr && !PChar->isLinkDead)
             {

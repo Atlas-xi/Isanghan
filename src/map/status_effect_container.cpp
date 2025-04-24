@@ -183,7 +183,7 @@ bool statusOrdering(CStatusEffect* AStatus, CStatusEffect* BStatus)
     // Sort by start time
     if (isSortedByStartTime(AStatus->GetStatusID()) && isSortedByStartTime(BStatus->GetStatusID()))
     {
-        auto diff = timer::get_milliseconds(AStatus->GetStartTime() - BStatus->GetStartTime());
+        auto diff = timer::count_milliseconds(AStatus->GetStartTime() - BStatus->GetStartTime());
         if (diff != 0)
         {
             return diff > 0;
@@ -1743,20 +1743,20 @@ void CStatusEffectContainer::SaveStatusEffects(bool logout)
                 PStatusEffect->SetPower(m_POwner->getMod(Mod::STONESKIN));
             }
 
-            uint32 tick     = static_cast<uint32>(timer::get_seconds(PStatusEffect->GetTickTime()));
+            uint32 tick     = static_cast<uint32>(timer::count_seconds(PStatusEffect->GetTickTime()));
             uint32 duration = 0;
 
             if (PStatusEffect->GetDuration() > 0s)
             {
                 if (PStatusEffect->HasEffectFlag(EFFECTFLAG_OFFLINE_TICK))
                 {
-                    duration = static_cast<uint32>(timer::get_seconds(PStatusEffect->GetDuration()));
+                    duration = static_cast<uint32>(timer::count_seconds(PStatusEffect->GetDuration()));
                 }
                 else
                 {
                     if (realduration > 0s)
                     {
-                        duration = static_cast<uint32>(timer::get_seconds(realduration));
+                        duration = static_cast<uint32>(timer::count_seconds(realduration));
                     }
                     else
                     {

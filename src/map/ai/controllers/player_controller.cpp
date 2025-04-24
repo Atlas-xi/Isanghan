@@ -134,7 +134,7 @@ bool CPlayerController::Ability(uint16 targid, uint16 abilityid)
             }
 
             PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 0, MSGBASIC_UNABLE_TO_USE_JA2);
-            PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, timer::get_seconds(currentRecast), 0, MSGBASIC_TIME_LEFT);
+            PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, timer::count_seconds(currentRecast), 0, MSGBASIC_TIME_LEFT);
             return false;
         }
         if (auto target = PChar->GetEntity(targid); target && target->PAI->IsUntargetable())

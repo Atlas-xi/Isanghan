@@ -452,7 +452,7 @@ namespace roeutils
         if (GetEminenceRecordCompletion(PChar, 1))
         {
             auto currentTime     = earth_time::now();
-            auto lastJstMidnight = earth_time::jst::get_next_midnight(currentTime) - std::chrono::days(1); // Most recent JST midnight
+            auto lastJstMidnight = earth_time::jst::get_next_midnight(currentTime) - 24h; // Most recent JST midnight
 
             { // Daily Reset
                 if (PChar->lastOnline < lastJstMidnight)

@@ -76,13 +76,13 @@ namespace vanadiel_time
 
     inline uint32 count_weeks(const duration& d)
     {
-        clock::weeks total_weeks = std::chrono::duration_cast<clock::weeks>(d);
+        clock::weeks total_weeks = std::chrono::floor<clock::weeks>(d);
         return static_cast<uint32>(total_weeks.count());
     }
 
     inline uint32 count_days(const duration& d)
     {
-        clock::days total_days = std::chrono::duration_cast<clock::days>(d);
+        clock::days total_days = std::chrono::floor<clock::days>(d);
         return static_cast<uint32>(total_days.count());
     }
 
@@ -99,26 +99,26 @@ namespace vanadiel_time
         result.tm_wday = static_cast<uint32>(total_days_count % 8);
 
         // Calculate components by progressively removing larger units.
-        clock::years year = std::chrono::duration_cast<clock::years>(d_since_epoch);
+        clock::years year = std::chrono::floor<clock::years>(d_since_epoch);
         d_since_epoch -= year;
         result.tm_year = static_cast<uint32>(year.count());
 
-        clock::months mon = std::chrono::duration_cast<clock::months>(d_since_epoch);
+        clock::months mon = std::chrono::floor<clock::months>(d_since_epoch);
         d_since_epoch -= mon;
         result.tm_mon = static_cast<uint32>(mon.count());
 
         // Get the time within the day.
         d_since_epoch = tp.time_since_epoch() - clock::days(total_days_count);
 
-        clock::hours hour = std::chrono::duration_cast<clock::hours>(d_since_epoch);
+        clock::hours hour = std::chrono::floor<clock::hours>(d_since_epoch);
         d_since_epoch -= hour;
         result.tm_hour = static_cast<uint32>(hour.count());
 
-        clock::minutes min = std::chrono::duration_cast<clock::minutes>(d_since_epoch);
+        clock::minutes min = std::chrono::floor<clock::minutes>(d_since_epoch);
         d_since_epoch -= min;
         result.tm_min = static_cast<uint32>(min.count());
 
-        clock::seconds sec = std::chrono::duration_cast<clock::seconds>(d_since_epoch);
+        clock::seconds sec = std::chrono::floor<clock::seconds>(d_since_epoch);
         result.tm_sec      = static_cast<uint32>(sec.count());
 
         return result;
@@ -178,37 +178,42 @@ namespace vanadiel_time
 
     inline TOTD get_totd(const time_point& tp)
     {
-        auto hour = get_hour(tp);
-
-        if (hour < 4)
+        switch (get_hour(tp))
         {
-            return TOTD::MIDNIGHT;
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+                return TOTD::MIDNIGHT;
+            case 4:
+            case 5:
+                return TOTD::NEWDAY;
+            case 6:
+                return TOTD::DAWN;
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+            case 14:
+            case 15:
+            case 16:
+                return TOTD::DAY;
+            case 17:
+                return TOTD::DUSK;
+            case 18:
+            case 19:
+                return TOTD::EVENING;
+            case 20:
+            case 21:
+            case 22:
+            case 23:
+                return TOTD::NIGHT;
+            default:
+                return TOTD::NONE;
         }
-        else if (hour >= 4 && hour < 6)
-        {
-            return TOTD::NEWDAY;
-        }
-        else if (hour == 6)
-        {
-            return TOTD::DAWN;
-        }
-        else if (hour >= 7 && hour < 17)
-        {
-            return TOTD::DAY;
-        }
-        else if (hour == 17)
-        {
-            return TOTD::DUSK;
-        }
-        else if (hour >= 18 && hour < 20)
-        {
-            return TOTD::EVENING;
-        }
-        else if (hour >= 20)
-        {
-            return TOTD::NIGHT;
-        }
-        return TOTD::NONE;
     }
     inline TOTD get_totd()
     {

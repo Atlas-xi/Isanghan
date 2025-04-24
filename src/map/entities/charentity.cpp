@@ -886,7 +886,7 @@ uint32 CCharEntity::GetPlayTime(bool needUpdate)
     {
         auto currentTime = timer::now();
 
-        m_PlayTime += static_cast<uint32>(timer::get_seconds(currentTime - m_SaveTime));
+        m_PlayTime += static_cast<uint32>(timer::count_seconds(currentTime - m_SaveTime));
         m_SaveTime = currentTime;
     }
 
@@ -1734,7 +1734,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             // TODO: this is bad
             // "recast" 1-4 = sic/ready
             // "recast" 1 = quickdraw, stratagems
-            auto crypticRecastSecondsAsType = timer::get_seconds(PAbility->getRecastTime());
+            auto crypticRecastSecondsAsType = timer::count_seconds(PAbility->getRecastTime());
 
             action.recast = charge->chargeTime * crypticRecastSecondsAsType - meritRecastReduction;
         }
@@ -1767,7 +1767,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
 
             // Localvar will set the BP ability timer when the move consumes MP
             // The delay is snapshot when the player uses the ability: https://www.bg-wiki.com/ffxi/Blood_Pact_Ability_Delay
-            this->SetLocalVar("bpRecastTime", static_cast<uint16>(timer::get_seconds(std::max<timer::duration>(0s, action.recast - std::chrono::seconds(bloodPactDelayReduction)))));
+            this->SetLocalVar("bpRecastTime", static_cast<uint16>(timer::count_seconds(std::max<timer::duration>(0s, action.recast - std::chrono::seconds(bloodPactDelayReduction)))));
 
             // Recast is actually triggered when the bp goes off (no recast packet at all on using a bp and the target moving out of range of the pet)
             action.recast = 0s;

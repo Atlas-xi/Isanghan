@@ -114,7 +114,7 @@ uint32 CPetEntity::getJugDuration()
         return 0;
     }
 
-    return static_cast<uint32>(timer::get_seconds(m_jugDuration));
+    return static_cast<uint32>(timer::count_seconds(m_jugDuration));
 }
 
 void CPetEntity::setJugDuration(uint32 seconds)

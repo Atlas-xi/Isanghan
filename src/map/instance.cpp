@@ -228,7 +228,7 @@ void CInstance::CheckTime(timer::time_point tick)
 {
     if (m_lastTimeCheck + 1s <= tick && !Failed())
     {
-        luautils::OnInstanceTimeUpdate(GetZone(), this, static_cast<uint32>(timer::get_milliseconds(GetElapsedTime(tick))));
+        luautils::OnInstanceTimeUpdate(GetZone(), this, static_cast<uint32>(timer::count_milliseconds(GetElapsedTime(tick))));
         m_lastTimeCheck = tick;
     }
 }

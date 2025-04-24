@@ -180,7 +180,7 @@ WEATHER CLuaZone::getWeather()
 
 uint32 CLuaZone::getUptime()
 {
-    long long uptime = timer::get_seconds(timer::get_uptime());
+    long long uptime = timer::count_seconds(timer::get_uptime());
     // returns the zone up time in seconds
     return static_cast<uint32>(uptime);
 }

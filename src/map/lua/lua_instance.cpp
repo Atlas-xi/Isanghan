@@ -121,7 +121,7 @@ sol::table CLuaInstance::getPets()
 
 uint32 CLuaInstance::getTimeLimit()
 {
-    uint32 limit = std::chrono::duration_cast<std::chrono::minutes>(m_PLuaInstance->GetTimeLimit()).count();
+    uint32 limit = std::chrono::floor<std::chrono::minutes>(m_PLuaInstance->GetTimeLimit()).count();
     return limit;
 }
 
@@ -145,7 +145,7 @@ uint8 CLuaInstance::getLevelCap()
 
 uint32 CLuaInstance::getLastTimeUpdate()
 {
-    auto time_ms = timer::get_milliseconds(m_PLuaInstance->GetLastTimeUpdate());
+    auto time_ms = timer::count_milliseconds(m_PLuaInstance->GetLastTimeUpdate());
     return static_cast<uint32>(time_ms);
 }
 
@@ -156,7 +156,7 @@ uint32 CLuaInstance::getProgress()
 
 uint32 CLuaInstance::getWipeTime()
 {
-    auto time_ms = timer::get_milliseconds(m_PLuaInstance->GetWipeTime());
+    auto time_ms = timer::count_milliseconds(m_PLuaInstance->GetWipeTime());
     return static_cast<uint32>(time_ms);
 }
 

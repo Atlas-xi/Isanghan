@@ -205,7 +205,7 @@ void MapServer::prepareWatchdog()
             ShowCritical(outputStr);
 
             // Allow some time for logging to flush
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            std::this_thread::sleep_for(200ms);
 
             throw std::runtime_error("Watchdog thread time exceeded. Killing process.");
         }
@@ -234,17 +234,17 @@ void MapServer::run()
 
         const auto tickDiffTime = kMainLoopInterval - tickDuration;
 
-        mapStatistics_->set(MapStatistics::Key::TasksTickTime, timer::get_milliseconds(tasksDuration));
-        mapStatistics_->set(MapStatistics::Key::NetworkTickTime, timer::get_milliseconds(networkDuration));
-        mapStatistics_->set(MapStatistics::Key::TotalTickTime, timer::get_milliseconds(tickDuration));
-        mapStatistics_->set(MapStatistics::Key::TickDiffTime, timer::get_milliseconds(tickDiffTime));
+        mapStatistics_->set(MapStatistics::Key::TasksTickTime, timer::count_milliseconds(tasksDuration));
+        mapStatistics_->set(MapStatistics::Key::NetworkTickTime, timer::count_milliseconds(networkDuration));
+        mapStatistics_->set(MapStatistics::Key::TotalTickTime, timer::count_milliseconds(tickDuration));
+        mapStatistics_->set(MapStatistics::Key::TickDiffTime, timer::count_milliseconds(tickDiffTime));
         mapStatistics_->flush();
 
         DebugPerformanceFmt("Tasks: {}ms, Network: {}ms, Total: {}ms, Diff/Sleep: {}ms",
-                            timer::get_milliseconds(tasksDuration),
-                            timer::get_milliseconds(networkDuration),
-                            timer::get_milliseconds(tickDuration),
-                            timer::get_milliseconds(tickDiffTime));
+                            timer::count_milliseconds(tasksDuration),
+                            timer::count_milliseconds(networkDuration),
+                            timer::count_milliseconds(tickDuration),
+                            timer::count_milliseconds(tickDiffTime));
 
         watchdog_->update();
 
@@ -254,7 +254,7 @@ void MapServer::run()
         }
         else if (tickDiffTime < -kMainLoopBacklogThreshold)
         {
-            RATE_LIMIT(15s, ShowWarningFmt("Main loop is running {}ms behind, performance is degraded!", -timer::get_milliseconds(tickDiffTime)));
+            RATE_LIMIT(15s, ShowWarningFmt("Main loop is running {}ms behind, performance is degraded!", -timer::count_milliseconds(tickDiffTime)));
         }
     }
 }

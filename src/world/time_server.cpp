@@ -39,6 +39,9 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 
     WorldServer* worldServer = std::any_cast<WorldServer*>(PTask->m_data);
 
+    // Earth-based ticks.
+    // Uses the JST equivalent of the current timer tick. (steady_clock -> system_clock)
+
     // Earth time points
     const auto jstTime    = earth_time::time_point(timer::to_utc(tick));
     const auto jstHour    = earth_time::jst::get_hour(jstTime);
@@ -73,7 +76,7 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
             // This should happen hourly, except midnight.
             worldServer->conquestSystem_->updateHourlyConquest();
         }
-        // 1-hour tick
+        // 1-hour tick (including every midnight)
 
         if (jstHour % 2 == 0)
         {
@@ -89,6 +92,11 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
         nextHourlyTick = std::chrono::ceil<std::chrono::hours>(jstTime);
     }
 
+    // Vana'diel-based ticks.
+    // Uses the Vana'diel time equivalent of the current JST time. (steady_clock -> system_clock -> vanadiel_clock)
+    // Note: Vana'diel minute is equal to the tick interval (2400ms). It is possible to miss a minute if there is
+    //       variance in the tick time.
+
     // Vana'diel time points
     const auto vanaTime = vanadiel_time::from_earth_time(jstTime);
     const auto vanaTotd = vanadiel_time::get_totd(vanaTime);
@@ -100,18 +108,18 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 
     if (vanaTime >= nextVHourlyUpdate)
     {
-        ShowDebugFmt("Vana'diel hour tick... (current tick: {})", tickNum);
+        // Vana'diel Hour
+        worldServer->conquestSystem_->updateVanaHourlyConquest();
+
         if (vanaHour == 0)
         {
             // Vana'diel Day
             ShowDebugFmt("Vana'diel day tick... (current tick: {})", tickNum);
         }
-        // Vana'diel Hour
-        worldServer->conquestSystem_->updateVanaHourlyConquest();
 
         if (vanaTotd != prevTotd)
         {
-            // Some notable time-event has occurred.
+            // MIDNIGHT -> NEWDAY -> DAWN -> DAY -> DUSK -> EVENING -> NIGHT
             ShowDebugFmt("Vana'diel TOTD change. (current tick: {})", tickNum);
 
             prevTotd = vanaTotd;

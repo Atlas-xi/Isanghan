@@ -3152,7 +3152,7 @@ namespace luautils
         }
 
         auto name    = PBattlefield->GetName();
-        auto seconds = timer::get_seconds(PBattlefield->GetTimeInside());
+        auto seconds = timer::count_seconds(PBattlefield->GetTimeInside());
 
         if (invokeBattlefieldEvent(PBattlefield->GetID(), "onBattlefieldTick", PBattlefield, seconds) == 0)
         {
@@ -4827,7 +4827,7 @@ namespace luautils
 
         if (PMob != nullptr)
         {
-            return static_cast<uint32>(timer::get_seconds(PMob->m_RespawnTime));
+            return static_cast<uint32>(timer::count_seconds(PMob->m_RespawnTime));
         }
 
         ShowError("luautils::GetMobAction: mob <%u> was not found", mobid);

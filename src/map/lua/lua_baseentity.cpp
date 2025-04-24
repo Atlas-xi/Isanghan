@@ -17009,7 +17009,7 @@ uint32 CLuaBaseEntity::getRespawnTime()
 
     if (PMob->m_AllowRespawn)
     {
-        return static_cast<uint32>(timer::get_seconds(PMob->m_RespawnTime));
+        return static_cast<uint32>(timer::count_seconds(PMob->m_RespawnTime));
     }
 
     return 0;
@@ -17511,7 +17511,7 @@ uint32 CLuaBaseEntity::getBattleTime()
         return 0;
     }
 
-    auto seconds = timer::get_seconds(static_cast<CBattleEntity*>(m_PBaseEntity)->GetBattleTime());
+    auto seconds = timer::count_seconds(static_cast<CBattleEntity*>(m_PBaseEntity)->GetBattleTime());
     return static_cast<uint32>(seconds);
 }
 

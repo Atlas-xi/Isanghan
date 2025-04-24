@@ -615,7 +615,7 @@ namespace conquest
     {
         auto currentTime       = earth_time::now();
         auto nextWeek          = earth_time::get_next_game_week(currentTime);
-        auto secondsUntilTally = timer::get_seconds(nextWeek - currentTime);
+        auto secondsUntilTally = timer::count_seconds(nextWeek - currentTime);
 
         // 3456 Earth seconds in 1 Vana'diel day.
         uint8 vanaDaysUntilTally = static_cast<uint8>(1 + (secondsUntilTally / 3456));

@@ -1928,7 +1928,7 @@ void SmallPacket0x03A(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     uint8 size = PItemContainer->GetSize();
 
-    if (timer::now() < PItemContainer->LastSortingTime + std::chrono::milliseconds(1000))
+    if (timer::now() < PItemContainer->LastSortingTime + 1s)
     {
         if (settings::get<uint8>("map.LIGHTLUGGAGE_BLOCK") == (int32)(++PItemContainer->SortingPacket))
         {

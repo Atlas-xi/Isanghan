@@ -220,7 +220,7 @@ auto db::detail::timer(std::string const& query) -> xi::final_action<std::functi
     return xi::finally<std::function<void()>>([query, start]() -> void
     {
         const auto end      = timer::now();
-        const auto duration = timer::get_milliseconds(end - start);
+        const auto duration = timer::count_milliseconds(end - start);
         if (timersEnabled && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
         {
             if (duration > settings::get<uint32>("logging.SQL_SLOW_QUERY_ERROR_TIME"))
@@ -303,7 +303,7 @@ auto db::queryStr(std::string const& rawQuery) -> std::unique_ptr<db::detail::Re
         }
 
         ShowCritical("Query Failed after %d retries: %s", queryRetryCount, rawQuery.c_str());
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(1s);
         std::terminate();
     });
     // clang-format on

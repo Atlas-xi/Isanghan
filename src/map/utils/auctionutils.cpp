@@ -154,7 +154,7 @@ void auctionutils::OpenListOfSales(CCharEntity* PChar, uint8 action, uint16 item
 
     const auto curTick = timer::now();
 
-    if (curTick - PChar->m_AHHistoryTimestamp > std::chrono::milliseconds(5000))
+    if (curTick - PChar->m_AHHistoryTimestamp > 5s)
     {
         PChar->m_ah_history.clear();
         PChar->m_AHHistoryTimestamp = curTick;

@@ -43,7 +43,7 @@ int16 CLuaAbility::getMsg()
 
 uint16 CLuaAbility::getRecast()
 {
-    return static_cast<uint16>(timer::get_seconds(m_PLuaAbility->getRecastTime()));
+    return static_cast<uint16>(timer::count_seconds(m_PLuaAbility->getRecastTime()));
 }
 
 uint16 CLuaAbility::getRecastID()

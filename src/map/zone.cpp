@@ -642,7 +642,7 @@ void CZone::UpdateWeather()
     luautils::OnZoneWeatherChange(GetID(), Weather);
 
     // clang-format off
-    timer::time_point nextWeatherTick = timer::now() + std::chrono::duration_cast<std::chrono::seconds>(WeatherNextUpdate);
+    timer::time_point nextWeatherTick = timer::now() + std::chrono::duration_cast<earth_time::duration>(WeatherNextUpdate);
     CTaskManager::getInstance()->AddTask("zone_update_weather", nextWeatherTick, this, CTaskManager::TASK_ONCE, 1s,
     [](timer::time_point tick, CTaskManager::CTask* PTask)
     {

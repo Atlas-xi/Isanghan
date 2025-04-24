@@ -1615,7 +1615,7 @@ namespace fishingutils
         PMob->Spawn();
         PMob->setMobMod(MOBMOD_CHARMABLE, 0);
         PMob->setMobMod(MOBMOD_IDLE_DESPAWN, 180);
-        PMob->SetDespawnTime(std::chrono::seconds(180));
+        PMob->SetDespawnTime(180s);
         PMob->SetLocalVar("hooked", 0);
 
         if (mob->maxRespawn > mob->minRespawn)

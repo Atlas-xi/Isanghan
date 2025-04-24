@@ -61,32 +61,32 @@ uint8 CLuaBattlefield::getArea()
 
 uint32 CLuaBattlefield::getTimeLimit()
 {
-    return static_cast<uint32>(timer::get_seconds(m_PLuaBattlefield->GetTimeLimit()));
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetTimeLimit()));
 }
 
 uint32 CLuaBattlefield::getTimeInside()
 {
-    return static_cast<uint32>(timer::get_seconds(m_PLuaBattlefield->GetTimeInside()));
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetTimeInside()));
 }
 
 uint32 CLuaBattlefield::getRemainingTime()
 {
-    return static_cast<uint32>(timer::get_seconds(m_PLuaBattlefield->GetRemainingTime()));
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetRemainingTime()));
 }
 
 uint32 CLuaBattlefield::getFightTick()
 {
-    return static_cast<uint32>(timer::get_seconds(m_PLuaBattlefield->GetFightTime() - m_PLuaBattlefield->GetStartTime()));
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetFightTime() - m_PLuaBattlefield->GetStartTime()));
 }
 
 uint32 CLuaBattlefield::getWipeTime()
 {
-    return static_cast<uint32>(timer::get_seconds(m_PLuaBattlefield->GetWipeTime() - timer::start_time));
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetWipeTime() - timer::start_time));
 }
 
 uint32 CLuaBattlefield::getFightTime()
 {
-    return static_cast<uint32>(timer::get_seconds(timer::start_time - m_PLuaBattlefield->GetFightTime()));
+    return static_cast<uint32>(timer::count_seconds(timer::start_time - m_PLuaBattlefield->GetFightTime()));
 }
 
 uint32 CLuaBattlefield::getMaxParticipants()
@@ -193,7 +193,7 @@ std::tuple<std::string, uint32, uint32> CLuaBattlefield::getRecord()
     const auto& record = m_PLuaBattlefield->GetRecord();
 
     auto   name = record.name;
-    uint32 time = timer::get_seconds(record.time);
+    uint32 time = timer::count_seconds(record.time);
     uint32 size = static_cast<uint32>(record.partySize);
 
     return std::make_tuple(name, time, size);
@@ -211,7 +211,7 @@ uint64_t CLuaBattlefield::getLocalVar(std::string const& name)
 
 uint32 CLuaBattlefield::getLastTimeUpdate()
 {
-    auto count = timer::get_seconds(m_PLuaBattlefield->GetLastTimeUpdate());
+    auto count = timer::count_seconds(m_PLuaBattlefield->GetLastTimeUpdate());
     return count;
 }
 

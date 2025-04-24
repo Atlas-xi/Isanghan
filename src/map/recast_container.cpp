@@ -238,7 +238,7 @@ bool CRecastContainer::HasRecast(RECASTTYPE type, uint16 id, timer::duration rec
                 // TODO: this is bad
                 // "recast" 1-4 = sic/ready
                 // "recast" 1 = quickdraw, stratagems
-                auto crypticRecastSecondsAsType = timer::get_seconds(recast);
+                auto crypticRecastSecondsAsType = timer::count_seconds(recast);
                 if (crypticRecastSecondsAsType > i.maxCharges)
                 {
                     return true;

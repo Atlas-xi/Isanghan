@@ -39,7 +39,7 @@ CCharRecastPacket::CCharRecastPacket(CCharEntity* PChar)
 
     for (auto&& recast : *RecastList)
     {
-        uint32 recastSeconds = static_cast<uint32>(timer::get_seconds(recast.RecastTime == 0s ? 0s : (recast.TimeStamp - timer::now() + recast.RecastTime)));
+        uint32 recastSeconds = static_cast<uint32>(timer::count_seconds(recast.RecastTime == 0s ? 0s : (recast.TimeStamp - timer::now() + recast.RecastTime)));
 
         if (recast.ID == 256) // borrowing this id for mount recast
         {

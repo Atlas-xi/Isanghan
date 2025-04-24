@@ -65,15 +65,15 @@ namespace timer
 
     // Gets the Earth milliseconds of a duration.
     template <typename Rep, typename Period>
-    auto get_milliseconds(const std::chrono::duration<Rep, Period>& d) -> int64
+    auto count_milliseconds(const std::chrono::duration<Rep, Period>& d) -> int64
     {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
+        return std::chrono::floor<std::chrono::milliseconds>(d).count();
     };
 
     // Gets the Earth seconds of a duration.
     template <typename Rep, typename Period>
-    auto get_seconds(const std::chrono::duration<Rep, Period>& d) -> int64
+    auto count_seconds(const std::chrono::duration<Rep, Period>& d) -> int64
     {
-        return std::chrono::duration_cast<std::chrono::seconds>(d).count();
+        return std::chrono::floor<std::chrono::seconds>(d).count();
     };
 }; // namespace timer

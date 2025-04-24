@@ -71,7 +71,7 @@ uint16 CLuaStatusEffect::getTier()
 
 uint32 CLuaStatusEffect::getDuration()
 {
-    return static_cast<uint32>(timer::get_milliseconds(m_PLuaStatusEffect->GetDuration()));
+    return static_cast<uint32>(timer::count_milliseconds(m_PLuaStatusEffect->GetDuration()));
 }
 
 //======================================================//
@@ -113,7 +113,7 @@ uint32 CLuaStatusEffect::getTimeRemaining()
     if (m_PLuaStatusEffect->GetDuration() > 0s)
     {
         auto duration = m_PLuaStatusEffect->GetStartTime() - timer::now() + m_PLuaStatusEffect->GetDuration();
-        remaining     = static_cast<uint32>(timer::get_milliseconds(duration));
+        remaining     = static_cast<uint32>(timer::count_milliseconds(duration));
     }
 
     return remaining;
@@ -132,7 +132,7 @@ uint32 CLuaStatusEffect::getTickCount()
 
 uint32 CLuaStatusEffect::getTick()
 {
-    return static_cast<uint32>(timer::get_milliseconds(m_PLuaStatusEffect->GetTickTime()));
+    return static_cast<uint32>(timer::count_milliseconds(m_PLuaStatusEffect->GetTickTime()));
 }
 
 //======================================================//

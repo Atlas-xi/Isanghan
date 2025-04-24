@@ -83,7 +83,7 @@ void CLuaSpell::setMPCost(uint16 mpcost)
 
 uint32 CLuaSpell::getCastTime()
 {
-    return static_cast<uint32>(timer::get_milliseconds(m_PLuaSpell->getCastTime()));
+    return static_cast<uint32>(timer::count_milliseconds(m_PLuaSpell->getCastTime()));
 }
 
 void CLuaSpell::setCastTime(uint32 casttime)

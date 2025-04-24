@@ -44,7 +44,7 @@ CStatusEffectPacket::CStatusEffectPacket(CCharEntity* PChar)
             auto durationRemaining = 0x7FFFFFFF;
             if (PEffect->GetDuration() == 0s || PEffect->HasEffectFlag(EFFECTFLAG_HIDE_TIMER))
             {
-                durationRemaining = timer::get_seconds(PEffect->GetStartTime() - timer::now() + PEffect->GetDuration());
+                durationRemaining = timer::count_seconds(PEffect->GetStartTime() - timer::now() + PEffect->GetDuration());
                 durationRemaining += earth_time::vanadiel_timestamp();
                 durationRemaining *= 60;
             }

@@ -61,7 +61,7 @@ void CLuaAction::setRecast(uint16 recast)
 
 uint16 CLuaAction::getRecast()
 {
-    return static_cast<uint16>(timer::get_seconds(m_PLuaAction->recast));
+    return static_cast<uint16>(timer::count_seconds(m_PLuaAction->recast));
 }
 
 void CLuaAction::actionID(uint16 actionid)

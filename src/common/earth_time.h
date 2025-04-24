@@ -103,7 +103,7 @@ namespace earth_time
         inline time_point get_next_midnight(const time_point& tp)
         {
             auto previous_midnight = std::chrono::floor<std::chrono::days>(tp);
-            auto next_midnight     = previous_midnight + std::chrono::days(1);
+            auto next_midnight     = previous_midnight + 24h;
             return next_midnight;
         }
         inline time_point get_next_midnight()
@@ -115,7 +115,7 @@ namespace earth_time
     // Japan Standard Time (UTC+9)
     namespace jst
     {
-        constexpr std::chrono::hours jst_offset = std::chrono::hours(9);
+        constexpr std::chrono::hours jst_offset = 9h;
 
         inline uint32 get_second(const time_point& tp)
         {
@@ -210,7 +210,7 @@ namespace earth_time
     // Returns a Unix timestamp.
     inline uint32 timestamp(const time_point& tp)
     {
-        return static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count());
+        return static_cast<uint32>(std::chrono::floor<std::chrono::seconds>(tp.time_since_epoch()).count());
     }
     inline uint32 timestamp()
     {
@@ -220,7 +220,7 @@ namespace earth_time
     // Returns the number of Earth seconds since the Vana'diel epoch.
     inline uint32 vanadiel_timestamp(const time_point& tp)
     {
-        return static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(tp - vanadiel_epoch).count());
+        return static_cast<uint32>(std::chrono::floor<std::chrono::seconds>(tp - vanadiel_epoch).count());
     }
     inline uint32 vanadiel_timestamp()
     {

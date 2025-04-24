@@ -151,17 +151,17 @@ WheatyExceptionReport::~WheatyExceptionReport()
 const char* GetUptimeString()
 {
     auto uptimeDuration = timer::now() - gStartUpTime;
-    if (uptimeDuration < std::chrono::minutes(2))
+    if (uptimeDuration < 2min)
     {
-        gUptimeString = fmt::format("{} seconds", std::chrono::duration_cast<std::chrono::seconds>(uptimeDuration).count()).c_str();
+        gUptimeString = fmt::format("{} seconds", std::chrono::floor<std::chrono::seconds>(uptimeDuration).count()).c_str();
     }
-    else if (uptimeDuration > std::chrono::minutes(120))
+    else if (uptimeDuration > 2h)
     {
-        gUptimeString = fmt::format("{} hours", std::chrono::duration_cast<std::chrono::hours>(uptimeDuration).count()).c_str();
+        gUptimeString = fmt::format("{} hours", std::chrono::floor<std::chrono::hours>(uptimeDuration).count()).c_str();
     }
     else
     {
-        gUptimeString = fmt::format("{} minutes", std::chrono::duration_cast<std::chrono::minutes>(uptimeDuration).count()).c_str();
+        gUptimeString = fmt::format("{} minutes", std::chrono::floor<std::chrono::minutes>(uptimeDuration).count()).c_str();
     }
 
     return gUptimeString.c_str();
@@ -402,7 +402,7 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
     m_hReportFile = nullptr;
 
     // Pause for a moment to give spdlog a chance to flush
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(200ms);
 
     TerminateProcess(GetCurrentProcess(), 1);
     return EXCEPTION_EXECUTE_HANDLER; // Unreacheable code

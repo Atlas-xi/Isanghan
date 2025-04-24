@@ -44,6 +44,9 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
     static auto tickNum = 0;
     ++tickNum;
 
+    // Earth-based ticks.
+    // Uses the JST equivalent of the current timer tick. (steady_clock -> system_clock)
+
     // Earth time points
     const auto jstTime    = earth_time::time_point(timer::to_utc(tick));
     const auto jstHour    = earth_time::jst::get_hour(jstTime);
@@ -55,7 +58,6 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
     // Hourly ticks
     if (jstTime >= nextHourlyTick)
     {
-        ShowDebugFmt("1-hour tick... (current tick: {})", tickNum);
         if (jstHour == 0)
         {
             // Daily tick (midnight JST)
@@ -73,6 +75,7 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
             luautils::UpdateSanrakusMobs();
         }
         // 1-hour tick
+        ShowDebugFmt("1-hour tick... (current tick: {})", tickNum);
         roeutils::UpdateUnityRankings();
 
         if (jstHour % 2 == 0)
@@ -91,6 +94,11 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
         nextHourlyTick = std::chrono::ceil<std::chrono::hours>(jstTime);
     }
 
+    // Vana'diel-based ticks.
+    // Uses the Vana'diel time equivalent of the current JST time. (steady_clock -> system_clock -> vanadiel_clock)
+    // Note: Vana'diel minute is equal to the tick interval (2400ms). It is possible to miss a minute if there is
+    //       variance in the tick time.
+
     // Vana'diel time points
     const auto vanaTime = vanadiel_time::from_earth_time(jstTime);
     const auto vanaTotd = vanadiel_time::get_totd(vanaTime);
@@ -98,13 +106,11 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 
     // Static variables for the next tick
     static auto nextVHourlyUpdate = std::chrono::ceil<xi::vanadiel_clock::hours>(vanaTime);
-    static auto prevTotd          = vanadiel_time::TOTD::NONE;
+    static auto prevTotd          = vanaTotd;
 
     if (vanaTime >= nextVHourlyUpdate)
     {
         // Vana'diel Hour
-        ShowDebugFmt("Vana'diel hour tick... (current tick: {})", tickNum);
-
         // clang-format off
         zoneutils::ForEachZone([](CZone* PZone)
         {
@@ -138,10 +144,11 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 
         if (vanaTotd != prevTotd)
         {
-            // Some notable time-event has occurred.
+            // MIDNIGHT -> NEWDAY -> DAWN -> DAY -> DUSK -> EVENING -> NIGHT
             TracyZoneScoped;
             ShowDebugFmt("Vana'diel TOTD change. (current tick: {})", tickNum);
             zoneutils::TOTDChange(vanaTotd);
+            fishingutils::RestockFishingAreas();
 
             // clang-format off
             zoneutils::ForEachZone([](CZone* PZone)
@@ -154,8 +161,6 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
             });
             // clang-format on
 
-            fishingutils::RestockFishingAreas();
-
             prevTotd = vanaTotd;
         }
 
@@ -164,13 +169,9 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
 
     CTriggerHandler::getInstance()->triggerTimer();
     CTransportHandler::getInstance()->TransportTimer();
-
     instanceutils::CheckInstance();
-
     luautils::OnTimeServerTick();
-
     luautils::TryReloadFilewatchList();
-
     moduleutils::OnTimeServerTick();
 
     TracyFrameMark;

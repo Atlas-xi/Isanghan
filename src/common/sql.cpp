@@ -80,7 +80,7 @@ SqlConnection::SqlConnection(const char* user, const char* passwd, const char* h
     m_Db     = db;
 
     // these members will be set up in SetupKeepalive(), they need to be init'd here to appease clang-tidy
-    m_PingInterval = std::chrono::seconds(0);
+    m_PingInterval = 0s;
     m_LastPing     = timer::time_point::min();
 
     m_TimersEnabled = false;
@@ -256,7 +256,7 @@ int32 SqlConnection::QueryStr(const char* query)
     }
 
     auto endTime = timer::now();
-    auto dTimeMs = timer::get_milliseconds(endTime - startTime);
+    auto dTimeMs = timer::count_milliseconds(endTime - startTime);
 
     if (m_TimersEnabled && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
     {
