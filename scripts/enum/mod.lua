@@ -928,7 +928,10 @@ xi.mod =
 
     -- Circle Abilities Extended Duration from AF/AF+1
     HOLY_CIRCLE_DURATION            = 857,
+    HOLY_CIRCLE_POTENCY             = 1141, -- Increases the potency of the Holy Circle effect (e.g. mod value 2 = +2% Undead Killer)
     ANCIENT_CIRCLE_DURATION         = 859,
+    ANCIENT_CIRCLE_POTENCY          = 1142, -- Increases the potency of the Ancient Circle effect (e.g. mod value 2 = +2% Dragon Killer)
+    WARDING_CIRCLE_POTENCY          = 1143, -- Increases the potency of the Warding Circle effect (e.g. mod value 2 = +2% Demon Killer)
 
     -- Other
     CURE2MP_PERCENT                 = 860, -- Converts % of "Cure" amount to MP
