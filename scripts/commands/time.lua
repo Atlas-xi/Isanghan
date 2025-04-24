@@ -51,7 +51,16 @@ commandObj.onTrigger = function(player)
         "Gusgen Mines",
         "Maze of Shakhrami",
     }
-
+    local earthDayName =
+    {
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    }
     -- Time and Date
     local year = VanadielYear() + 886
     local month = VanadielMonth() + 1
@@ -60,8 +69,9 @@ commandObj.onTrigger = function(player)
     local hour = VanadielHour()
     local minute = VanadielMinute()
     local totd = totdName[VanadielTOTD()] or "None"
-    player:printToPlayer(fmt('It has been {} Vana\'diel days ({} Earth seconds) since the Vana\'diel epoch.', VanadielUniqueDay(), VanadielTime()), channel)
-    player:printToPlayer(fmt('Vana\'diel: {}/{}/{}, {}, {:02}:{:02} ({}, {} days into the year)', year, month, day, dayElement, hour, minute, totd, VanadielDayOfTheYear()), channel)
+    player:printToPlayer(fmt('It has been {} Vana\'diel days ({} seconds) since the Vana\'diel epoch.', VanadielUniqueDay(), VanadielTime()), channel)
+    player:printToPlayer(fmt('The next Vana\'diel day is in {} seconds.', getVanaMidnight() - os.time()), channel)
+    player:printToPlayer(fmt('Vana\'diel: {}/{}/{}, {}, {}:{:02} ({}, {} days into the year)', year, month, day, dayElement, hour, minute, totd, VanadielDayOfTheYear()), channel)
 
     -- Moon
     local moonDirection = VanadielMoonDirection()
@@ -88,10 +98,24 @@ commandObj.onTrigger = function(player)
     end
     player:printToPlayer(fmt('              {} ({}%)', moonType, moonPhase), channel)
 
+    -- Earth time
+    local utcTimestamp = GetSystemTime()
+    local secondsToMidnight = JstMidnight() - utcTimestamp
+    local hoursToMidnight = math.floor(secondsToMidnight / (60 * 60))
+    secondsToMidnight = secondsToMidnight - (hoursToMidnight * 60 * 60)
+    local minutesToMidnight = math.floor(secondsToMidnight / 60)
+    secondsToMidnight = secondsToMidnight - (minutesToMidnight * 60)
+    local jstHours = 23 - hoursToMidnight
+    local jstMinutes = 59 - minutesToMidnight
+    local jstSeconds = 59 - secondsToMidnight
+    local weeklyResetDays = math.floor((NextJstWeek() - utcTimestamp) / (24 * 60 * 60))
+    player:printToPlayer(fmt('Japan: {}, {}:{:02}:{:02} (weekly reset in {} days)', earthDayName[JstWeekday() + 1], jstHours, jstMinutes, jstSeconds, weeklyResetDays), channel)
+
     -- RSE
     local rseRace = raceName[VanadielRSERace()]
     local rseLocation = rseZoneName[VanadielRSELocation() + 1]
     player:printToPlayer(fmt('Current RSE is {} in {}.', rseRace, rseLocation), channel)
+
 end
 
 return commandObj
