@@ -191,7 +191,7 @@ CCharEntity::CCharEntity()
     m_LevelRestriction   = 0;
     m_lastBcnmTimePrompt = 0;
     m_AHHistoryTimestamp = timer::time_point::min();
-    m_DeathTimestamp     = 0;
+    m_DeathTimestamp     = timer::time_point::min();
 
     m_EquipFlag         = 0;
     m_EquipBlock        = 0;
@@ -232,7 +232,7 @@ CCharEntity::CCharEntity()
     resetPetZoningInfo();
     petZoningInfo.petID = 0;
 
-    m_PlayTime    = 0;
+    m_PlayTime    = 0s;
     m_SaveTime    = timer::time_point::min();
     m_reloadParty = false;
 
@@ -874,19 +874,19 @@ void CCharEntity::setBlockingAid(bool isBlockingAid)
     m_isBlockingAid = isBlockingAid;
 }
 
-void CCharEntity::SetPlayTime(uint32 playTime)
+void CCharEntity::SetPlayTime(timer::duration playTime)
 {
     m_PlayTime = playTime;
     m_SaveTime = timer::now();
 }
 
-uint32 CCharEntity::GetPlayTime(bool needUpdate)
+timer::duration CCharEntity::GetPlayTime(bool needUpdate)
 {
     if (needUpdate)
     {
         auto currentTime = timer::now();
 
-        m_PlayTime += static_cast<uint32>(timer::count_seconds(currentTime - m_SaveTime));
+        m_PlayTime += currentTime - m_SaveTime;
         m_SaveTime = currentTime;
     }
 
@@ -1030,7 +1030,7 @@ void CCharEntity::Tick(timer::time_point tick)
 {
     TracyZoneScoped;
     CBattleEntity::Tick(tick);
-    if (m_DeathTimestamp > 0 && tick >= m_deathSyncTime)
+    if (m_DeathTimestamp > timer::time_point::min() && tick >= m_deathSyncTime)
     {
         // Send an update packet at a regular interval to keep the player's death variables synced
         updatemask |= UPDATE_STATUS;
@@ -2662,7 +2662,7 @@ void CCharEntity::Die()
     }
 
     Die(death_duration);
-    SetDeathTimestamp((uint32)time(nullptr));
+    SetDeathTime(timer::now());
 
     setBlockingAid(false);
 
@@ -2737,26 +2737,22 @@ void CCharEntity::Raise()
     TracyZoneScoped;
 
     PAI->Internal_Raise();
-    SetDeathTimestamp(0);
+    SetDeathTime(timer::time_point::min());
 }
 
-void CCharEntity::SetDeathTimestamp(uint32 timestamp)
+void CCharEntity::SetDeathTime(timer::time_point timestamp)
 {
     m_DeathTimestamp = timestamp;
 }
 
-int32 CCharEntity::GetSecondsElapsedSinceDeath() const
+timer::duration CCharEntity::GetTimeSinceDeath() const
 {
-    return m_DeathTimestamp > 0 ? (uint32)time(nullptr) - m_DeathTimestamp : 0;
+    return m_DeathTimestamp > timer::time_point::min() ? timer::now() - m_DeathTimestamp : 0s;
 }
 
-int32 CCharEntity::GetTimeRemainingUntilDeathHomepoint() const
+timer::duration CCharEntity::GetTimeUntilDeathHomepoint() const
 {
-    // 0x0003A020 is 60 * 3960 and 3960 is 66 minutes in seconds
-    // The client uses this time as the maximum amount of time for death
-    // We convert the elapsed death time to this total time and subtract it which gives us the remaining time to a forced homepoint
-    // Once the returned value here reaches below 360 then the client with force homepoint the character
-    return 0x0003A020 - (60 * GetSecondsElapsedSinceDeath());
+    return 60min - GetTimeSinceDeath();
 }
 
 earth_time::time_point CCharEntity::GetTimeCreated()

@@ -6319,7 +6319,7 @@ uint32 CLuaBaseEntity::getPlaytime(sol::object const& shouldUpdate)
     bool  update = (shouldUpdate != sol::lua_nil) ? shouldUpdate.as<bool>() : true;
     auto* PChar  = static_cast<CCharEntity*>(m_PBaseEntity);
 
-    return PChar->GetPlayTime(update);
+    return static_cast<uint32>(timer::count_seconds(PChar->GetPlayTime(update)));
 }
 
 /************************************************************************
@@ -18457,7 +18457,7 @@ uint32 CLuaBaseEntity::getAvailableTraverserStones()
  *  Purpose : Returns the number of Traverser Stones claimed by the player
  ************************************************************************/
 
-time_t CLuaBaseEntity::getTraverserEpoch()
+uint32 CLuaBaseEntity::getTraverserEpoch()
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -18465,7 +18465,7 @@ time_t CLuaBaseEntity::getTraverserEpoch()
     }
 
     auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
-    return charutils::getTraverserEpoch(PChar);
+    return earth_time::timestamp(charutils::getTraverserEpoch(PChar));
 }
 
 /************************************************************************

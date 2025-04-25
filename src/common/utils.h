@@ -39,7 +39,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <filesystem>
 #include <iostream>
 #include <set>

@@ -2096,7 +2096,7 @@ namespace fishingutils
 
                 if (lost && PChar->hookedFish->nm && PChar->hookedFish->nmFlags & FISHINGNM_RESET_RESPAWN_ON_FAIL)
                 {
-                    PMob->SetLocalVar("lastTOD", (uint32)time(nullptr));
+                    PMob->SetLocalVar("lastTOD", earth_time::timestamp());
                 }
             }
         }
@@ -2306,7 +2306,7 @@ namespace fishingutils
                         else if (mob->maxRespawn > 0)
                         {
                             uint32 respawnTime = PMob->GetLocalVar("lastTOD") + PMob->GetLocalVar("respawnTime");
-                            if ((uint32)time(nullptr) > respawnTime)
+                            if (earth_time::timestamp() > respawnTime)
                             {
                                 mobAdd = true;
                                 MobPoolWeight += 50;
@@ -2566,7 +2566,7 @@ namespace fishingutils
             if (PMob != nullptr && PMob->GetLocalVar("hooked") == 0)
             {
                 PMob->SetLocalVar("hooked", 1);
-                PMob->SetLocalVar("hookedTime", (uint32)time(nullptr));
+                PMob->SetLocalVar("hookedTime", earth_time::timestamp());
 
                 response->hooked              = true;
                 response->catchid             = MobSelection->mobId;

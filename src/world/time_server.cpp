@@ -120,7 +120,6 @@ int32 time_server(timer::time_point tick, CTaskManager::CTask* PTask)
         if (vanaTotd != prevTotd)
         {
             // MIDNIGHT -> NEWDAY -> DAWN -> DAY -> DUSK -> EVENING -> NIGHT
-            ShowDebugFmt("Vana'diel TOTD change. (current tick: {})", tickNum);
 
             prevTotd = vanaTotd;
         }

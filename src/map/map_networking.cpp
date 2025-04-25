@@ -550,7 +550,7 @@ int32 MapNetworking::parse(uint8* buff, size_t* buffsize, MapSession* map_sessio
         }
 
         ref<uint16>(map_session_data->server_packet_data.data(), 2) = SmallPD_Code;
-        ref<uint16>(map_session_data->server_packet_data.data(), 8) = (uint32)time(nullptr);
+        ref<uint16>(map_session_data->server_packet_data.data(), 8) = earth_time::timestamp();
 
         PBuff     = map_session_data->server_packet_data;
         *buffsize = map_session_data->server_packet_size;
@@ -581,7 +581,7 @@ int32 MapNetworking::send_parse(uint8* buff, size_t* buffsize, MapSession* map_s
     ref<uint16>(buff, 2) = map_session_data->client_packet_id;
 
     // save the current time (32 BIT!)
-    ref<uint32>(buff, 8) = (uint32)time(nullptr);
+    ref<uint32>(buff, 8) = earth_time::timestamp();
 
     // build a large package, consisting of several small packets
     CCharEntity* PChar = map_session_data->PChar;

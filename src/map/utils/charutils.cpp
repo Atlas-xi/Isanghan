@@ -430,7 +430,7 @@ namespace charutils
             db::extractFromBlob(rset, "campaign", PChar->m_campaignLog);
             db::extractFromBlob(rset, "eminence", PChar->m_eminenceLog);
 
-            PChar->SetPlayTime(rset->get<uint32>("playtime"));
+            PChar->SetPlayTime(std::chrono::seconds(rset->get<uint32>("playtime")));
             PChar->profile.campaign_allegiance = rset->get<uint8>("campaign_allegiance");
             PChar->setStyleLocked(rset->get<uint32>("isstylelocked") == 1);
             PChar->SetMoghancement(rset->get<uint16>("moghancement"));
@@ -5337,7 +5337,7 @@ namespace charutils
                          "LIMIT 1",
                          PChar->m_eminenceLog, PChar->id);
 
-        PChar->m_eminenceCache.lastWriteout = static_cast<uint32>(time(nullptr));
+        PChar->m_eminenceCache.lastWriteout = timer::now();
     }
 
     void SaveCharInventoryCapacity(CCharEntity* PChar)
@@ -6094,20 +6094,22 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* fmtQuery = "UPDATE char_stats SET death = %u WHERE charid = %u LIMIT 1";
-        _sql->Query(fmtQuery, PChar->GetSecondsElapsedSinceDeath(), PChar->id);
+        const char* fmtQuery          = "UPDATE char_stats SET death = %u WHERE charid = %u LIMIT 1";
+        uint32      secondsSinceDeath = static_cast<uint32>(timer::count_seconds(PChar->GetTimeSinceDeath()));
+        _sql->Query(fmtQuery, secondsSinceDeath, PChar->id);
     }
 
     void SavePlayTime(CCharEntity* PChar)
     {
         TracyZoneScoped;
 
-        uint32 playtime = PChar->GetPlayTime();
+        timer::duration playDuration = PChar->GetPlayTime();
+        uint32          playtime     = static_cast<uint32>(timer::count_seconds(playDuration));
 
         _sql->Query("UPDATE chars SET playtime = '%u' WHERE charid = '%u' LIMIT 1", playtime, PChar->id);
 
         // Removes new player icon if played for more than 240 hours
-        if (PChar->isNewPlayer() && playtime >= 864000)
+        if (PChar->isNewPlayer() && playDuration >= 240h)
         {
             PChar->playerConfig.NewAdventurerOffFlg = true;
             PChar->updatemask |= UPDATE_HP;
@@ -6653,7 +6655,7 @@ namespace charutils
             PChar->StatusEffectContainer->DelStatusEffectSilent(EFFECT_WEAKNESS);
             PChar->StatusEffectContainer->DelStatusEffectSilent(EFFECT_LEVEL_SYNC);
 
-            PChar->SetDeathTimestamp(0);
+            PChar->SetDeathTime(timer::time_point::min());
 
             PChar->health.hp = PChar->GetMaxHP();
             PChar->health.mp = PChar->GetMaxMP();
@@ -6896,19 +6898,19 @@ namespace charutils
         PChar->pushPacket<CObjectiveUtilityPacket>();
     }
 
-    time_t getTraverserEpoch(CCharEntity* PChar)
+    earth_time::time_point getTraverserEpoch(CCharEntity* PChar)
     {
         TracyZoneScoped;
 
-        auto fmtQuery = "SELECT unix_timestamp(traverser_start) FROM char_unlocks WHERE charid = %u";
+        auto fmtQuery = "SELECT UNIX_TIMESTAMP(traverser_start) FROM char_unlocks WHERE charid = %u";
 
         auto ret = _sql->Query(fmtQuery, PChar->id);
         if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
         {
-            return _sql->GetUIntData(0);
+            return earth_time::time_point(std::chrono::seconds(_sql->GetUIntData(0)));
         }
 
-        return 0;
+        return earth_time::time_point::min();
     }
 
     // TODO: Perhaps allow for optional argument to support GM Commands
@@ -6958,18 +6960,18 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        auto   fmtQuery         = "SELECT unix_timestamp(traverser_start), traverser_claimed FROM char_unlocks WHERE charid = %u";
-        time_t traverserEpoch   = 0;
-        uint32 traverserClaimed = 0;
+        auto                   fmtQuery         = "SELECT UNIX_TIMESTAMP(traverser_start), traverser_claimed FROM char_unlocks WHERE charid = %u";
+        earth_time::time_point traverserEpoch   = earth_time::time_point::min();
+        uint32                 traverserClaimed = 0;
 
         auto ret = _sql->Query(fmtQuery, PChar->id);
         if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
         {
-            traverserEpoch   = _sql->GetUIntData(0);
+            traverserEpoch   = earth_time::time_point(std::chrono::seconds(_sql->GetUIntData(0)));
             traverserClaimed = _sql->GetUIntData(1);
         }
 
-        if (traverserEpoch == 0)
+        if (traverserEpoch == earth_time::time_point::min())
         {
             // Players cannot accrue Traverser Stones until the epoch has been set.  This is not possible
             // in quests, but is always displayed in player currencies.
@@ -6977,16 +6979,18 @@ namespace charutils
         }
 
         // Handle reduction for Celerity Key Items
-        uint8 stoneWaitHours = 20;
+        earth_time::duration stoneWaitHours = 20h;
         for (int keyItem = 1385; keyItem <= 1387; ++keyItem)
         {
             if (hasKeyItem(PChar, keyItem))
             {
-                stoneWaitHours -= 4;
+                stoneWaitHours -= 4h;
             }
         }
+        earth_time::duration elapsedSinceEpoch = earth_time::now() - traverserEpoch;
+        uint32               stonesGenerated   = std::chrono::floor<std::chrono::hours>(elapsedSinceEpoch) / stoneWaitHours;
 
-        return floor((std::time(nullptr) - traverserEpoch) / (stoneWaitHours * 3600)) - traverserClaimed;
+        return stonesGenerated - traverserClaimed;
     }
 
     void ReadHistory(CCharEntity* PChar)
@@ -7367,11 +7371,11 @@ namespace charutils
         if (rset && rset->rowsCount() && rset->next())
         {
             // Update the character's death timestamp based off of how long they were previously dead
-            const auto secondsSinceDeath = rset->get<uint32>("death");
+            const auto secondsSinceDeath = std::chrono::seconds(rset->get<uint32>("death"));
             if (PChar->health.hp == 0)
             {
-                PChar->SetDeathTimestamp((uint32)time(nullptr) - secondsSinceDeath);
-                PChar->Die(CCharEntity::death_duration - std::chrono::seconds(secondsSinceDeath));
+                PChar->SetDeathTime(timer::time_point(timer::now() - secondsSinceDeath));
+                PChar->Die(CCharEntity::death_duration - secondsSinceDeath);
             }
         }
     }

@@ -111,7 +111,7 @@ Application::Application(std::string const& serverName, int argc, char** argv)
     ShowInfoFmt("=======================================================================");
     ShowInfoFmt("Begin {}-server init...", serverName);
 
-    srand((uint32)time(nullptr));
+    srand(earth_time::timestamp());
     xirand::seed();
 
 #ifdef ENV64BIT

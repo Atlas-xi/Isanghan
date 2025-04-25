@@ -1951,7 +1951,7 @@ namespace luautils
 
         ShowTraceFmt("luautils::OnGameIn: {}", PChar->getName());
 
-        callGlobal<void>("xi.player.onGameIn", PChar, PChar->GetPlayTime(false) == 0, zoning);
+        callGlobal<void>("xi.player.onGameIn", PChar, PChar->GetPlayTime(false) == 0s, zoning);
     }
 
     void OnZoneIn(CCharEntity* PChar)

@@ -272,7 +272,7 @@ void auth_session::read_func()
                     ref<uint32>(buffer_.data(), 1) = accountID;
 
                     unsigned char hash[16];
-                    uint32        hashData = std::time(nullptr) ^ getpid();
+                    uint32        hashData = earth_time::timestamp() ^ getpid();
                     md5(reinterpret_cast<uint8*>(&hashData), hash, sizeof(hashData));
                     std::memcpy(buffer_.data() + 5, hash, 16);
 

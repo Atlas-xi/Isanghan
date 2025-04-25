@@ -464,7 +464,7 @@ public:
     uint16            m_Costume;
     uint16            m_Costume2;
     timer::time_point m_AHHistoryTimestamp;
-    uint32            m_DeathTimestamp;
+    timer::time_point m_DeathTimestamp;
     timer::time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
 
     uint8      m_hasTractor;        // checks if player has tractor already
@@ -476,7 +476,7 @@ public:
 
     location_t m_previousLocation{};
 
-    uint32            m_PlayTime;
+    timer::duration   m_PlayTime;
     timer::time_point m_SaveTime;
 
     timer::time_point m_LeaderCreatedPartyTime{}; // Time that a party member joined and this player was leader.
@@ -520,8 +520,8 @@ public:
     std::unordered_map<uint16, timer::time_point> m_PacketRecievedTimestamps;
     uint16                                        m_LastPacketType{};
 
-    void   SetPlayTime(uint32 playTime);        // Set playtime
-    uint32 GetPlayTime(bool needUpdate = true); // Get playtime
+    void            SetPlayTime(timer::duration playTime); // Set playtime
+    timer::duration GetPlayTime(bool needUpdate = true);   // Get playtime
 
     CItemEquipment* getEquip(SLOTTYPE slot);
 
@@ -560,9 +560,9 @@ public:
     static constexpr timer::duration death_duration         = 60min;
     static constexpr timer::duration death_update_frequency = 16s;
 
-    void  SetDeathTimestamp(uint32 timestamp);
-    int32 GetSecondsElapsedSinceDeath() const;
-    int32 GetTimeRemainingUntilDeathHomepoint() const;
+    void            SetDeathTime(timer::time_point timestamp);
+    timer::duration GetTimeSinceDeath() const;
+    timer::duration GetTimeUntilDeathHomepoint() const;
 
     earth_time::time_point GetTimeCreated();
 

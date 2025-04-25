@@ -1740,7 +1740,7 @@ void SmallPacket0x034(MapSession* const PSession, CCharEntity* const PChar, CBas
                          sender_name   = PChar->getName(),
                          receiver      = PTarget->id,
                          receiver_name = PTarget->getName(),
-                         date          = static_cast<uint32>(time(nullptr))]()
+                         date          = earth_time::timestamp()]()
                         {
                             const auto query = "INSERT INTO audit_trade(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
                             if (!db::preparedStmt(query, itemID, quantity, sender, sender_name, receiver, receiver_name, date))
@@ -1844,7 +1844,7 @@ void SmallPacket0x036(MapSession* const PSession, CCharEntity* const PChar, CBas
                      sender_name   = PChar->getName(),
                      receiver      = PNpc->id,
                      receiver_name = PNpc->getName(),
-                     date          = static_cast<uint32>(time(nullptr))]()
+                     date          = earth_time::timestamp()]()
                     {
                         const auto query = "INSERT INTO audit_trade(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
                         if (!db::preparedStmt(query, itemID, quantity, sender, sender_name, receiver, receiver_name, date))
@@ -4118,7 +4118,7 @@ void SmallPacket0x085(MapSession* const PSession, CCharEntity* const PChar, CBas
              seller_name = PChar->getName(),
              baseprice   = PItem->getBasePrice(),
              totalprice  = cost,
-             time        = static_cast<uint32>(time(nullptr))]()
+             time        = earth_time::timestamp()]()
             {
                 const auto query = "INSERT INTO audit_vendor(itemid, quantity, seller, seller_name, baseprice, totalprice, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 if (!db::preparedStmt(query, itemid, quantity, seller, seller_name, baseprice, totalprice, time))
@@ -7146,7 +7146,7 @@ void SmallPacket0x106(MapSession* const PSession, CCharEntity* const PChar, CBas
                  purchaserID   = PChar->id,
                  purchaserName = PChar->getName(),
                  price         = PriceWithTax,
-                 date          = static_cast<uint32>(time(nullptr))]
+                 date          = earth_time::timestamp()]
                 {
                     const auto query = "INSERT INTO audit_bazaar(itemid, quantity, seller, seller_name, purchaser, purchaser_name, price, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                     if (!db::preparedStmt(query, itemID, quantity, sellerID, sellerName, purchaserID, purchaserName, price, date))

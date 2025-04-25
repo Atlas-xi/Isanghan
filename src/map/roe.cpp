@@ -21,11 +21,7 @@
 
 #include "roe.h"
 
-#include "common/vana_time.h"
-
-#include <ctime>
-
-#include "common/vana_time.h"
+#include "common/timer.h"
 #include "lua/luautils.h"
 #include "packets/chat_message.h"
 #include "utils/charutils.h"
@@ -36,7 +32,7 @@
 #include "packets/roe_sparkupdate.h"
 #include "packets/roe_update.h"
 
-#define ROE_CACHETIME 15
+#define ROE_CACHETIME 15s
 
 std::array<RoeCheckHandler, ROE_NONE> RoeHandlers;
 RoeSystemData                         roeutils::RoeSystem;
@@ -44,7 +40,7 @@ RoeSystemData                         roeutils::RoeSystem;
 void SaveEminenceDataNice(CCharEntity* PChar)
 {
     TracyZoneScoped;
-    if (PChar->m_eminenceCache.lastWriteout < time(nullptr) - ROE_CACHETIME)
+    if (PChar->m_eminenceCache.lastWriteout < timer::now() - ROE_CACHETIME)
     {
         charutils::SaveEminenceData(PChar);
     }

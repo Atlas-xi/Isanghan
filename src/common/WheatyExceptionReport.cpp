@@ -373,8 +373,7 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
         Log(_T("Process Name: %s"), GetCommandLineArgsString());
         Log(_T("Full crash report: %s"), m_szLogFileName);
         Log(_T("Memory dump: %s"), m_szDumpFileName);
-        std::time_t t = std::time(nullptr);
-        Log(_T(fmt::format("Time of crash: {:%Y/%m/%d %H:%M:%S}", fmt::localtime(t)).c_str()));
+        Log(_T(fmt::format("Time of crash: {:%Y/%m/%d %H:%M:%S}", earth_time::to_local_tm(earth_time::now())).c_str()));
         Log(_T("Process Uptime: %s"), GetUptimeString());
         PrintSystemInfo();
         Log(_T("Process Memory Usage: %s"), GetProcessMemoryUsageString());

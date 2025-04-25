@@ -616,7 +616,7 @@ void monstrosity::HandleDeathMenu(CCharEntity* PChar, uint8 type)
         PChar->loc.p.y = 0.0f;
         PChar->loc.p.z = 0.0f;
 
-        PChar->SetDeathTimestamp(0);
+        PChar->SetDeathTime(timer::time_point::min());
 
         PChar->status = STATUS_TYPE::DISAPPEAR;
 

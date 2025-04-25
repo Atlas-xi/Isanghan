@@ -29,7 +29,6 @@
 #include <bitset>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <string>
 
 #define FFXI_HEADER_SIZE 0x1C // common packet header size
@@ -317,9 +316,9 @@ struct eminencelog_t
 
 struct eminencecache_t
 {
-    xi::bitset<4096> activemap;
-    uint32           lastWriteout;
-    bool             notifyTimedRecord;
+    xi::bitset<4096>  activemap;
+    timer::time_point lastWriteout;
+    bool              notifyTimedRecord;
 };
 
 struct nameflags_t
