@@ -663,7 +663,7 @@ namespace battleutils
         // matching day 10% bonus, matching weather 10% or 25% for double weather
         float   dBonus  = 1.0;
         float   resist  = 1.0;
-        uint32  WeekDay = static_cast<uint8>(vanadiel_time::get_weekday(vanadiel_time::now()));
+        uint32  WeekDay = static_cast<uint8>(vanadiel_time::get_weekday());
         WEATHER weather = GetWeather(PAttacker, false);
 
         DAYTYPE strongDay[8]           = { FIRESDAY, ICEDAY, WINDSDAY, EARTHSDAY, LIGHTNINGDAY, WATERSDAY, LIGHTSDAY, DARKSDAY };
@@ -5467,7 +5467,7 @@ namespace battleutils
 
     ELEMENT GetDayElement()
     {
-        DAYTYPE weekday = static_cast<DAYTYPE>(vanadiel_time::get_weekday(vanadiel_time::now()));
+        DAYTYPE weekday = static_cast<DAYTYPE>(vanadiel_time::get_weekday());
         switch (weekday)
         {
             case FIRESDAY:

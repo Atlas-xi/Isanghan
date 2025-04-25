@@ -49,14 +49,14 @@ namespace timer
     }
 
     // https://stackoverflow.com/questions/35282308/convert-between-c11-clocks/35282833#35282833
-    inline earth_time::time_point to_utc(time_point timer_tp)
+    inline earth_time::time_point to_utc(const time_point& timer_tp = now())
     {
         auto utc_now   = earth_time::now();
         auto timer_now = clock::now();
         return std::chrono::time_point_cast<earth_time::duration>(timer_tp - timer_now + utc_now);
     };
 
-    inline time_point from_utc(earth_time::time_point utc_tp)
+    inline time_point from_utc(const earth_time::time_point& utc_tp = earth_time::now())
     {
         auto timer_now = clock::now();
         auto utc_now   = earth_time::now();

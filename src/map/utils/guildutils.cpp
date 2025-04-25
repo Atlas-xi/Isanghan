@@ -157,7 +157,7 @@ namespace guildutils
     void UpdateGuildPointsPattern()
     {
         // TODO: This function can be faulty when dealing with multiple processes. Needs to be synchronized properly across servers.
-        auto jstDayOfYear = earth_time::jst::get_yearday(earth_time::now());
+        auto jstDayOfYear = earth_time::jst::get_yearday();
         bool doUpdate     = static_cast<uint32>(serverutils::GetServerVar("[GUILD]pattern_update")) != jstDayOfYear;
 
         uint8 pattern = xirand::GetRandomNumber(8);

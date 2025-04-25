@@ -338,7 +338,7 @@ void auth_session::read_func()
                 accid = (accid < 1000 ? 1000 : accid);
 
                 // creating new account
-                std::tm timecreateinfo = earth_time::to_local_tm(earth_time::now());
+                std::tm timecreateinfo = earth_time::to_local_tm();
 
                 char strtimecreate[128];
                 strftime(strtimecreate, sizeof(strtimecreate), "%Y:%m:%d %H:%M:%S", &timecreateinfo);

@@ -63,7 +63,7 @@ commandObj.onTrigger = function(player)
     }
     -- Time and Date
     local year = VanadielYear() + 886
-    local month = VanadielMonth() + 1
+    local month = VanadielMonth()
     local day = VanadielDayOfTheMonth()
     local dayElement = elementalDayName[VanadielDayOfTheWeek() + 1]
     local hour = VanadielHour()

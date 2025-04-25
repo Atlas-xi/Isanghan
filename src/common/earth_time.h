@@ -36,7 +36,13 @@ namespace earth_time
     // Unix time of the Vana'diel epoch
     static constexpr earth_time::time_point vanadiel_epoch{ 1009810800s };
 
-    inline std::tm to_utc_tm(const time_point& tp)
+    // Earth time = UTC
+    inline time_point now()
+    {
+        return clock::now();
+    }
+
+    inline std::tm to_utc_tm(const time_point& tp = clock::now())
     {
         std::time_t time_t_val = clock::to_time_t(tp);
         std::tm     utc_tm{};
@@ -44,7 +50,7 @@ namespace earth_time
         return utc_tm;
     }
 
-    inline std::tm to_local_tm(const time_point& tp)
+    inline std::tm to_local_tm(const time_point& tp = clock::now())
     {
         std::time_t time_t_val = clock::to_time_t(tp);
         std::tm     local_tm{};
@@ -54,202 +60,225 @@ namespace earth_time
 
     namespace utc
     {
-        inline time_point now()
-        {
-            return clock::now();
-        }
-
         // seconds after the minute - [​0​, 60]
-        inline uint32 get_second(const time_point& tp)
+        inline uint32 get_second(const time_point& tp = now())
         {
-            return to_utc_tm(tp).tm_sec;
+            const auto days = std::chrono::floor<std::chrono::days>(tp);
+            const auto time = std::chrono::hh_mm_ss<clock::duration>(tp - days);
+            return static_cast<uint32>(time.seconds().count());
         }
         // minutes after the hour – [​0​, 59]
-        inline uint32 get_minute(const time_point& tp)
+        inline uint32 get_minute(const time_point& tp = now())
         {
-            return to_utc_tm(tp).tm_min;
+            const auto days = std::chrono::floor<std::chrono::days>(tp);
+            const auto time = std::chrono::hh_mm_ss<clock::duration>(tp - days);
+            return static_cast<uint32>(time.minutes().count());
         }
         // hours since midnight – [​0​, 23]
-        inline uint32 get_hour(const time_point& tp)
+        inline uint32 get_hour(const time_point& tp = now())
         {
-            return to_utc_tm(tp).tm_hour;
+            const auto days = std::chrono::floor<std::chrono::days>(tp);
+            const auto time = std::chrono::hh_mm_ss<clock::duration>(tp - days);
+            return static_cast<uint32>(time.hours().count());
         }
         // day of the month – [1, 31]
-        inline uint32 get_monthday(const time_point& tp)
+        inline uint32 get_monthday(const time_point& tp = now())
         {
-            return to_utc_tm(tp).tm_mday;
+            const auto ymd = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(tp));
+            return static_cast<uint32>(ymd.day());
         }
-        // months since January – [​0​, 11]
-        inline uint32 get_month(const time_point& tp)
+        // current month – [​1​, 12]
+        inline uint32 get_month(const time_point& tp = now())
         {
-            return to_utc_tm(tp).tm_mon;
+            const auto ymd = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(tp));
+            return static_cast<uint32>(ymd.month());
         }
-        // years since 1900
-        inline uint32 get_year(const time_point& tp)
+        // current year
+        inline int32 get_year(const time_point& tp = now())
         {
-            return to_utc_tm(tp).tm_year;
+            const auto ymd = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(tp));
+            return static_cast<int32>(ymd.year());
         }
         // days since Sunday – [​0​, 6]
-        inline uint32 get_weekday(const time_point& tp)
+        inline uint32 get_weekday(const time_point& tp = now())
         {
-            return to_utc_tm(tp).tm_wday;
+            return std::chrono::weekday(std::chrono::floor<std::chrono::days>(tp)).c_encoding();
         }
         // days since January 1 – [​0​, 365]
-        inline uint32 get_yearday(const time_point& tp)
+        inline uint32 get_yearday(const time_point& tp = now())
         {
-            return to_utc_tm(tp).tm_yday;
+            const auto years = std::chrono::floor<std::chrono::years>(tp);
+            const auto days  = std::chrono::floor<std::chrono::days>(tp - years);
+            return static_cast<uint32>(days.count());
         }
 
-        inline time_point get_next_midnight(const time_point& tp)
+        inline time_point get_next_midnight(const time_point& tp = now())
         {
-            auto previous_midnight = std::chrono::floor<std::chrono::days>(tp);
-            auto next_midnight     = previous_midnight + 24h;
-            return next_midnight;
-        }
-        inline time_point get_next_midnight()
-        {
-            return get_next_midnight(now());
+            return std::chrono::ceil<std::chrono::days>(tp);
         }
     } // namespace utc
 
     // Japan Standard Time (UTC+9)
     namespace jst
     {
-        constexpr std::chrono::hours jst_offset = 9h;
+        // seconds after the minute - [​0​, 60]
+        inline uint32 get_second(const time_point& tp = now())
+        {
+            const auto jst_tp = std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), tp).get_local_time();
+            const auto days   = std::chrono::floor<std::chrono::days>(jst_tp);
+            const auto time   = std::chrono::hh_mm_ss<clock::duration>(jst_tp - days);
+            return static_cast<uint32>(time.seconds().count());
+        }
+        // minutes after the hour – [​0​, 59]
+        inline uint32 get_minute(const time_point& tp = now())
+        {
+            const auto jst_tp = std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), tp).get_local_time();
+            const auto days   = std::chrono::floor<std::chrono::days>(jst_tp);
+            const auto time   = std::chrono::hh_mm_ss<clock::duration>(jst_tp - days);
+            return static_cast<uint32>(time.minutes().count());
+        }
+        // hours since midnight – [​0​, 23]
+        inline uint32 get_hour(const time_point& tp = now())
+        {
+            const auto jst_tp = std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), tp).get_local_time();
+            const auto days   = std::chrono::floor<std::chrono::days>(jst_tp);
+            const auto time   = std::chrono::hh_mm_ss<clock::duration>(jst_tp - days);
+            return static_cast<uint32>(time.hours().count());
+        }
+        // day of the month – [1, 31]
+        inline uint32 get_monthday(const time_point& tp = now())
+        {
+            const auto jst_tp = std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), tp).get_local_time();
+            const auto ymd    = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(jst_tp));
+            return static_cast<uint32>(ymd.day());
+        }
+        // current month – [​1​, 12]
+        inline uint32 get_month(const time_point& tp = now())
+        {
+            const auto jst_tp = std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), tp).get_local_time();
+            const auto ymd    = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(jst_tp));
+            return static_cast<uint32>(ymd.month());
+        }
+        // current year
+        inline int32 get_year(const time_point& tp = now())
+        {
+            const auto jst_tp = std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), tp).get_local_time();
+            const auto ymd    = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(jst_tp));
+            return static_cast<int32>(ymd.year());
+        }
+        // days since Sunday – [​0​, 6]
+        inline uint32 get_weekday(const time_point& tp = now())
+        {
+            const auto jst_tp = std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), tp).get_local_time();
+            return std::chrono::weekday(std::chrono::floor<std::chrono::days>(jst_tp)).c_encoding();
+        }
+        // days since January 1 – [​0​, 365]
+        inline uint32 get_yearday(const time_point& tp = now())
+        {
+            const auto jst_tp = std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), tp).get_local_time();
+            const auto years  = std::chrono::floor<std::chrono::years>(jst_tp);
+            const auto days   = std::chrono::floor<std::chrono::days>(jst_tp - years);
+            return static_cast<uint32>(days.count());
+        }
 
-        inline uint32 get_second(const time_point& tp)
+        inline time_point get_next_midnight(const time_point& tp = now())
         {
-            return to_utc_tm(tp + jst_offset).tm_sec;
-        }
-        inline uint32 get_minute(const time_point& tp)
-        {
-            return to_utc_tm(tp + jst_offset).tm_min;
-        }
-        inline uint32 get_hour(const time_point& tp)
-        {
-            return to_utc_tm(tp + jst_offset).tm_hour;
-        }
-        inline uint32 get_monthday(const time_point& tp)
-        {
-            return to_utc_tm(tp + jst_offset).tm_mday;
-        }
-        inline uint32 get_month(const time_point& tp)
-        {
-            return to_utc_tm(tp + jst_offset).tm_mon;
-        }
-        inline uint32 get_year(const time_point& tp)
-        {
-            return to_utc_tm(tp + jst_offset).tm_year;
-        }
-        inline uint32 get_weekday(const time_point& tp)
-        {
-            return to_utc_tm(tp + jst_offset).tm_wday;
-        }
-        inline uint32 get_yearday(const time_point& tp)
-        {
-            return to_utc_tm(tp + jst_offset).tm_yday;
-        }
-
-        inline time_point get_next_midnight(const time_point& tp)
-        {
-            // Add jst_offset to align JST day with UTC day, then subtract from UTC midnight.
-            return utc::get_next_midnight(tp + jst_offset) - jst_offset;
-        }
-        inline time_point get_next_midnight()
-        {
-            return get_next_midnight(utc::now());
+            const auto jst_tp       = std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), tp).get_local_time();
+            const auto jst_midnight = std::chrono::ceil<std::chrono::days>(jst_tp);
+            return std::chrono::zoned_time(std::chrono::locate_zone("Asia/Tokyo"), jst_midnight).get_sys_time();
         }
     } // namespace jst
 
     namespace local
     {
-        inline uint32 get_second(const time_point& tp)
+        // seconds after the minute - [​0​, 60]
+        inline uint32 get_second(const time_point& tp = now())
         {
-            return to_local_tm(tp).tm_sec;
+            const auto local_tp = std::chrono::zoned_time(std::chrono::current_zone(), tp).get_local_time();
+            const auto days     = std::chrono::floor<std::chrono::days>(local_tp);
+            const auto time     = std::chrono::hh_mm_ss<clock::duration>(local_tp - days);
+            return static_cast<uint32>(time.seconds().count());
         }
-        inline uint32 get_minute(const time_point& tp)
+        // minutes after the hour – [​0​, 59]
+        inline uint32 get_minute(const time_point& tp = now())
         {
-            return to_local_tm(tp).tm_min;
+            const auto local_tp = std::chrono::zoned_time(std::chrono::current_zone(), tp).get_local_time();
+            const auto days     = std::chrono::floor<std::chrono::days>(local_tp);
+            const auto time     = std::chrono::hh_mm_ss<clock::duration>(local_tp - days);
+            return static_cast<uint32>(time.minutes().count());
         }
-        inline uint32 get_hour(const time_point& tp)
+        // hours since midnight – [​0​, 23]
+        inline uint32 get_hour(const time_point& tp = now())
         {
-            return to_local_tm(tp).tm_hour;
+            const auto local_tp = std::chrono::zoned_time(std::chrono::current_zone(), tp).get_local_time();
+            const auto days     = std::chrono::floor<std::chrono::days>(local_tp);
+            const auto time     = std::chrono::hh_mm_ss<clock::duration>(local_tp - days);
+            return static_cast<uint32>(time.hours().count());
         }
-        inline uint32 get_monthday(const time_point& tp)
+        // day of the month – [1, 31]
+        inline uint32 get_monthday(const time_point& tp = now())
         {
-            return to_local_tm(tp).tm_mday;
+            const auto local_tp = std::chrono::zoned_time(std::chrono::current_zone(), tp).get_local_time();
+            const auto ymd      = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(local_tp));
+            return static_cast<uint32>(ymd.day());
         }
-        inline uint32 get_month(const time_point& tp)
+        // current month – [​1​, 12]
+        inline uint32 get_month(const time_point& tp = now())
         {
-            return to_local_tm(tp).tm_mon;
+            const auto local_tp = std::chrono::zoned_time(std::chrono::current_zone(), tp).get_local_time();
+            const auto ymd      = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(local_tp));
+            return static_cast<uint32>(ymd.month());
         }
-        inline uint32 get_year(const time_point& tp)
+        // current year
+        inline int32 get_year(const time_point& tp = now())
         {
-            return to_local_tm(tp).tm_year;
+            const auto local_tp = std::chrono::zoned_time(std::chrono::current_zone(), tp).get_local_time();
+            const auto ymd      = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(local_tp));
+            return static_cast<int32>(ymd.year());
         }
-        inline uint32 get_weekday(const time_point& tp)
+        // days since Sunday – [​0​, 6]
+        inline uint32 get_weekday(const time_point& tp = now())
         {
-            return to_local_tm(tp).tm_wday;
+            const auto local_tp = std::chrono::zoned_time(std::chrono::current_zone(), tp).get_local_time();
+            return std::chrono::weekday(std::chrono::floor<std::chrono::days>(local_tp)).c_encoding();
         }
-        inline uint32 get_yearday(const time_point& tp)
+        // days since January 1 – [​0​, 365]
+        inline uint32 get_yearday(const time_point& tp = now())
         {
-            return to_local_tm(tp).tm_yday;
+            const auto local_tp = std::chrono::zoned_time(std::chrono::current_zone(), tp).get_local_time();
+            const auto years    = std::chrono::floor<std::chrono::years>(local_tp);
+            const auto days     = std::chrono::floor<std::chrono::days>(local_tp - years);
+            return static_cast<uint32>(days.count());
         }
-        inline bool is_dst(const time_point& tp)
+        inline bool is_dst(const time_point& tp = now())
         {
-            return to_local_tm(tp).tm_isdst > 0;
+            const auto sys_info = std::chrono::current_zone()->get_info(tp);
+            return sys_info.save != 0min;
         }
     } // namespace local
 
-    // Earth time = UTC
-    inline time_point now()
-    {
-        return utc::now();
-    }
-
     // Returns a Unix timestamp.
-    inline uint32 timestamp(const time_point& tp)
+    inline uint32 timestamp(const time_point& tp = now())
     {
         return static_cast<uint32>(std::chrono::floor<std::chrono::seconds>(tp.time_since_epoch()).count());
     }
-    inline uint32 timestamp()
-    {
-        return timestamp(now());
-    }
 
     // Returns the number of Earth seconds since the Vana'diel epoch.
-    inline uint32 vanadiel_timestamp(const time_point& tp)
+    inline uint32 vanadiel_timestamp(const time_point& tp = now())
     {
         return static_cast<uint32>(std::chrono::floor<std::chrono::seconds>(tp - vanadiel_epoch).count());
     }
-    inline uint32 vanadiel_timestamp()
-    {
-        return vanadiel_timestamp(now());
-    }
 
     // Returns an integer 0-6 representing Monday-Sunday JST.
-    inline uint8 get_game_weekday(const time_point& tp)
+    inline uint8 get_game_weekday(const time_point& tp = now())
     {
-        return static_cast<uint8>((jst::get_weekday(tp) + 6) % 7);
-    }
-    inline uint8 get_game_weekday()
-    {
-        return get_game_weekday(now());
+        return static_cast<uint8>(std::chrono::weekday(jst::get_weekday(tp)).iso_encoding() - 1);
     }
 
     // Returns a time point for the start of the next game week (midnight Monday JST aka weekly reset).
-    inline time_point get_next_game_week(const time_point& tp)
+    inline time_point get_next_game_week(const time_point& tp = now())
     {
-        time_point next_jst_midnight = jst::get_next_midnight(tp);
-        uint8      game_weekday      = get_game_weekday(tp);
-
         // Start with the next midnight and apply N days worth of time to it.
-        time_point next_game_week = next_jst_midnight + std::chrono::days(6 - game_weekday);
-
-        return next_game_week;
-    }
-    inline time_point get_next_game_week()
-    {
-        return get_next_game_week(now());
+        return jst::get_next_midnight(tp) + std::chrono::days(6 - get_game_weekday(tp));
     }
 }; // namespace earth_time

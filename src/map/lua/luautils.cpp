@@ -1452,14 +1452,14 @@ namespace luautils
     {
         TracyZoneScoped;
 
-        return vanadiel_time::get_year(vanadiel_time::now());
+        return vanadiel_time::get_year();
     }
 
     uint32 VanadielMonth()
     {
         TracyZoneScoped;
 
-        return vanadiel_time::get_month(vanadiel_time::now());
+        return vanadiel_time::get_month();
     }
 
     /************************************************************************
@@ -1477,13 +1477,13 @@ namespace luautils
     uint32 VanadielDayOfTheYear()
     {
         TracyZoneScoped;
-        return vanadiel_time::get_yearday(vanadiel_time::now());
+        return vanadiel_time::get_yearday();
     }
 
     uint32 VanadielDayOfTheMonth()
     {
         TracyZoneScoped;
-        return vanadiel_time::get_monthday(vanadiel_time::now());
+        return vanadiel_time::get_monthday();
     }
 
     /************************************************************************
@@ -1498,19 +1498,19 @@ namespace luautils
     uint32 VanadielDayOfTheWeek()
     {
         TracyZoneScoped;
-        return vanadiel_time::get_weekday(vanadiel_time::now());
+        return vanadiel_time::get_weekday();
     }
 
     uint32 VanadielHour()
     {
         TracyZoneScoped;
-        return vanadiel_time::get_hour(vanadiel_time::now());
+        return vanadiel_time::get_hour();
     }
 
     uint32 VanadielMinute()
     {
         TracyZoneScoped;
-        return vanadiel_time::get_minute(vanadiel_time::now());
+        return vanadiel_time::get_minute();
     }
 
     /************************************************************************
@@ -1561,7 +1561,7 @@ namespace luautils
     uint32 JstWeekday()
     {
         TracyZoneScoped;
-        return earth_time::jst::get_weekday(earth_time::now());
+        return earth_time::jst::get_weekday();
     }
 
     /************************************************************************

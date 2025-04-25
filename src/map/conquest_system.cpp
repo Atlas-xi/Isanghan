@@ -613,14 +613,12 @@ namespace conquest
 
     uint8 GetNextTally()
     {
-        auto currentTime       = earth_time::now();
-        auto nextWeek          = earth_time::get_next_game_week(currentTime);
-        auto secondsUntilTally = timer::count_seconds(nextWeek - currentTime);
+        auto nextWeek   = earth_time::get_next_game_week();
+        auto untilTally = vanadiel_time::from_earth_time(nextWeek) - vanadiel_time::now();
 
-        // 3456 Earth seconds in 1 Vana'diel day.
-        uint8 vanaDaysUntilTally = static_cast<uint8>(1 + (secondsUntilTally / 3456));
+        auto vanaDaysUntilTally = std::chrono::ceil<xi::vanadiel_clock::days>(untilTally).count();
 
-        return vanaDaysUntilTally;
+        return static_cast<uint8>(vanaDaysUntilTally);
     }
 
     /************************************************************************

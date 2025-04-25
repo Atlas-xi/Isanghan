@@ -22,7 +22,6 @@
 #pragma once
 
 #include <chrono>
-#include <ctime>
 
 #include "cbasetypes.h"
 #include "xi.h"
@@ -62,121 +61,104 @@ namespace vanadiel_time
         return clock::now();
     }
 
-    inline earth_time::time_point to_earth_time(time_point vanadiel_tp)
+    inline earth_time::time_point to_earth_time(const time_point& vanadiel_tp = now())
     {
-        earth_time::duration earth_since_epoch = std::chrono::duration_cast<earth_time::duration>(vanadiel_tp.time_since_epoch());
+        const earth_time::duration earth_since_epoch = std::chrono::duration_cast<earth_time::duration>(vanadiel_tp.time_since_epoch());
         return earth_time::time_point(earth_since_epoch + earth_time::vanadiel_epoch);
     };
 
-    inline time_point from_earth_time(earth_time::time_point earth_tp)
+    inline time_point from_earth_time(const earth_time::time_point& earth_tp = earth_time::now())
     {
-        clock::duration vanadiel_since_epoch = std::chrono::duration_cast<clock::duration>(earth_tp - earth_time::vanadiel_epoch);
+        const clock::duration vanadiel_since_epoch = std::chrono::duration_cast<clock::duration>(earth_tp - earth_time::vanadiel_epoch);
         return time_point(vanadiel_since_epoch);
     };
 
     inline uint32 count_weeks(const duration& d)
     {
-        clock::weeks total_weeks = std::chrono::floor<clock::weeks>(d);
+        const clock::weeks total_weeks = std::chrono::floor<clock::weeks>(d);
         return static_cast<uint32>(total_weeks.count());
     }
 
     inline uint32 count_days(const duration& d)
     {
-        clock::days total_days = std::chrono::floor<clock::days>(d);
+        const clock::days total_days = std::chrono::floor<clock::days>(d);
         return static_cast<uint32>(total_days.count());
     }
 
-    inline std::tm to_tm(const time_point& tp)
-    {
-        std::tm  result        = {};
-        duration d_since_epoch = tp.time_since_epoch();
-
-        auto total_days_count = count_days(d_since_epoch);
-        auto days_into_year   = total_days_count % 360;
-
-        result.tm_yday = static_cast<uint32>(days_into_year);
-        result.tm_mday = static_cast<uint32>(days_into_year % 30) + 1;
-        result.tm_wday = static_cast<uint32>(total_days_count % 8);
-
-        // Calculate components by progressively removing larger units.
-        clock::years year = std::chrono::floor<clock::years>(d_since_epoch);
-        d_since_epoch -= year;
-        result.tm_year = static_cast<uint32>(year.count());
-
-        clock::months mon = std::chrono::floor<clock::months>(d_since_epoch);
-        d_since_epoch -= mon;
-        result.tm_mon = static_cast<uint32>(mon.count());
-
-        // Get the time within the day.
-        d_since_epoch = tp.time_since_epoch() - clock::days(total_days_count);
-
-        clock::hours hour = std::chrono::floor<clock::hours>(d_since_epoch);
-        d_since_epoch -= hour;
-        result.tm_hour = static_cast<uint32>(hour.count());
-
-        clock::minutes min = std::chrono::floor<clock::minutes>(d_since_epoch);
-        d_since_epoch -= min;
-        result.tm_min = static_cast<uint32>(min.count());
-
-        clock::seconds sec = std::chrono::floor<clock::seconds>(d_since_epoch);
-        result.tm_sec      = static_cast<uint32>(sec.count());
-
-        return result;
-    }
-
     // seconds after the minute - [​0​, 60]
-    inline uint32 get_second(const time_point& tp)
+    inline uint32 get_second(const time_point& tp = now())
     {
-        return to_tm(tp).tm_sec;
+        const duration       since_epoch = tp.time_since_epoch();
+        const clock::minutes minutes     = std::chrono::floor<clock::minutes>(since_epoch);
+        const clock::seconds seconds     = std::chrono::floor<clock::seconds>(since_epoch);
+        return static_cast<uint32>((seconds % minutes).count());
     }
     // minutes after the hour – [​0​, 59]
-    inline uint32 get_minute(const time_point& tp)
+    inline uint32 get_minute(const time_point& tp = now())
     {
-        return to_tm(tp).tm_min;
+        const duration       since_epoch = tp.time_since_epoch();
+        const clock::hours   hours       = std::chrono::floor<clock::hours>(since_epoch);
+        const clock::minutes minutes     = std::chrono::floor<clock::minutes>(since_epoch);
+        return static_cast<uint32>((minutes % hours).count());
     }
     // hours since midnight – [​0​, 23]
-    inline uint32 get_hour(const time_point& tp)
+    inline uint32 get_hour(const time_point& tp = now())
     {
-        return to_tm(tp).tm_hour;
+        const duration     since_epoch = tp.time_since_epoch();
+        const clock::days  days        = std::chrono::floor<clock::days>(since_epoch);
+        const clock::hours hours       = std::chrono::floor<clock::hours>(since_epoch);
+        return static_cast<uint32>((hours % days).count());
     }
     // day of the month – [1, 30]
-    inline uint32 get_monthday(const time_point& tp)
+    inline uint32 get_monthday(const time_point& tp = now())
     {
-        return to_tm(tp).tm_mday;
+        const duration      since_epoch = tp.time_since_epoch();
+        const clock::months months      = std::chrono::floor<clock::months>(since_epoch);
+        const clock::days   days        = std::chrono::ceil<clock::days>(since_epoch);
+        return static_cast<uint32>((days % months).count());
     }
-    // month – [​0​, 11]
-    inline uint32 get_month(const time_point& tp)
+    // current month – [​1​, 12]
+    inline uint32 get_month(const time_point& tp = now())
     {
-        return to_tm(tp).tm_mon;
+        const duration      since_epoch = tp.time_since_epoch();
+        const clock::years  years       = std::chrono::floor<clock::years>(since_epoch);
+        const clock::months months      = std::chrono::ceil<clock::months>(since_epoch);
+        return static_cast<uint32>((months % years).count());
     }
     // years since 886
-    inline uint32 get_year(const time_point& tp)
+    inline int32 get_year(const time_point& tp = now())
     {
-        return to_tm(tp).tm_year;
+        const duration     since_epoch = tp.time_since_epoch();
+        const clock::years years       = std::chrono::floor<clock::years>(since_epoch);
+        return static_cast<int32>(years.count());
     }
     // days since Firesday – [​0​, 7]
-    inline uint32 get_weekday(const time_point& tp)
+    inline uint32 get_weekday(const time_point& tp = now())
     {
-        return to_tm(tp).tm_wday;
+        const duration     since_epoch = tp.time_since_epoch();
+        const clock::weeks weeks       = std::chrono::floor<clock::weeks>(since_epoch);
+        const clock::days  days        = std::chrono::floor<clock::days>(since_epoch);
+        return static_cast<uint32>((days % weeks).count());
     }
     // days since 1st day of year – [​0​, 360]
-    inline uint32 get_yearday(const time_point& tp)
+    inline uint32 get_yearday(const time_point& tp = now())
     {
-        return to_tm(tp).tm_yday;
+        const duration     since_epoch = tp.time_since_epoch();
+        const clock::years years       = std::chrono::floor<clock::years>(since_epoch);
+        const clock::days  days        = std::chrono::floor<clock::days>(since_epoch);
+        return static_cast<uint32>((days % years).count());
     }
 
-    inline time_point get_next_midnight(const time_point& tp)
+    inline time_point get_next_midnight(const time_point& tp = now())
     {
-        auto previous_midnight = std::chrono::floor<clock::days>(tp);
-        auto next_midnight     = previous_midnight + clock::days(1);
-        return next_midnight;
-    }
-    inline time_point get_next_midnight()
-    {
-        return get_next_midnight(now());
+        return std::chrono::ceil<clock::days>(tp);
     }
 
-    inline TOTD get_totd(const time_point& tp)
+    /**
+     * Gets the time of the day for the current or given time point.
+     * @returns NONE, MIDNIGHT, NEWDAY, DAWN, DAY, DUSK, EVENING, NIGHT
+     */
+    inline TOTD get_totd(const time_point& tp = now())
     {
         switch (get_hour(tp))
         {
@@ -215,14 +197,10 @@ namespace vanadiel_time
                 return TOTD::NONE;
         }
     }
-    inline TOTD get_totd()
-    {
-        return get_totd(now());
-    }
 
     namespace moon
     {
-        inline uint32 get_phase(const time_point& tp)
+        inline uint32 get_phase(const time_point& tp = now())
         {
             int32  phase   = 0;
             double daysmod = static_cast<int32>((count_days(tp.time_since_epoch() + clock::years(886)) + 26) % 84);
@@ -238,12 +216,17 @@ namespace vanadiel_time
 
             return phase;
         }
-        inline uint32 get_phase()
-        {
-            return get_phase(now());
-        }
 
-        inline uint8 get_direction(const time_point& tp)
+        /**
+         * Gets the moon direction for the current or given time point.
+         * @returns
+         * ```
+         * 0: Neither
+         * 1: Waning
+         * 2: Waxing
+         * ```
+         */
+        inline uint8 get_direction(const time_point& tp = now())
         {
             double daysmod = static_cast<int32>((count_days(tp.time_since_epoch() + clock::years(886)) + 26) % 84);
 
@@ -260,21 +243,27 @@ namespace vanadiel_time
                 return 2; // waxing
             }
         }
-        inline uint8 get_direction()
-        {
-            return get_direction(now());
-        }
     } // namespace moon
 
     namespace rse
     {
-        inline uint8 get_race()
+        inline uint8 get_race(const time_point& tp = now())
         {
-            return static_cast<uint8>(count_weeks(now().time_since_epoch()) % 8 + 1);
+            return static_cast<uint8>(count_weeks(tp.time_since_epoch()) % 8 + 1);
         }
-        inline uint8 get_location()
+
+        /**
+         * Gets the RSE location for the current or given time point.
+         * @returns
+         * ```
+         * 0: Ordelle's Caves
+         * 1: Gusgen Mines
+         * 2: Maze of Shakhrami
+         * ```
+         */
+        inline uint8 get_location(const time_point& tp = now())
         {
-            return static_cast<uint8>(count_weeks(now().time_since_epoch()) % 3);
+            return static_cast<uint8>(count_weeks(tp.time_since_epoch()) % 3);
         }
     } // namespace rse
 }; // namespace vanadiel_time

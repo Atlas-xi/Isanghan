@@ -203,7 +203,7 @@ namespace fishingutils
     {
         uint8          waitTime  = 13;
         uint8          moonPhase = GetMoonPhase();
-        uint8          hour      = static_cast<uint8>(vanadiel_time::get_hour(vanadiel_time::now()));
+        uint8          hour      = static_cast<uint8>(vanadiel_time::get_hour());
         fishing_gear_t gear      = GetFishingGear(PChar);
 
         if (moonPhase == MOONPHASE_NEW || moonPhase == MOONPHASE_FULL)
@@ -227,7 +227,7 @@ namespace fishingutils
     float GetMonthlyTidalInfluence(fish_t* fish) // 0.25 to 1.25
     {
         float modifier = 0.5f;
-        uint8 month    = static_cast<uint8>(vanadiel_time::get_month(vanadiel_time::now()));
+        uint8 month    = static_cast<uint8>(vanadiel_time::get_month() - 1);
 
         switch (fish->monthPattern)
         {
@@ -269,7 +269,7 @@ namespace fishingutils
     float GetHourlyModifier(fish_t* fish)
     { // 0.25 to 1.25
         float modifier = 0.5f;
-        uint8 hour     = static_cast<uint8>(vanadiel_time::get_hour(vanadiel_time::now()));
+        uint8 hour     = static_cast<uint8>(vanadiel_time::get_hour());
 
         switch (fish->hourPattern)
         {
@@ -524,7 +524,7 @@ namespace fishingutils
         bonus += (moonModifier * 5) + (moonModifier * xirand::GetRandomNumber(1, 5));
 
         // Time of Day modifier
-        uint32 gameHour = vanadiel_time::get_hour(vanadiel_time::now());
+        uint32 gameHour = vanadiel_time::get_hour();
 
         if ((gameHour == 6 || gameHour == 7) || (gameHour >= 16 && gameHour <= 18))
         {

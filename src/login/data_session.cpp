@@ -445,7 +445,7 @@ void data_session::read_func()
             if (settings::get<bool>("login.LOG_USER_IP"))
             {
                 // Log clients IP info when player spawns into map server
-                std::tm convertedTime = earth_time::to_local_tm(earth_time::now());
+                std::tm convertedTime = earth_time::to_local_tm();
 
                 char timeAndDate[128];
                 strftime(timeAndDate, sizeof(timeAndDate), "%Y:%m:%d %H:%M:%S", &convertedTime);
