@@ -285,14 +285,12 @@ xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, action
     local resist                      = xi.mobskills.applyPlayerResistance(actor, nil, target, actor:getStat(xi.mod.INT) - target:getStat(xi.mod.INT), petAccBonus, actionElement)
     local dayAndWeather               = xi.spells.damage.calculateDayAndWeather(actor, actionElement, false)
     local magicBonusDiff              = xi.spells.damage.calculateMagicBonusDiff(actor, target, 0, 0, actionElement)
-    local targetMagicDamageAdjustment = xi.spells.damage.calculateTMDA(target, actionElement)
 
     -- Calculate final damage.
     finalDamage = math.floor(finalDamage * sdt)
     finalDamage = math.floor(finalDamage * resist)
     finalDamage = math.floor(finalDamage * dayAndWeather)
     finalDamage = math.floor(finalDamage * magicBonusDiff)
-    finalDamage = math.floor(finalDamage * targetMagicDamageAdjustment)
     finalDamage = math.floor(finalDamage * damageModifier)
 
     -- magical mob skills are single hit so provide single Melee hit TP return if primary target
