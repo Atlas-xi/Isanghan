@@ -404,24 +404,24 @@ end
 -- https://www.ffxiah.com/forum/topic/49614/blade-chi-damage-formula/2/#3171538
 local function calculateHybridMagicDamage(tp, physicaldmg, attacker, target, wsParams, calcParams, wsID)
     local ftp      = xi.weaponskills.fTP(tp, wsParams.ftpMod)
-    local magicdmg = physicaldmg * ftp + attacker:getMod(xi.mod.MAGIC_DAMAGE)
+    local magicdmg = math.floor(physicaldmg * ftp + attacker:getMod(xi.mod.MAGIC_DAMAGE))
     local wsd      = attacker:getMod(xi.mod.ALL_WSDMG_ALL_HITS)
 
     if attacker:getMod(xi.mod.WEAPONSKILL_DAMAGE_BASE + wsID) > 0 then
         wsd = wsd + attacker:getMod(xi.mod.WEAPONSKILL_DAMAGE_BASE + wsID)
     end
 
-    magicdmg = magicdmg * (100 + wsd) / 100
-    magicdmg = addBonusesAbility(attacker, wsParams.ele, target, magicdmg, wsParams)
-    magicdmg = magicdmg + calcParams.bonusfTP * physicaldmg
-    magicdmg = magicdmg * applyResistanceAbility(attacker, target, wsParams.ele, wsParams.skill, calcParams.bonusAcc)
-    magicdmg = target:magicDmgTaken(magicdmg, wsParams.ele)
+    magicdmg = math.floor(magicdmg * (100 + wsd) / 100)
+    magicdmg = math.floor(addBonusesAbility(attacker, wsParams.ele, target, magicdmg, wsParams))
+    magicdmg = math.floor(magicdmg + calcParams.bonusfTP * physicaldmg)
+    magicdmg = math.floor(magicdmg * applyResistanceAbility(attacker, target, wsParams.ele, wsParams.skill, calcParams.bonusAcc))
+    magicdmg = math.floor(magicdmg * xi.spells.damage.calculateTMDA(target, wsParams.ele))
 
     if magicdmg > 0 then
-        magicdmg = magicdmg * xi.spells.damage.calculateNukeAbsorbOrNullify(target, wsParams.ele)
+        magicdmg = math.floor(magicdmg * xi.spells.damage.calculateNukeAbsorbOrNullify(target, wsParams.ele))
     end
 
-    if magicdmg > 0 then                                           -- handle nonzero damage if previous function does not absorb or nullify
+    if magicdmg > 0 then -- handle nonzero damage if previous function does not absorb or nullify
         magicdmg = magicdmg - target:getMod(xi.mod.PHALANX)
         magicdmg = utils.clamp(magicdmg, 0, 99999)
         magicdmg = utils.oneforall(target, magicdmg)
@@ -972,9 +972,9 @@ xi.weaponskills.doMagicWeaponskill = function(attacker, target, wsID, wsParams, 
         dmg = dmg + dmg * attacker:getMod(xi.mod.ALL_WSDMG_FIRST_HIT) / 100 -- Add in our "first hit" WS dmg bonus
 
         -- Calculate magical bonuses and reductions
-        dmg = addBonusesAbility(attacker, wsParams.ele, target, dmg, wsParams)
-        dmg = dmg * applyResistanceAbility(attacker, target, wsParams.ele, wsParams.skill, bonusacc)
-        dmg = target:magicDmgTaken(dmg, wsParams.ele)
+        dmg = math.floor(addBonusesAbility(attacker, wsParams.ele, target, dmg, wsParams))
+        dmg = math.floor(dmg * applyResistanceAbility(attacker, target, wsParams.ele, wsParams.skill, bonusacc))
+        dmg = math.floor(dmg * xi.spells.damage.calculateTMDA(target, wsParams.ele))
 
         if dmg < 0 then
             calcParams.finalDmg = dmg
