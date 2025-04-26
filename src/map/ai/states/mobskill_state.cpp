@@ -61,7 +61,7 @@ CMobSkillState::CMobSkillState(CBattleEntity* PEntity, uint16 targid, uint16 wsi
 
     m_PSkill = std::make_unique<CMobSkill>(*skill);
 
-    m_castTime = std::chrono::milliseconds(m_PSkill->getActivationTime());
+    m_castTime = m_PSkill->getActivationTime();
 
     if (m_castTime > 0s)
     {
@@ -134,8 +134,7 @@ bool CMobSkillState::Update(timer::time_point tick)
         action_t action;
         m_PEntity->OnMobSkillFinished(*this, action);
         m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(action));
-        auto delay   = std::chrono::milliseconds(m_PSkill->getAnimationTime());
-        m_finishTime = tick + delay;
+        m_finishTime = tick + m_PSkill->getAnimationTime();
         Complete();
     }
     if (IsCompleted() && tick > m_finishTime)

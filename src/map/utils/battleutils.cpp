@@ -211,8 +211,8 @@ namespace battleutils
                 PMobSkill->setAoe(_sql->GetIntData(3));
                 PMobSkill->setAoeRadius(_sql->GetIntData(4));
                 PMobSkill->setDistance(_sql->GetFloatData(5));
-                PMobSkill->setAnimationTime(_sql->GetIntData(6));
-                PMobSkill->setActivationTime(_sql->GetIntData(7));
+                PMobSkill->setAnimationTime(std::chrono::milliseconds(_sql->GetIntData(6)));
+                PMobSkill->setActivationTime(std::chrono::milliseconds(_sql->GetIntData(7)));
                 PMobSkill->setValidTargets(_sql->GetIntData(8));
                 PMobSkill->setFlag(_sql->GetIntData(9));
                 PMobSkill->setParam(_sql->GetIntData(10));
@@ -265,8 +265,8 @@ namespace battleutils
                 PPetSkill->setName(_sql->GetStringData(2));
                 PPetSkill->setAoe(_sql->GetIntData(3));
                 PPetSkill->setDistance(_sql->GetFloatData(4));
-                PPetSkill->setAnimationTime(_sql->GetIntData(5));
-                PPetSkill->setActivationTime(_sql->GetIntData(6));
+                PPetSkill->setAnimationTime(std::chrono::milliseconds(_sql->GetIntData(5)));
+                PPetSkill->setActivationTime(std::chrono::milliseconds(_sql->GetIntData(6)));
                 PPetSkill->setValidTargets(_sql->GetIntData(7));
                 PPetSkill->setMsg(_sql->GetIntData(8));
                 PPetSkill->setFlag(_sql->GetIntData(9));

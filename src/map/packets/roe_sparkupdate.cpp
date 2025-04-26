@@ -32,7 +32,7 @@ CRoeSparkUpdatePacket::CRoeSparkUpdatePacket(CCharEntity* PChar)
     this->setType(0x110);
     this->setSize(0x14);
 
-    earth_time::duration vanaTime        = earth_time::now() - earth_time::vanadiel_epoch;
+    earth_time::duration vanaTime        = std::chrono::seconds(earth_time::vanadiel_timestamp());
     uint32               daysSinceEpoch  = std::chrono::floor<std::chrono::days>(vanaTime).count();
     uint32               weeksSinceEpoch = std::chrono::floor<std::chrono::weeks>(vanaTime).count();
 

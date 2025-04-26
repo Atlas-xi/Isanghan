@@ -29,7 +29,7 @@
 CGuild::CGuild(uint8 id, const std::string& _pointsName)
 : m_id(id)
 {
-    earth_time::duration currentTime = earth_time::now() - earth_time::vanadiel_epoch;
+    earth_time::duration currentTime = std::chrono::seconds(earth_time::vanadiel_timestamp());
     uint32               elapsedDays = std::chrono::floor<std::chrono::days>(currentTime).count();
 
     for (size_t i = 0; i < m_GPItemsRank.size(); ++i)

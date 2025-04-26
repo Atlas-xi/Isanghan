@@ -973,6 +973,13 @@ namespace charutils
                         PItem->setSignature(EncodedString);
                     }
 
+                    if (auto PItemUsable = dynamic_cast<CItemUsable*>(PItem))
+                    {
+                        uint32 useTime;
+                        std::memcpy(&useTime, PItemUsable->m_extra + 0x04, sizeof(useTime));
+                        PItemUsable->setLastUseTime(timer::now() - std::chrono::seconds(earth_time::vanadiel_timestamp() - useTime));
+                    }
+
                     if (PItem->isType(ITEM_FURNISHING) && (PItem->getLocationID() == LOC_MOGSAFE || PItem->getLocationID() == LOC_MOGSAFE2))
                     {
                         if (((CItemFurnishing*)PItem)->isInstalled()) // Check if furniture (furnishing) item is actually installed
@@ -2754,9 +2761,9 @@ namespace charutils
                     }
                     if (PItem->isType(ITEM_USABLE) && ((CItemUsable*)PItem)->getCurrentCharges() != 0)
                     {
-                        PItem->setAssignTime(earth_time::vanadiel_timestamp());
-                        PChar->PRecastContainer->Add(RECAST_ITEM, slotID << 8 | containerID,
-                                                     std::chrono::milliseconds(PItem->getReuseTime())); // add recast timer to Recast List from any bag
+                        PItem->setAssignTime(timer::now());
+                        // add recast timer to Recast List from any bag
+                        PChar->PRecastContainer->Add(RECAST_ITEM, slotID << 8 | containerID, PItem->getReuseTime());
 
                         // Do not forget to update the timer when equipping the subject
 

@@ -2583,7 +2583,7 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
         {
             PItem->setCurrentCharges(PItem->getCurrentCharges() - 1);
         }
-        PItem->setLastUseTime(earth_time::vanadiel_timestamp());
+        PItem->setLastUseTime(timer::now());
 
         db::preparedStmt("UPDATE char_inventory "
                          "SET extra = ? "
@@ -2592,8 +2592,8 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
 
         if (PItem->getCurrentCharges() != 0)
         {
-            this->PRecastContainer->Add(RECAST_ITEM, PItem->getSlotID() << 8 | PItem->getLocationID(),
-                                        std::chrono::milliseconds(PItem->getReuseTime())); // add recast timer to Recast List from any bag
+            // add recast timer to Recast List from any bag
+            this->PRecastContainer->Add(RECAST_ITEM, PItem->getSlotID() << 8 | PItem->getLocationID(), PItem->getReuseTime());
         }
     }
     else // unlock all items except equipment

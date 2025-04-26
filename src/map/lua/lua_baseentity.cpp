@@ -4294,7 +4294,7 @@ bool CLuaBaseEntity::addUsedItem(uint16 itemID)
             {
                 auto* PUsable = static_cast<CItemUsable*>(PItem);
                 PUsable->setQuantity(1);
-                PUsable->setLastUseTime(earth_time::vanadiel_timestamp());
+                PUsable->setLastUseTime(timer::now());
                 SlotID = charutils::AddItem(PChar, LOC_INVENTORY, PUsable, false);
             }
             else
