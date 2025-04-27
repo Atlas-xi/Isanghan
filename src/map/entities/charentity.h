@@ -133,7 +133,7 @@ struct PetInfo_t
 {
     bool              respawnPet;   // Used for spawning pet on zone
     timer::time_point jugSpawnTime; // Keeps track of original spawn time
-    uint32            jugDuration;  // Number of seconds a jug pet should last after its original spawn time
+    timer::duration   jugDuration;  // Duration a jug pet should last after its original spawn time
     uint8             petID;        // ID as in wyvern(48) , carbuncle(8) ect..
     PET_TYPE          petType;      // Type of pet being transferred
     uint8             petLevel;     // Level the pet was spawned with

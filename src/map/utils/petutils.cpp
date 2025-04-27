@@ -116,7 +116,7 @@ namespace petutils
 
                 Pet->minLevel  = (uint8)_sql->GetIntData(3);
                 Pet->maxLevel  = (uint8)_sql->GetIntData(4);
-                Pet->time      = _sql->GetUIntData(5);
+                Pet->time      = std::chrono::seconds(_sql->GetUIntData(5));
                 Pet->radius    = _sql->GetUIntData(6);
                 Pet->EcoSystem = (ECOSYSTEM)_sql->GetIntData(7);
                 Pet->m_Family  = (uint16)_sql->GetIntData(8);

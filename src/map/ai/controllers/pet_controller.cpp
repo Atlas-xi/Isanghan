@@ -56,7 +56,7 @@ void CPetController::Tick(timer::time_point tick)
         auto* PPetEntity = dynamic_cast<CPetEntity*>(PPet);
         if (PPetEntity && PPetEntity->isAlive() && PPetEntity->getPetType() == PET_TYPE::JUG_PET)
         {
-            if (tick > PPetEntity->getJugSpawnTime() + std::chrono::seconds(PPetEntity->getJugDuration()))
+            if (tick > PPetEntity->getJugSpawnTime() + PPetEntity->getJugDuration())
             {
                 petutils::DespawnPet(PPetEntity->PMaster);
                 return;

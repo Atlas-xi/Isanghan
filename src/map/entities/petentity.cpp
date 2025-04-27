@@ -106,18 +106,18 @@ void CPetEntity::setJugSpawnTime(timer::time_point spawnTime)
     m_jugSpawnTime = spawnTime;
 }
 
-uint32 CPetEntity::getJugDuration()
+timer::duration CPetEntity::getJugDuration()
 {
     if (m_PetType != PET_TYPE::JUG_PET)
     {
         ShowWarning("Non-Jug Pet calling function (%d).", static_cast<uint8>(m_PetType));
-        return 0;
+        return 0s;
     }
 
-    return static_cast<uint32>(timer::count_seconds(m_jugDuration));
+    return m_jugDuration;
 }
 
-void CPetEntity::setJugDuration(uint32 seconds)
+void CPetEntity::setJugDuration(timer::duration seconds)
 {
     if (m_PetType != PET_TYPE::JUG_PET)
     {
@@ -125,7 +125,7 @@ void CPetEntity::setJugDuration(uint32 seconds)
         return;
     }
 
-    m_jugDuration = std::chrono::seconds(seconds);
+    m_jugDuration = seconds;
 }
 
 const std::string CPetEntity::GetScriptName()

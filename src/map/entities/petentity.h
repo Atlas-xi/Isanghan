@@ -55,9 +55,9 @@ public:
     PET_TYPE          getPetType();
     uint8             getSpawnLevel();
     void              setSpawnLevel(uint8 level);
-    timer::time_point getJugSpawnTime();              // initial spawn time of this pet if it's a jug pet
-    uint32            getJugDuration();               // duration of this jug pet in seconds
-    void              setJugDuration(uint32 seconds); // sets the duration of this jug pet in seconds
+    timer::time_point getJugSpawnTime();                       // initial spawn time of this pet if it's a jug pet
+    timer::duration   getJugDuration();                        // duration of this jug pet in seconds
+    void              setJugDuration(timer::duration seconds); // sets the duration of this jug pet in seconds
     bool              isBstPet();
     uint32            m_PetID;
     const std::string GetScriptName();
