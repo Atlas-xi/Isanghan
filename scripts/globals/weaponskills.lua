@@ -37,50 +37,6 @@ local function getAlpha(level)
     return alpha
 end
 
--- Returns fSTR based on range and divisor
-local function calculateRawFstr(dSTR, divisor)
-    local fSTR = 0
-
-    if dSTR >= 12 then
-        fSTR = dSTR + 4
-    elseif dSTR >= 6 then
-        fSTR = dSTR + 6
-    elseif dSTR >= 1 then
-        fSTR = dSTR + 7
-    elseif dSTR >= -2 then
-        fSTR = dSTR + 8
-    elseif dSTR >= -7 then
-        fSTR = dSTR + 9
-    elseif dSTR >= -15 then
-        fSTR = dSTR + 10
-    elseif dSTR >= -21 then
-        fSTR = dSTR + 12
-    else
-        fSTR = dSTR + 13
-    end
-
-    return fSTR / divisor
-end
-
--- Given the attacker's str and the mob's vit, fSTR2 is calculated (for ranged WS)
-xi.weaponskills.fSTR2 = function(atkStr, defVit, weaponRank)
-    local dSTR  = atkStr - defVit
-    local fSTR2 = calculateRawFstr(dSTR, 2)
-
-    -- Apply fSTR2 caps.
-    local lowerCap = weaponRank * -2
-
-    if weaponRank == 0 then
-        lowerCap = -2
-    elseif weaponRank == 1 then
-        lowerCap = -3
-    end
-
-    fSTR2 = utils.clamp(fSTR2, lowerCap, (weaponRank + 8) * 2)
-
-    return fSTR2
-end
-
 -- http://wiki.ffo.jp/html/1705.html
 -- https://www.ffxiah.com/forum/topic/21497/stalwart-soul/ some anecdotal data that aligns with JP
 -- https://www.bg-wiki.com/ffxi/Agwu%27s_Scythe Souleater Effect that goes beyond established cap, Stalwart Soul bonus being additive to trait
@@ -773,7 +729,7 @@ xi.weaponskills.doPhysicalWeaponskill = function(attacker, target, wsID, wsParam
     calcParams.wsID                    = wsID
     calcParams.attackInfo              = attack
     calcParams.weaponDamage            = xi.weaponskills.getMeleeDmg(attacker, attack.weaponType, wsParams.kick)
-    calcParams.fSTR                    = xi.weaponskills.fSTR(attacker:getStat(xi.mod.STR), target:getStat(xi.mod.VIT), attacker:getWeaponDmgRank())
+    calcParams.fSTR                    = xi.combat.physical.calculateMeleeStatFactor(attacker, target)
     calcParams.accStat                 = attacker:getACC()
     calcParams.melee                   = true
     calcParams.mustMiss                = target:hasStatusEffect(xi.effect.PERFECT_DODGE) or (target:hasStatusEffect(xi.effect.ALL_MISS) and not wsParams.hitsHigh)
@@ -853,7 +809,7 @@ xi.weaponskills.doRangedWeaponskill = function(attacker, target, wsID, wsParams,
         attackInfo              = attack,
         weaponDamage            = { attacker:getRangedDmg() },
         skillType               = attacker:getWeaponSkillType(xi.slot.RANGED),
-        fSTR                    = xi.weaponskills.fSTR2(attacker:getStat(xi.mod.STR), target:getStat(xi.mod.VIT), attacker:getRangedDmgRank()),
+        fSTR                    = xi.combat.physical.calculateRangedStatFactor(attacker, target),
         accStat                 = attacker:getRACC(),
         melee                   = false,
         mustMiss                = false,
@@ -1223,19 +1179,6 @@ xi.weaponskills.calculatedIgnoredDef = function(tp, def, ignoredDefenseTable)
     end
 
     return 0
-end
-
--- Given the attacker's str and the mob's vit, fSTR is calculated (for melee WS)
-xi.weaponskills.fSTR = function(atkStr, defVit, weaponRank)
-    local dSTR = atkStr - defVit
-    local fSTR = calculateRawFstr(dSTR, 4)
-
-    -- Apply fSTR caps.
-    local lowerCap = math.min(-1, weaponRank * -1)
-
-    fSTR = utils.clamp(fSTR, lowerCap, weaponRank + 8)
-
-    return fSTR
 end
 
 xi.weaponskills.handleWSGorgetBelt = function(attacker)
