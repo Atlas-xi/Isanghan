@@ -46,7 +46,8 @@ SqlConnection::SqlConnection()
 }
 
 SqlConnection::SqlConnection(const char* user, const char* passwd, const char* host, uint16 port, const char* db)
-: m_ThreadId(std::this_thread::get_id())
+: m_PingInterval(0s)
+, m_ThreadId(std::this_thread::get_id())
 {
     TracyZoneScoped;
 

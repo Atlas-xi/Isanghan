@@ -975,7 +975,7 @@ namespace charutils
 
                     if (auto PItemUsable = dynamic_cast<CItemUsable*>(PItem))
                     {
-                        uint32 useTime;
+                        uint32 useTime = 0;
                         std::memcpy(&useTime, PItemUsable->m_extra + 0x04, sizeof(useTime));
                         PItemUsable->setLastUseTime(timer::now() - std::chrono::seconds(earth_time::vanadiel_timestamp() - useTime));
                     }

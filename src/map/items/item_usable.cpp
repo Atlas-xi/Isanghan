@@ -28,19 +28,19 @@
 
 CItemUsable::CItemUsable(uint16 id)
 : CItem(id)
+, m_UseDelay(0s)
+, m_AnimationTime(0s)
+, m_ActivationTime(0s)
+, m_ReuseDelay(0s)
 {
     setType(ITEM_USABLE);
 
-    m_UseDelay       = 0s;
-    m_MaxCharges     = 0;
-    m_Animation      = 0;
-    m_AnimationTime  = 0s;
-    m_ActivationTime = 0s;
-    m_ValidTarget    = 0;
-    m_ReuseDelay     = 0s;
-    m_AssignTime     = timer::time_point::min();
-    m_LastUseTime    = timer::time_point::min();
-    m_AoE            = 0;
+    m_MaxCharges  = 0;
+    m_Animation   = 0;
+    m_ValidTarget = 0;
+    m_AssignTime  = timer::time_point::min();
+    m_LastUseTime = timer::time_point::min();
+    m_AoE         = 0;
 }
 
 CItemUsable::~CItemUsable() = default;

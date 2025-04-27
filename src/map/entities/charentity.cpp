@@ -97,6 +97,7 @@
 #include "weapon_skill.h"
 
 CCharEntity::CCharEntity()
+: m_PlayTime(0s)
 {
     TracyZoneScoped;
     objtype     = TYPE_PC;
@@ -232,7 +233,6 @@ CCharEntity::CCharEntity()
     resetPetZoningInfo();
     petZoningInfo.petID = 0;
 
-    m_PlayTime    = 0s;
     m_SaveTime    = timer::time_point::min();
     m_reloadParty = false;
 

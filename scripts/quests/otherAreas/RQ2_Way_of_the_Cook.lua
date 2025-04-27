@@ -7,8 +7,6 @@
 -----------------------------------
 
 local quest          = Quest:new(xi.questLog.OTHER_AREAS, xi.quest.id.otherAreas.WAY_OF_THE_COOK)
-local daysPassed     = 0
-local totalHoursLeft = 0
 
 quest.reward =
 {
