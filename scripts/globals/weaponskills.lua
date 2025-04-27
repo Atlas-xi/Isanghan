@@ -19,24 +19,6 @@ require('scripts/globals/combat/physical_utilities')
 xi = xi or {}
 xi.weaponskills = xi.weaponskills or {}
 
--- Obtains alpha, used for working out WSC on legacy servers
--- Retail has no alpha anymore as of 2014 Weaponskill functions
-local function getAlpha(level)
-    local alpha = 1
-
-    if not xi.settings.main.USE_ADOULIN_WEAPON_SKILL_CHANGES then
-        if level > 75 then
-            alpha = 0.85
-        elseif level > 59 then
-            alpha = 0.9 - math.floor((level - 60) / 2) / 100
-        elseif level > 5 then
-            alpha = 1 - math.floor(level / 6) / 100
-        end
-    end
-
-    return alpha
-end
-
 -- http://wiki.ffo.jp/html/1705.html
 -- https://www.ffxiah.com/forum/topic/21497/stalwart-soul/ some anecdotal data that aligns with JP
 -- https://www.bg-wiki.com/ffxi/Agwu%27s_Scythe Souleater Effect that goes beyond established cap, Stalwart Soul bonus being additive to trait
@@ -331,29 +313,6 @@ local function modifyMeleeHitDamage(attacker, target, attackTbl, wsParams, rawDa
     return adjustedDamage
 end
 
-local modParameters =
-{
-    ['str_wsc'] = { xi.mod.STR, xi.mod.WS_STR_BONUS },
-    ['dex_wsc'] = { xi.mod.DEX, xi.mod.WS_DEX_BONUS },
-    ['vit_wsc'] = { xi.mod.VIT, xi.mod.WS_VIT_BONUS },
-    ['agi_wsc'] = { xi.mod.AGI, xi.mod.WS_AGI_BONUS },
-    ['int_wsc'] = { xi.mod.INT, xi.mod.WS_INT_BONUS },
-    ['mnd_wsc'] = { xi.mod.MND, xi.mod.WS_MND_BONUS },
-    ['chr_wsc'] = { xi.mod.CHR, xi.mod.WS_CHR_BONUS },
-}
-
-local function calculateWsMods(attacker, calcParams, wsParams)
-    local wsMods = 0
-
-    for parameterName, modList in pairs(modParameters) do
-        local paramValue = wsParams[parameterName] and wsParams[parameterName] or 0
-
-        wsMods = wsMods + attacker:getStat(modList[1]) * paramValue
-    end
-
-    return wsMods * calcParams.alpha + calcParams.fSTR
-end
-
 -- Compute magic damage component of hybrid weaponskill
 -- https://wiki.ffo.jp/html/1261.html
 -- https://www.ffxiah.com/forum/topic/33470/the-sealed-dagger-a-ninja-guide/151/#3420836
@@ -403,25 +362,21 @@ xi.weaponskills.calculateRawWSDmg = function(attacker, target, wsID, tp, action,
     local targetLvl = target:getMainLvl()
     local targetHp  = target:getHP() + target:getMod(xi.mod.STONESKIN)
 
-    -- Calculate alpha, WSC, and our modifiers for our base per-hit damage
-    calcParams.alpha = getAlpha(attacker:getMainLvl())
-
-    -- Begin Checks for bonus wsc bonuses. See the following for details:
-    -- https://www.bg-wiki.com/bg/Utu_Grip
-    -- https://www.bluegartr.com/threads/108199-Random-Facts-Thread-Other?p=6826618&viewfull=1#post6826618
-
-    for parameterName, modList in pairs(modParameters) do
-        if attacker:getMod(modList[2]) > 0 then
-            if wsParams[parameterName] then
-                wsParams[parameterName] = wsParams[parameterName] + (attacker:getMod(modList[2]) / 100)
-            else
-                wsParams[parameterName] = attacker:getMod(modList[2]) / 100
-            end
+    -- Obtains alpha, used for working out WSC on legacy servers. Retail has no alpha anymore as of 2014 Weaponskill functions
+    local alpha = 1
+    if not xi.settings.main.USE_ADOULIN_WEAPON_SKILL_CHANGES then
+        local level = attacker:getMainLvl()
+        if level > 75 then
+            alpha = 0.85
+        elseif level > 59 then
+            alpha = 0.9 - math.floor((level - 60) / 2) / 100
+        elseif level > 5 then
+            alpha = 1 - math.floor(level / 6) / 100
         end
     end
 
-    local wsMods   = calculateWsMods(attacker, calcParams, wsParams)
-    local mainBase = calcParams.weaponDamage[1] + wsMods + calcParams.bonusWSmods
+    local wsc      = xi.combat.physical.calculateWSC(attacker, wsParams.str_wsc, wsParams.dex_wsc, wsParams.vit_wsc, wsParams.agi_wsc, wsParams.int_wsc, wsParams.mnd_wsc, wsParams.chr_wsc)
+    local mainBase = math.floor(calcParams.weaponDamage[1] + calcParams.fSTR + calcParams.bonusWSmods + wsc * alpha)
 
     -- Calculate fTP multiplier
     local ftp = xi.weaponskills.fTP(tp, wsParams.ftpMod) + calcParams.bonusfTP
@@ -626,7 +581,7 @@ xi.weaponskills.calculateRawWSDmg = function(attacker, target, wsID, tp, action,
     -- Do the extra hit for our offhand if applicable
     if calcParams.extraOffhandHit and hitsDone < 8 and finaldmg < targetHp then
         calcParams.hitsLanded = 0
-        local offhandDmg      = calcParams.weaponDamage[2] + wsMods
+        local offhandDmg      = calcParams.weaponDamage[2] + calcParams.fSTR + wsc * alpha
         hitdmg, calcParams    = getSingleHitDamage(attacker, target, offhandDmg, ftp, wsParams, calcParams)
 
         if calcParams.melee then
@@ -660,7 +615,7 @@ xi.weaponskills.calculateRawWSDmg = function(attacker, target, wsID, tp, action,
     local offhandMultiHitsDone = 0
 
     while hitsDone < 8 and offhandMultiHitsDone < numOffhandMultis and finaldmg < targetHp do
-        local offhandDmg      = calcParams.weaponDamage[2] + wsMods
+        local offhandDmg      = calcParams.weaponDamage[2] + calcParams.fSTR + wsc * alpha
         calcParams.hitsLanded = 0
         hitdmg, calcParams    = getSingleHitDamage(attacker, target, offhandDmg, ftp, wsParams, calcParams)
 
@@ -896,23 +851,7 @@ xi.weaponskills.doMagicWeaponskill = function(attacker, target, wsID, wsParams, 
 
     -- Magic-based WSes never miss, so we don't need to worry about calculating a miss, only if a shadow absorbed it.
     if not shadowAbsorb(target) then
-
-        -- Begin Checks for bonus wsc bonuses. See the following for details:
-        -- https://www.bg-wiki.com/bg/Utu_Grip
-        -- https://www.bluegartr.com/threads/108199-Random-Facts-Thread-Other?p=6826618&viewfull=1#post6826618
-
-        for parameterName, modList in pairs(modParameters) do
-            if attacker:getMod(modList[2]) > 0 then
-                wsParams[parameterName] = wsParams[parameterName] + (attacker:getMod(modList[2]) / 100)
-            end
-        end
-
-        for parameterName, modList in pairs(modParameters) do
-            local paramValue = wsParams[parameterName] and wsParams[parameterName] or 0
-
-            dmg = dmg + attacker:getStat(modList[1]) * paramValue
-        end
-
+        dmg = dmg + xi.combat.physical.calculateWSC(attacker, wsParams.str_wsc, wsParams.dex_wsc, wsParams.vit_wsc, wsParams.agi_wsc, wsParams.int_wsc, wsParams.mnd_wsc, wsParams.chr_wsc)
         dmg = dmg + attacker:getMainLvl() + 2 + fint
 
         -- Applying fTP multiplier
