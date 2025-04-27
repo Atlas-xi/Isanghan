@@ -446,6 +446,18 @@ xi.mod =
     PERPETUATION_REDUCTION          = 346,
     SPIKES_DMG_BONUS                = 1079, -- Increases Blaze/Ice/Shock spikes damage by percentage (e.g. mod value 50 = +50% spikes damage)
 
+    -- fTP modifiers
+    FIRE_FTP_BONUS                  = 544,  -- Gives bonus fTP when weaponskill has a Fire property. (Elemental beltes and gorgets) /256
+    ICE_FTP_BONUS                   = 545,  -- Gives bonus fTP when weaponskill has a Ice property. (Elemental beltes and gorgets) /256
+    WIND_FTP_BONUS                  = 546,  -- Gives bonus fTP when weaponskill has a Wind property. (Elemental beltes and gorgets) /256
+    EARTH_FTP_BONUS                 = 547,  -- Gives bonus fTP when weaponskill has a Earth property. (Elemental beltes and gorgets) /256
+    THUNDER_FTP_BONUS               = 548,  -- Gives bonus fTP when weaponskill has a Thunder property. (Elemental beltes and gorgets) /256
+    WATER_FTP_BONUS                 = 549,  -- Gives bonus fTP when weaponskill has a Water property. (Elemental beltes and gorgets) /256
+    LIGHT_FTP_BONUS                 = 550,  -- Gives bonus fTP when weaponskill has a Light property. (Elemental beltes and gorgets) /256
+    DARK_FTP_BONUS                  = 551,  -- Gives bonus fTP when weaponskill has a Dark property. (Elemental beltes and gorgets) /256
+    ANY_FTP_BONUS                   = 1144, -- Gives bonus fTP when weaponskill has a (any) property. (Fotia Gorget, Fotia Belt) /256
+    DAY_FTP_BONUS                   = 1145, -- Gives bonus fTP when weaponskill has a property that matches current day. (Mekira Oto, Gavialis helm, etc...) /256
+
     -- Warrior
     BERSERK_POTENCY                 = 948,  -- Augments "Berserk"/Enhances "Berserk" effect (Conqueror)
     BERSERK_DURATION                = 954,  -- Berserk Duration
