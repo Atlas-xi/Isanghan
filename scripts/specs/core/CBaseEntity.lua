@@ -3090,6 +3090,11 @@ function CBaseEntity:uncharm()
 end
 
 ---@nodiscard
+---@return boolean
+function CBaseEntity:isTandemActive()
+end
+
+---@nodiscard
 ---@param element integer
 ---@param burden integer
 ---@return integer

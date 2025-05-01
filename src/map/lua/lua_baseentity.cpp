@@ -14286,6 +14286,24 @@ void CLuaBaseEntity::uncharm()
 }
 
 /************************************************************************
+ *  Function: isTandemActive()
+ *  Purpose : If entity is pet or master, checks to see if both are fighting same target
+ *  Example : player:isTandemActive()
+ *  Notes   : used for BST traits Tandem Strike / Tandem Blow
+ ************************************************************************/
+
+bool CLuaBaseEntity::isTandemActive()
+{
+    auto* PBattle = dynamic_cast<CBattleEntity*>(m_PBaseEntity);
+    if (!PBattle)
+    {
+        ShowError("Invalid entity type calling function (%s).", m_PBaseEntity->getName());
+        return false;
+    }
+    return petutils::IsTandemActive(static_cast<CBattleEntity*>(m_PBaseEntity));
+}
+
+/************************************************************************
  *  Function: addBurden()
  *  Purpose : Adds a Burden to a Target
  *  Example : local overload = target:addBurden(xi.magic.ele.EARTH - 1, burden)
@@ -19604,6 +19622,7 @@ void CLuaBaseEntity::Register()
     // BST
     SOL_REGISTER("charm", CLuaBaseEntity::charm);
     SOL_REGISTER("uncharm", CLuaBaseEntity::uncharm);
+    SOL_REGISTER("isTandemActive", CLuaBaseEntity::isTandemActive);
 
     // PUP
     SOL_REGISTER("addBurden", CLuaBaseEntity::addBurden);
