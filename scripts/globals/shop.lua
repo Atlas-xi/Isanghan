@@ -4,21 +4,6 @@
 require('scripts/globals/conquest')
 -----------------------------------
 
------------------------------------
--- IDs for Curio Vendor Moogle
------------------------------------
-
-local curio =
-{
-    ['medicine']        = 1,
-    ['ammunition']      = 2,
-    ['ninjutsuTools']   = 3,
-    ['foodStuffs']      = 4,
-    ['scrolls']         = 5,
-    ['keys']            = 6,
-    -- keyitems not implemented yet
-}
-
 xi = xi or {}
 
 xi.shop =
@@ -27,7 +12,7 @@ xi.shop =
     -- stock cuts off after 16 items. if you add more, extras will not display
     -- stock is of form { itemId1, price1, itemId2, price2, ... }
     -- log is a fame area from xi.fameArea
-    -- TODO update all usage of this function to define stock as a properly-indexed table
+    -- TODO update all usage of this function to define stock as a properly-indexed table: for _, stockItem in ipairs(stock) do
     general = function(player, stock, log)
         local priceMultiplier = 1
 
@@ -64,20 +49,34 @@ xi.shop =
     -- send curio vendor moogle shop shop dialog to player
     -- stock is of form { itemId1, price1, keyItemRequired, ... }
     -- log is default set to -1 as it's needed as part of createShop()
-    -- TODO update all usage of this function to define stock as a properly-indexed table
     curioVendorMoogle = function(player, stock)
         local log = -1
 
         player:createShop(#stock / 3, log)
 
-        for i = 1, #stock, 3 do
-            if player:hasKeyItem(stock[i + 2]) then
-                player:addShopItem(stock[i], stock[i + 1])
+        for _, stockItem in ipairs(stock) do
+            if player:hasKeyItem(stockItem[3]) then
+                player:addShopItem(stockItem[1], stockItem[2])
             end
         end
 
         player:sendMenu(xi.menuType.SHOP)
     end,
+
+    -----------------------------------
+    -- option IDs for Curio Vendor Moogle Menu
+    -----------------------------------
+
+    curio =
+    {
+        ['medicine']        = 1,
+        ['ammunition']      = 2,
+        ['ninjutsuTools']   = 3,
+        ['foodStuffs']      = 4,
+        ['scrolls']         = 5,
+        ['keys']            = 6,
+        -- keyitems not implemented yet
+    },
 
     -- send nation shop dialog to player
     -- stock cuts off after 16 items. if you add more, extras will not display
@@ -408,189 +407,189 @@ xi.shop =
             { xi.item.NIOBIUM_ORE,            1126125,      xi.craftRank.AMATEUR },      -- Niobium Ore
         }
     },
+}
 
-    curioVendorMoogleStock =
+xi.shop.curioVendorMoogleStock =
+{
+    [xi.shop.curio.medicine] =
     {
-        [curio.medicine] =
-        {
-            xi.item.POTION,                    300,      xi.ki.RHAPSODY_IN_WHITE,   -- Potion
-            xi.item.HI_POTION,                 600,      xi.ki.RHAPSODY_IN_UMBER,   -- Hi-Potion
-            xi.item.X_POTION,                 1200,    xi.ki.RHAPSODY_IN_CRIMSON,   -- X-Potion
-            -- xi.item.ETHER,                  650,      xi.ki.RHAPSODY_IN_WHITE,   -- Ether / Temporarily(?) removed by SE June 2021
-            xi.item.HI_ETHER,                 1300,      xi.ki.RHAPSODY_IN_UMBER,   -- Hi-Ether
-            xi.item.SUPER_ETHER,              3000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Super Ether
-            xi.item.ELIXIR,                  15000,      xi.ki.RHAPSODY_IN_AZURE,   -- Elixir
-            xi.item.ANTIDOTE,                  300,      xi.ki.RHAPSODY_IN_WHITE,   -- Antidote
-            xi.item.FLASK_OF_EYE_DROPS,       1000,      xi.ki.RHAPSODY_IN_UMBER,   -- Eye Drops
-            xi.item.FLASK_OF_ECHO_DROPS,       700,      xi.ki.RHAPSODY_IN_UMBER,   -- Echo Drops
-            xi.item.BOTTLE_OF_MULSUM,          500,      xi.ki.RHAPSODY_IN_WHITE,   -- Mulsum
-            xi.item.PINCH_OF_PRISM_POWDER,     500,      xi.ki.RHAPSODY_IN_WHITE,   -- Prism Powder
-            xi.item.POT_OF_SILENT_OIL,         500,      xi.ki.RHAPSODY_IN_WHITE,   -- Silent Oil
-            xi.item.FLASK_OF_DEODORIZER,       250,      xi.ki.RHAPSODY_IN_WHITE,   -- Deodorizer
-            xi.item.RERAISER,                 1000,      xi.ki.RHAPSODY_IN_AZURE,   -- Reraiser
-        },
+        { xi.item.POTION,                    300,      xi.ki.RHAPSODY_IN_WHITE },   -- Potion
+        { xi.item.HI_POTION,                 600,      xi.ki.RHAPSODY_IN_UMBER },   -- Hi-Potion
+        { xi.item.X_POTION,                 1200,    xi.ki.RHAPSODY_IN_CRIMSON },   -- X-Potion
+        -- { xi.item.ETHER,                  650,         xi.ki.RHAPSODY_IN_WHITE },   -- Ether / Temporarily(?) removed by SE June 2021
+        { xi.item.HI_ETHER,                 1300,      xi.ki.RHAPSODY_IN_UMBER },   -- Hi-Ether
+        { xi.item.SUPER_ETHER,              3000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Super Ether
+        { xi.item.ELIXIR,                  15000,      xi.ki.RHAPSODY_IN_AZURE },   -- Elixir
+        { xi.item.ANTIDOTE,                  300,      xi.ki.RHAPSODY_IN_WHITE },   -- Antidote
+        { xi.item.FLASK_OF_EYE_DROPS,       1000,      xi.ki.RHAPSODY_IN_UMBER },   -- Eye Drops
+        { xi.item.FLASK_OF_ECHO_DROPS,       700,      xi.ki.RHAPSODY_IN_UMBER },   -- Echo Drops
+        { xi.item.BOTTLE_OF_MULSUM,          500,      xi.ki.RHAPSODY_IN_WHITE },   -- Mulsum
+        { xi.item.PINCH_OF_PRISM_POWDER,     500,      xi.ki.RHAPSODY_IN_WHITE },   -- Prism Powder
+        { xi.item.POT_OF_SILENT_OIL,         500,      xi.ki.RHAPSODY_IN_WHITE },   -- Silent Oil
+        { xi.item.FLASK_OF_DEODORIZER,       250,      xi.ki.RHAPSODY_IN_WHITE },   -- Deodorizer
+        { xi.item.RERAISER,                 1000,      xi.ki.RHAPSODY_IN_AZURE },   -- Reraiser
+    },
 
-        [curio.ammunition] =
-        {
-            xi.item.STONE_QUIVER,              400,      xi.ki.RHAPSODY_IN_WHITE,   -- Stone Quiver
-            xi.item.BONE_QUIVER,               680,      xi.ki.RHAPSODY_IN_WHITE,   -- Bone Quiver
-            xi.item.IRON_QUIVER,              1200,      xi.ki.RHAPSODY_IN_WHITE,   -- Iron Quiver
-            xi.item.BEETLE_QUIVER,            1350,      xi.ki.RHAPSODY_IN_WHITE,   -- Beetle Quiver
-            xi.item.SILVER_QUIVER,            2040,      xi.ki.RHAPSODY_IN_WHITE,   -- Silver Quiver
-            xi.item.HORN_QUIVER,              2340,      xi.ki.RHAPSODY_IN_WHITE,   -- Horn Quiver
-            xi.item.SLEEP_QUIVER,             3150,      xi.ki.RHAPSODY_IN_UMBER,   -- Sleep Quiver
-            xi.item.SCORPION_QUIVER,          3500,      xi.ki.RHAPSODY_IN_UMBER,   -- Scorpion Quiver
-            xi.item.DEMON_QUIVER,             7000,      xi.ki.RHAPSODY_IN_AZURE,   -- Demon Quiver
-            xi.item.KABURA_QUIVER,            8800,      xi.ki.RHAPSODY_IN_AZURE,   -- Kabura Quiver
-            xi.item.ANTLION_QUIVER,           9900,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Antlion Quiver
-            xi.item.BRONZE_BOLT_QUIVER,        400,      xi.ki.RHAPSODY_IN_WHITE,   -- Bronze Bolt Quiver
-            xi.item.BLIND_BOLT_QUIVER,         800,      xi.ki.RHAPSODY_IN_WHITE,   -- Blind Bolt Quiver
-            xi.item.ACID_BOLT_QUIVER,         1250,      xi.ki.RHAPSODY_IN_WHITE,   -- Acid Bolt Quiver
-            xi.item.SLEEP_BOLT_QUIVER,        1500,      xi.ki.RHAPSODY_IN_WHITE,   -- Sleep Bolt Quiver
-            xi.item.BLOODY_BOLT_QUIVER,       2100,      xi.ki.RHAPSODY_IN_WHITE,   -- Bloody Bolt Quiver
-            xi.item.VENOM_BOLT_QUIVER,        2100,      xi.ki.RHAPSODY_IN_WHITE,   -- Venom Bolt Quiver
-            xi.item.HOLY_BOLT_QUIVER,         2400,      xi.ki.RHAPSODY_IN_WHITE,   -- Holy Bolt Quiver
-            xi.item.MYTHRIL_BOLT_QUIVER,      3500,      xi.ki.RHAPSODY_IN_UMBER,   -- Mythril Bolt Quiver
-            xi.item.DARKSTEEL_BOLT_QUIVER,    5580,      xi.ki.RHAPSODY_IN_AZURE,   -- Darksteel Bolt Quiver
-            xi.item.DARKLING_BOLT_QUIVER,     9460,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Darkling Bolt Quiver
-            xi.item.FUSION_BOLT_QUIVER,       9790,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Fusion Bolt Quiver
-            xi.item.BRONZE_BULLET_POUCH,       400,      xi.ki.RHAPSODY_IN_WHITE,   -- Bronze Bullet Pouch
-            xi.item.BULLET_POUCH,             1920,      xi.ki.RHAPSODY_IN_WHITE,   -- Bullet Pouch
-            xi.item.SPARTAN_BULLET_POUCH,     2400,      xi.ki.RHAPSODY_IN_WHITE,   -- Spartan Bullet Pouch
-            xi.item.IRON_BULLET_POUCH,        4800,      xi.ki.RHAPSODY_IN_UMBER,   -- Iron Bullet Pouch
-            xi.item.SILVER_BULLET_POUCH,      4800,      xi.ki.RHAPSODY_IN_UMBER,   -- Silver Bullet Pouch
-            xi.item.CORSAIR_BULLET_POUCH,     7100,      xi.ki.RHAPSODY_IN_AZURE,   -- Corsair Bullet Pouch
-            xi.item.STEEL_BULLET_POUCH,       7600,      xi.ki.RHAPSODY_IN_AZURE,   -- Steel Bullet Pouch
-            xi.item.DWEOMER_BULLET_POUCH,     9680,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Dweomer Bullet Pouch
-            xi.item.OBERON_BULLET_POUCH,      9900,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Oberon Bullet Pouch
-            xi.item.SHURIKEN_POUCH,           1400,      xi.ki.RHAPSODY_IN_WHITE,   -- Shuriken Pouch
-            xi.item.JUJI_SHURIKEN_POUCH,      2280,      xi.ki.RHAPSODY_IN_WHITE,   -- Juji Shuriken Pouch
-            xi.item.MANJI_SHURIKEN_POUCH,     4640,      xi.ki.RHAPSODY_IN_UMBER,   -- Manji Shuriken Pouch
-            xi.item.FUMA_SHURIKEN_POUCH,      7000,      xi.ki.RHAPSODY_IN_AZURE,   -- Fuma Shuriken Pouch
-            xi.item.IGA_SHURIKEN_POUCH,       9900,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Iga Shuriken Pouch
-        },
+    [xi.shop.curio.ammunition] =
+    {
+        { xi.item.STONE_QUIVER,              400,      xi.ki.RHAPSODY_IN_WHITE },   -- Stone Quiver
+        { xi.item.BONE_QUIVER,               680,      xi.ki.RHAPSODY_IN_WHITE },   -- Bone Quiver
+        { xi.item.IRON_QUIVER,              1200,      xi.ki.RHAPSODY_IN_WHITE },   -- Iron Quiver
+        { xi.item.BEETLE_QUIVER,            1350,      xi.ki.RHAPSODY_IN_WHITE },   -- Beetle Quiver
+        { xi.item.SILVER_QUIVER,            2040,      xi.ki.RHAPSODY_IN_WHITE },   -- Silver Quiver
+        { xi.item.HORN_QUIVER,              2340,      xi.ki.RHAPSODY_IN_WHITE },   -- Horn Quiver
+        { xi.item.SLEEP_QUIVER,             3150,      xi.ki.RHAPSODY_IN_UMBER },   -- Sleep Quiver
+        { xi.item.SCORPION_QUIVER,          3500,      xi.ki.RHAPSODY_IN_UMBER },   -- Scorpion Quiver
+        { xi.item.DEMON_QUIVER,             7000,      xi.ki.RHAPSODY_IN_AZURE },   -- Demon Quiver
+        { xi.item.KABURA_QUIVER,            8800,      xi.ki.RHAPSODY_IN_AZURE },   -- Kabura Quiver
+        { xi.item.ANTLION_QUIVER,           9900,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Antlion Quiver
+        { xi.item.BRONZE_BOLT_QUIVER,        400,      xi.ki.RHAPSODY_IN_WHITE },   -- Bronze Bolt Quiver
+        { xi.item.BLIND_BOLT_QUIVER,         800,      xi.ki.RHAPSODY_IN_WHITE },   -- Blind Bolt Quiver
+        { xi.item.ACID_BOLT_QUIVER,         1250,      xi.ki.RHAPSODY_IN_WHITE },   -- Acid Bolt Quiver
+        { xi.item.SLEEP_BOLT_QUIVER,        1500,      xi.ki.RHAPSODY_IN_WHITE },   -- Sleep Bolt Quiver
+        { xi.item.BLOODY_BOLT_QUIVER,       2100,      xi.ki.RHAPSODY_IN_WHITE },   -- Bloody Bolt Quiver
+        { xi.item.VENOM_BOLT_QUIVER,        2100,      xi.ki.RHAPSODY_IN_WHITE },   -- Venom Bolt Quiver
+        { xi.item.HOLY_BOLT_QUIVER,         2400,      xi.ki.RHAPSODY_IN_WHITE },   -- Holy Bolt Quiver
+        { xi.item.MYTHRIL_BOLT_QUIVER,      3500,      xi.ki.RHAPSODY_IN_UMBER },   -- Mythril Bolt Quiver
+        { xi.item.DARKSTEEL_BOLT_QUIVER,    5580,      xi.ki.RHAPSODY_IN_AZURE },   -- Darksteel Bolt Quiver
+        { xi.item.DARKLING_BOLT_QUIVER,     9460,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Darkling Bolt Quiver
+        { xi.item.FUSION_BOLT_QUIVER,       9790,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Fusion Bolt Quiver
+        { xi.item.BRONZE_BULLET_POUCH,       400,      xi.ki.RHAPSODY_IN_WHITE },   -- Bronze Bullet Pouch
+        { xi.item.BULLET_POUCH,             1920,      xi.ki.RHAPSODY_IN_WHITE },   -- Bullet Pouch
+        { xi.item.SPARTAN_BULLET_POUCH,     2400,      xi.ki.RHAPSODY_IN_WHITE },   -- Spartan Bullet Pouch
+        { xi.item.IRON_BULLET_POUCH,        4800,      xi.ki.RHAPSODY_IN_UMBER },   -- Iron Bullet Pouch
+        { xi.item.SILVER_BULLET_POUCH,      4800,      xi.ki.RHAPSODY_IN_UMBER },   -- Silver Bullet Pouch
+        { xi.item.CORSAIR_BULLET_POUCH,     7100,      xi.ki.RHAPSODY_IN_AZURE },   -- Corsair Bullet Pouch
+        { xi.item.STEEL_BULLET_POUCH,       7600,      xi.ki.RHAPSODY_IN_AZURE },   -- Steel Bullet Pouch
+        { xi.item.DWEOMER_BULLET_POUCH,     9680,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Dweomer Bullet Pouch
+        { xi.item.OBERON_BULLET_POUCH,      9900,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Oberon Bullet Pouch
+        { xi.item.SHURIKEN_POUCH,           1400,      xi.ki.RHAPSODY_IN_WHITE },   -- Shuriken Pouch
+        { xi.item.JUJI_SHURIKEN_POUCH,      2280,      xi.ki.RHAPSODY_IN_WHITE },   -- Juji Shuriken Pouch
+        { xi.item.MANJI_SHURIKEN_POUCH,     4640,      xi.ki.RHAPSODY_IN_UMBER },   -- Manji Shuriken Pouch
+        { xi.item.FUMA_SHURIKEN_POUCH,      7000,      xi.ki.RHAPSODY_IN_AZURE },   -- Fuma Shuriken Pouch
+        { xi.item.IGA_SHURIKEN_POUCH,       9900,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Iga Shuriken Pouch
+    },
 
-        [curio.ninjutsuTools] =
-        {
-            xi.item.TOOLBAG_UCHITAKE,           3000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Uchi)
-            xi.item.TOOLBAG_TSURARA,            3000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Tsurara)
-            xi.item.TOOLBAG_KAWAHORI_OGI,       3000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Kawahori-Ogi)
-            xi.item.TOOLBAG_MAKIBISHI,          3000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Makibishi)
-            xi.item.TOOLBAG_HIRAISHIN,          3000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Hiraishin)
-            xi.item.TOOLBAG_MIZU_DEPPO,         3000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Mizu-Deppo)
-            xi.item.TOOLBAG_SHIHEI,             5000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Shihei)
-            xi.item.TOOLBAG_JUSATSU,            5000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Jusatsu)
-            xi.item.TOOLBAG_KAGINAWA,           5000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Kaginawa)
-            xi.item.TOOLBAG_SAIRUI_RAN,         5000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Sairui-Ran)
-            xi.item.TOOLBAG_KODOKU,             5000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Kodoku)
-            xi.item.TOOLBAG_SHINOBI_TABI,       3000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Shinobi-Tabi)
-            xi.item.TOOLBAG_SANJAKU_TENUGUI,    3000,      xi.ki.RHAPSODY_IN_WHITE,   -- Toolbag (Sanjaku-Tenugui)
-            xi.item.TOOLBAG_SOSHI,              5000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Toolbag (Soshi)
-        },
-        [curio.foodStuffs] =
-        {
-            xi.item.JUG_OF_SELBINA_MILK,           60,      xi.ki.RHAPSODY_IN_WHITE,   -- Selbina Milk
-            xi.item.FLASK_OF_ORANGE_AU_LAIT,      100,      xi.ki.RHAPSODY_IN_WHITE,   -- Orange au Lait
-            xi.item.JUG_OF_ULEGUERAND_MILK,       100,      xi.ki.RHAPSODY_IN_WHITE,   -- Uleguerand Milk
-            xi.item.FLASK_OF_APPLE_AU_LAIT,       300,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Apple au Lait
-            xi.item.FLASK_OF_PEAR_AU_LAIT,        600,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Pear au Lait
-            xi.item.BOTTLE_OF_ORANGE_JUICE,       200,      xi.ki.RHAPSODY_IN_WHITE,   -- Orange Juice
-            xi.item.BOTTLE_OF_MELON_JUICE,       1100,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Melon Juice
-            xi.item.BOTTLE_OF_YAGUDO_DRINK,      2000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Yagudo Drink
-            xi.item.RICE_BALL,                    160,      xi.ki.RHAPSODY_IN_WHITE,   -- Rice Ball
-            xi.item.STRIP_OF_MEAT_JERKY,          120,      xi.ki.RHAPSODY_IN_WHITE,   -- Meat Jerky
-            xi.item.SLICE_OF_GRILLED_HARE,        184,      xi.ki.RHAPSODY_IN_WHITE,   -- Grilled Hare
-            xi.item.MEAT_MITHKABOB,               720,      xi.ki.RHAPSODY_IN_UMBER,   -- Meat Mithkabob
-            -- xi.item.BOILED_CRAB,               550,      xi.ki.RHAPSODY_IN_WHITE,   -- Boiled Crab / Temporarily(?) removed by SE June 2021
-            xi.item.FISH_MITHKABOB,              1080,      xi.ki.RHAPSODY_IN_UMBER,   -- Fish Mithkabob
-            xi.item.COEURL_SUB,                  1500,      xi.ki.RHAPSODY_IN_WHITE,   -- Coeurl Sub
-            xi.item.ROAST_PIPIRA,                 900,      xi.ki.RHAPSODY_IN_WHITE,   -- Roast Pipira
-            xi.item.SLICE_OF_ANCHOVY_PIZZA,       500,      xi.ki.RHAPSODY_IN_AZURE,   -- Anchovy Slice
-            xi.item.SLICE_OF_PEPPERONI_PIZZA,     400,      xi.ki.RHAPSODY_IN_UMBER,   -- Pepperoni Slice
-            xi.item.POT_AUF_FEU,                 3500,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Pot-auf-feu
-            xi.item.JACK_O_LANTERN,              1000,      xi.ki.RHAPSODY_IN_WHITE,   -- Jack-o'-Lantern
-            xi.item.PLATE_OF_BREAM_SUSHI,        5000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Bream Sushi
-            xi.item.PLATE_OF_DORADO_SUSHI,       4000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Dorado Sushi
-            xi.item.PLATE_OF_CRAB_SUSHI,         1500,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Crab Sushi
-            xi.item.CHOCOLATE_CREPE,              500,      xi.ki.RHAPSODY_IN_WHITE,   -- Chocolate Crepe
-            xi.item.BUTTER_CREPE,                1000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Butter Crepe
-            xi.item.APPLE_PIE,                    320,      xi.ki.RHAPSODY_IN_WHITE,   -- Apple Pie
-            xi.item.MELON_PIE,                    800,      xi.ki.RHAPSODY_IN_WHITE,   -- Melon Pie
-            xi.item.PUMPKIN_PIE,                 1200,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Pumpkin Pie
-            xi.item.ROAST_MUSHROOM,               344,      xi.ki.RHAPSODY_IN_WHITE,   -- Roast Mushroom
-            xi.item.ACORN_COOKIE,                  24,      xi.ki.RHAPSODY_IN_WHITE,   -- Acorn Cookie
-            xi.item.GINGER_COOKIE,                 12,      xi.ki.RHAPSODY_IN_AZURE,   -- Ginger Cookie
-            xi.item.SUGAR_RUSK,                  1000,      xi.ki.RHAPSODY_IN_WHITE,   -- Sugar Rusk
-            xi.item.CHOCOLATE_RUSK,              2000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Chocolate Rusk
-            xi.item.CHERRY_MACARON,              1000,      xi.ki.RHAPSODY_IN_WHITE,   -- Cherry Macaron
-            xi.item.COFFEE_MACARON,              2000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Coffee Macaron
-            xi.item.SALTENA,                     1000,      xi.ki.RHAPSODY_IN_WHITE,   -- Saltena
-            xi.item.ELSHENA,                     2000,      xi.ki.RHAPSODY_IN_AZURE,   -- Elshena
-            xi.item.MONTAGNA,                    2500,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Montagna
-            xi.item.STUFFED_PITARU,              1000,      xi.ki.RHAPSODY_IN_WHITE,   -- Stuffed Pitaru
-            xi.item.POULTRY_PITARU,              2000,      xi.ki.RHAPSODY_IN_AZURE,   -- Poultry Pitaru
-            xi.item.SEAFOOD_PITARU,              2500,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Seafood Pitaru
-            xi.item.PIECE_OF_SHIROMOCHI,         3000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Shiromochi
-            xi.item.PIECE_OF_KUSAMOCHI,          3000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Kusamochi
-            xi.item.PIECE_OF_AKAMOCHI,           3000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Akamochi
-            xi.item.BEEF_STEWPOT,               15000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Beef Stewpot
-            xi.item.SERVING_OF_ZARU_SOBA,       15000,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Zaru Soba
-            xi.item.SPICY_CRACKER,                450,    xi.ki.RHAPSODY_IN_CRIMSON,   -- Spicy Cracker
-        },
+    [xi.shop.curio.ninjutsuTools] =
+    {
+        { xi.item.TOOLBAG_UCHITAKE,           3000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Uchi)
+        { xi.item.TOOLBAG_TSURARA,            3000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Tsurara)
+        { xi.item.TOOLBAG_KAWAHORI_OGI,       3000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Kawahori-Ogi)
+        { xi.item.TOOLBAG_MAKIBISHI,          3000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Makibishi)
+        { xi.item.TOOLBAG_HIRAISHIN,          3000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Hiraishin)
+        { xi.item.TOOLBAG_MIZU_DEPPO,         3000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Mizu-Deppo)
+        { xi.item.TOOLBAG_SHIHEI,             5000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Shihei)
+        { xi.item.TOOLBAG_JUSATSU,            5000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Jusatsu)
+        { xi.item.TOOLBAG_KAGINAWA,           5000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Kaginawa)
+        { xi.item.TOOLBAG_SAIRUI_RAN,         5000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Sairui-Ran)
+        { xi.item.TOOLBAG_KODOKU,             5000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Kodoku)
+        { xi.item.TOOLBAG_SHINOBI_TABI,       3000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Shinobi-Tabi)
+        { xi.item.TOOLBAG_SANJAKU_TENUGUI,    3000,      xi.ki.RHAPSODY_IN_WHITE },   -- Toolbag (Sanjaku-Tenugui)
+        { xi.item.TOOLBAG_SOSHI,              5000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Toolbag (Soshi)
+    },
+    [xi.shop.curio.foodStuffs] =
+    {
+        { xi.item.JUG_OF_SELBINA_MILK,           60,      xi.ki.RHAPSODY_IN_WHITE },   -- Selbina Milk
+        { xi.item.FLASK_OF_ORANGE_AU_LAIT,      100,      xi.ki.RHAPSODY_IN_WHITE },   -- Orange au Lait
+        { xi.item.JUG_OF_ULEGUERAND_MILK,       100,      xi.ki.RHAPSODY_IN_WHITE },   -- Uleguerand Milk
+        { xi.item.FLASK_OF_APPLE_AU_LAIT,       300,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Apple au Lait
+        { xi.item.FLASK_OF_PEAR_AU_LAIT,        600,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Pear au Lait
+        { xi.item.BOTTLE_OF_ORANGE_JUICE,       200,      xi.ki.RHAPSODY_IN_WHITE },   -- Orange Juice
+        { xi.item.BOTTLE_OF_MELON_JUICE,       1100,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Melon Juice
+        { xi.item.BOTTLE_OF_YAGUDO_DRINK,      2000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Yagudo Drink
+        { xi.item.RICE_BALL,                    160,      xi.ki.RHAPSODY_IN_WHITE },   -- Rice Ball
+        { xi.item.STRIP_OF_MEAT_JERKY,          120,      xi.ki.RHAPSODY_IN_WHITE },   -- Meat Jerky
+        { xi.item.SLICE_OF_GRILLED_HARE,        184,      xi.ki.RHAPSODY_IN_WHITE },   -- Grilled Hare
+        { xi.item.MEAT_MITHKABOB,               720,      xi.ki.RHAPSODY_IN_UMBER },   -- Meat Mithkabob
+        -- { xi.item.BOILED_CRAB,               550,         xi.ki.RHAPSODY_IN_WHITE },   -- Boiled Crab / Temporarily(?) removed by SE June 2021
+        { xi.item.FISH_MITHKABOB,              1080,      xi.ki.RHAPSODY_IN_UMBER },   -- Fish Mithkabob
+        { xi.item.COEURL_SUB,                  1500,      xi.ki.RHAPSODY_IN_WHITE },   -- Coeurl Sub
+        { xi.item.ROAST_PIPIRA,                 900,      xi.ki.RHAPSODY_IN_WHITE },   -- Roast Pipira
+        { xi.item.SLICE_OF_ANCHOVY_PIZZA,       500,      xi.ki.RHAPSODY_IN_AZURE },   -- Anchovy Slice
+        { xi.item.SLICE_OF_PEPPERONI_PIZZA,     400,      xi.ki.RHAPSODY_IN_UMBER },   -- Pepperoni Slice
+        { xi.item.POT_AUF_FEU,                 3500,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Pot-auf-feu
+        { xi.item.JACK_O_LANTERN,              1000,      xi.ki.RHAPSODY_IN_WHITE },   -- Jack-o'-Lantern
+        { xi.item.PLATE_OF_BREAM_SUSHI,        5000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Bream Sushi
+        { xi.item.PLATE_OF_DORADO_SUSHI,       4000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Dorado Sushi
+        { xi.item.PLATE_OF_CRAB_SUSHI,         1500,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Crab Sushi
+        { xi.item.CHOCOLATE_CREPE,              500,      xi.ki.RHAPSODY_IN_WHITE },   -- Chocolate Crepe
+        { xi.item.BUTTER_CREPE,                1000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Butter Crepe
+        { xi.item.APPLE_PIE,                    320,      xi.ki.RHAPSODY_IN_WHITE },   -- Apple Pie
+        { xi.item.MELON_PIE,                    800,      xi.ki.RHAPSODY_IN_WHITE },   -- Melon Pie
+        { xi.item.PUMPKIN_PIE,                 1200,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Pumpkin Pie
+        { xi.item.ROAST_MUSHROOM,               344,      xi.ki.RHAPSODY_IN_WHITE },   -- Roast Mushroom
+        { xi.item.ACORN_COOKIE,                  24,      xi.ki.RHAPSODY_IN_WHITE },   -- Acorn Cookie
+        { xi.item.GINGER_COOKIE,                 12,      xi.ki.RHAPSODY_IN_AZURE },   -- Ginger Cookie
+        { xi.item.SUGAR_RUSK,                  1000,      xi.ki.RHAPSODY_IN_WHITE },   -- Sugar Rusk
+        { xi.item.CHOCOLATE_RUSK,              2000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Chocolate Rusk
+        { xi.item.CHERRY_MACARON,              1000,      xi.ki.RHAPSODY_IN_WHITE },   -- Cherry Macaron
+        { xi.item.COFFEE_MACARON,              2000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Coffee Macaron
+        { xi.item.SALTENA,                     1000,      xi.ki.RHAPSODY_IN_WHITE },   -- Saltena
+        { xi.item.ELSHENA,                     2000,      xi.ki.RHAPSODY_IN_AZURE },   -- Elshena
+        { xi.item.MONTAGNA,                    2500,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Montagna
+        { xi.item.STUFFED_PITARU,              1000,      xi.ki.RHAPSODY_IN_WHITE },   -- Stuffed Pitaru
+        { xi.item.POULTRY_PITARU,              2000,      xi.ki.RHAPSODY_IN_AZURE },   -- Poultry Pitaru
+        { xi.item.SEAFOOD_PITARU,              2500,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Seafood Pitaru
+        { xi.item.PIECE_OF_SHIROMOCHI,         3000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Shiromochi
+        { xi.item.PIECE_OF_KUSAMOCHI,          3000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Kusamochi
+        { xi.item.PIECE_OF_AKAMOCHI,           3000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Akamochi
+        { xi.item.BEEF_STEWPOT,               15000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Beef Stewpot
+        { xi.item.SERVING_OF_ZARU_SOBA,       15000,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Zaru Soba
+        { xi.item.SPICY_CRACKER,                450,    xi.ki.RHAPSODY_IN_CRIMSON },   -- Spicy Cracker
+    },
 
-        [curio.scrolls] =
-        {
-            xi.item.SCROLL_OF_INSTANT_WARP,       500,      xi.ki.RHAPSODY_IN_WHITE,   -- Instant Warp
-            xi.item.SCROLL_OF_INSTANT_RERAISE,    500,      xi.ki.RHAPSODY_IN_WHITE,   -- Instant Reraise
-            xi.item.SCROLL_OF_INSTANT_RETRACE,    500,      xi.ki.RHAPSODY_IN_AZURE,   -- Instant Retrace
-            xi.item.SCROLL_OF_INSTANT_PROTECT,    500,      xi.ki.RHAPSODY_IN_WHITE,   -- Instant Protect
-            xi.item.SCROLL_OF_INSTANT_SHELL,      500,      xi.ki.RHAPSODY_IN_WHITE,   -- Instant Shell
-            xi.item.SCROLL_OF_INSTANT_STONESKIN,  500,      xi.ki.RHAPSODY_IN_UMBER,   -- Instant Stoneskin
-        },
+    [xi.shop.curio.scrolls] =
+    {
+        { xi.item.SCROLL_OF_INSTANT_WARP,       500,      xi.ki.RHAPSODY_IN_WHITE },   -- Instant Warp
+        { xi.item.SCROLL_OF_INSTANT_RERAISE,    500,      xi.ki.RHAPSODY_IN_WHITE },   -- Instant Reraise
+        { xi.item.SCROLL_OF_INSTANT_RETRACE,    500,      xi.ki.RHAPSODY_IN_AZURE },   -- Instant Retrace
+        { xi.item.SCROLL_OF_INSTANT_PROTECT,    500,      xi.ki.RHAPSODY_IN_WHITE },   -- Instant Protect
+        { xi.item.SCROLL_OF_INSTANT_SHELL,      500,      xi.ki.RHAPSODY_IN_WHITE },   -- Instant Shell
+        { xi.item.SCROLL_OF_INSTANT_STONESKIN,  500,      xi.ki.RHAPSODY_IN_UMBER },   -- Instant Stoneskin
+    },
 
-        [curio.keys] =
-        {
-            xi.item.GHELSBA_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Ghelsba Chest Key
-            xi.item.PALBOROUGH_CHEST_KEY,     2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Palborough Chest Key
-            xi.item.GIDDEUS_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Giddeus Chest Key
-            xi.item.RANPERRE_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Ranperre Chest Key
-            xi.item.DANGRUF_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Dangruf Chest Key
-            xi.item.HORUTOTO_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Horutoto Chest Key
-            xi.item.ORDELLE_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Ordelle Chest Key
-            xi.item.GUSGEN_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Gusgen Chest Key
-            xi.item.SHAKHRAMI_CHEST_KEY,      2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Shakhrami Chest Key
-            xi.item.DAVOI_CHEST_KEY,          2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Davoi Chest Key
-            xi.item.BEADEAUX_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Beadeaux Chest Key
-            xi.item.OZTROJA_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Oztroja Chest Key
-            xi.item.DELKFUTT_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Delkfutt Chest Key
-            xi.item.FEIYIN_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Fei'Yin Chest Key
-            xi.item.ZVAHL_CHEST_KEY,          2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Zvahl Chest Key
-            xi.item.ELDIME_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Eldieme Chest Key
-            xi.item.NEST_CHEST_KEY,           2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Nest Chest Key
-            xi.item.GARLAIGE_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Garlaige Chest Key
-            xi.item.BEADEAUX_COFFER_KEY,      5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Beadeaux Coffer Key
-            xi.item.DAVOI_COFFER_KEY,         5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Davoi Coffer Key
-            xi.item.OZTROJA_COFFER_KEY,       5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Oztroja Coffer Key
-            xi.item.NEST_COFFER_KEY,          5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Nest Coffer Key
-            xi.item.ELDIEME_COFFER_KEY,       5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Eldieme Coffer Key
-            xi.item.GARLAIGE_COFFER_KEY,      5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Garlaige Coffer Key
-            xi.item.ZVAHL_COFFER_KEY,         5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Zvhal Coffer Key
-            xi.item.UGGALEPIH_COFFER_KEY,     5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Uggalepih Coffer Key
-            xi.item.RANCOR_DEN_COFFER_KEY,    5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Den Coffer Key
-            xi.item.KUFTAL_COFFER_KEY,        5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Kuftal Coffer Key
-            xi.item.BOYAHDA_COFFER_KEY,       5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Boyahda Coffer Key
-            xi.item.CAULDRON_COFFER_KEY,      5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Cauldron Coffer Key
-            xi.item.QUICKSAND_COFFER_KEY,     5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Quicksand Coffer Key
-            xi.item.GROTTO_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Grotto Chest Key
-            xi.item.ONZOZO_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Onzozo Chest Key
-            xi.item.TORAIMARI_COFFER_KEY,     5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Toraimarai Coffer Key
-            xi.item.GROTTO_COFFER_KEY,        5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Ru'Aun Coffer Key
-            xi.item.GROTTO_COFFER_KEY,        5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Grotto Coffer Key
-            xi.item.VELUGANNON_COFFER_KEY,    5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Ve'Lugannon Coffer Key
-            xi.item.SACRARIUM_COFFER_KEY,     2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Sacrarium Chest Key
-            xi.item.OLDTON_COFFER_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Oldton Chest Key
-            xi.item.NEWTON_COFFER_KEY,        5000,      xi.ki.RHAPSODY_IN_UMBER,   -- Newton Coffer Key
-            xi.item.PSOXJA_COFFER_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE,   -- Pso'Xja Chest Key
-        }
-    }
+    [xi.shop.curio.keys] =
+    {
+        { xi.item.GHELSBA_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Ghelsba Chest Key
+        { xi.item.PALBOROUGH_CHEST_KEY,     2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Palborough Chest Key
+        { xi.item.GIDDEUS_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Giddeus Chest Key
+        { xi.item.RANPERRE_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Ranperre Chest Key
+        { xi.item.DANGRUF_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Dangruf Chest Key
+        { xi.item.HORUTOTO_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Horutoto Chest Key
+        { xi.item.ORDELLE_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Ordelle Chest Key
+        { xi.item.GUSGEN_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Gusgen Chest Key
+        { xi.item.SHAKHRAMI_CHEST_KEY,      2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Shakhrami Chest Key
+        { xi.item.DAVOI_CHEST_KEY,          2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Davoi Chest Key
+        { xi.item.BEADEAUX_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Beadeaux Chest Key
+        { xi.item.OZTROJA_CHEST_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Oztroja Chest Key
+        { xi.item.DELKFUTT_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Delkfutt Chest Key
+        { xi.item.FEIYIN_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Fei'Yin Chest Key
+        { xi.item.ZVAHL_CHEST_KEY,          2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Zvahl Chest Key
+        { xi.item.ELDIME_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Eldieme Chest Key
+        { xi.item.NEST_CHEST_KEY,           2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Nest Chest Key
+        { xi.item.GARLAIGE_CHEST_KEY,       2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Garlaige Chest Key
+        { xi.item.BEADEAUX_COFFER_KEY,      5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Beadeaux Coffer Key
+        { xi.item.DAVOI_COFFER_KEY,         5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Davoi Coffer Key
+        { xi.item.OZTROJA_COFFER_KEY,       5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Oztroja Coffer Key
+        { xi.item.NEST_COFFER_KEY,          5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Nest Coffer Key
+        { xi.item.ELDIEME_COFFER_KEY,       5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Eldieme Coffer Key
+        { xi.item.GARLAIGE_COFFER_KEY,      5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Garlaige Coffer Key
+        { xi.item.ZVAHL_COFFER_KEY,         5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Zvhal Coffer Key
+        { xi.item.UGGALEPIH_COFFER_KEY,     5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Uggalepih Coffer Key
+        { xi.item.RANCOR_DEN_COFFER_KEY,    5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Den Coffer Key
+        { xi.item.KUFTAL_COFFER_KEY,        5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Kuftal Coffer Key
+        { xi.item.BOYAHDA_COFFER_KEY,       5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Boyahda Coffer Key
+        { xi.item.CAULDRON_COFFER_KEY,      5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Cauldron Coffer Key
+        { xi.item.QUICKSAND_COFFER_KEY,     5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Quicksand Coffer Key
+        { xi.item.GROTTO_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Grotto Chest Key
+        { xi.item.ONZOZO_CHEST_KEY,         2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Onzozo Chest Key
+        { xi.item.TORAIMARI_COFFER_KEY,     5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Toraimarai Coffer Key
+        { xi.item.GROTTO_COFFER_KEY,        5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Ru'Aun Coffer Key
+        { xi.item.GROTTO_COFFER_KEY,        5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Grotto Coffer Key
+        { xi.item.VELUGANNON_COFFER_KEY,    5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Ve'Lugannon Coffer Key
+        { xi.item.SACRARIUM_COFFER_KEY,     2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Sacrarium Chest Key
+        { xi.item.OLDTON_COFFER_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Oldton Chest Key
+        { xi.item.NEWTON_COFFER_KEY,        5000,      xi.ki.RHAPSODY_IN_UMBER },   -- Newton Coffer Key
+        { xi.item.PSOXJA_COFFER_KEY,        2500,      xi.ki.RHAPSODY_IN_WHITE },   -- Pso'Xja Chest Key
+    },
 }
