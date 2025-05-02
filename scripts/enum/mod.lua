@@ -471,6 +471,8 @@ xi.mod =
     AUGMENTS_IMPETUS                = 1097, -- see https://www.bg-wiki.com/ffxi/Impetus, adds Crit Hit Damage & Accuracy for Impetus
 
     -- Black Mage
+    ENHANCES_ELEMENTAL_SEAL         = 1149, -- Bonus magic damage when using Elemental Seal (percent)
+    ELEMENTAL_DEBUFF_EFFECT         = 1150, -- Increase stat reduction by N, and DoT by N/2 HP per tick
 
     -- Paladin
     ENHANCES_CHIVALRY               = 1061, -- Enhances "Chivalry" effect (increases the base TP modifier by the provided value / 100, e.g. mod value 5 = +0.05)
@@ -516,6 +518,7 @@ xi.mod =
 
     -- Ninja
     ENHANCES_SANGE                  = 1091, -- 1 = +1 attack for Daken during Sange per Sange merit (i.e. 20 with 5 merits = +100 attack during Sange)
+    ENHANCES_FUTAE                  = 1148, -- Adds to the +50% bonus damage to elemental ninjutsu provided by Futae (percent)
 
     -- Dragoon
     WYVERN_LVL_BONUS                = 1043, -- Wyvern: Lv.+ (Increases wyvern's base level above 99)
@@ -1049,9 +1052,6 @@ xi.mod =
     PARRY_HP_RECOVERY = 1135, -- Recover <Mod Value> HP on successful parry.
 
     -- TODO: These mods are not yet implemented.
-    ENHANCES_FUTAE                  = 1148, -- TODO: Adds to the +50% bonus damage to elemental ninjutsu provided by Futae (percent)
-    ENHANCES_ELEMENTAL_SEAL         = 1149, -- TODO: Bonus magic damage when using Elemental Seal (percent)
-    ELEMENTAL_DEBUFF_EFFECT         = 1150, -- TODO: Increase stat reduction by +N, and DoT by N/2 HP per tick
     ENF_MAG_DURATION                = 1151, -- TODO: Increase enfeebling spell duration (percent)
     REWARD_RECAST                   = 1152, -- TODO: Reduces Reward recast time (seconds)
     AUGMENTS_ABSORB_TP              = 1153, -- TODO: Increases absorb-TP potency, stacks with AUGMENTS_ABSORB
