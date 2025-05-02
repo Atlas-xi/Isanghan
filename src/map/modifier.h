@@ -432,9 +432,11 @@ enum class Mod
     REGEN_BONUS      = 989, // Increases the amount of HP restored by Regen
 
     // Black Mage
-    CLEAR_MIND             = 295,  // Used in conjunction with HEALMP to increase amount between tics
-    CONSERVE_MP            = 296,  // Percent chance
-    ELEMENTAL_MAGIC_RECAST = 1146, // Recast time for elemental magic spells (percent, usually negative)
+    CLEAR_MIND              = 295,  // Used in conjunction with HEALMP to increase amount between tics
+    CONSERVE_MP             = 296,  // Percent chance
+    ELEMENTAL_MAGIC_RECAST  = 1146, // Recast time for elemental magic spells (percent, usually negative)
+    ENHANCES_ELEMENTAL_SEAL = 1149, // Bonus magic damage when using Elemental Seal (percent)
+    ELEMENTAL_DEBUFF_EFFECT = 1150, // Increase stat reduction by N, and DoT by N/2 HP per tick
 
     // Red Mage
     BLINK             = 299, // Tracks blink shadows
@@ -578,6 +580,7 @@ enum class Mod
     DAKEN                = 911, // chance to throw a shuriken without consuming it
     NINJUTSU_DURATION    = 1000,
     ENHANCES_SANGE       = 1091, // 1 = +1 attack for Daken during Sange per Sange merit (i.e. 20 with 5 merits = +100 attack during Sange)
+    ENHANCES_FUTAE       = 1148, // Adds to the +50% bonus damage to elemental ninjutsu provided by Futae (percent)
 
     // Dragoon
     ANCIENT_CIRCLE_DURATION    = 859,  // Ancient Circle extended duration in seconds
@@ -1085,12 +1088,9 @@ enum class Mod
     PARRY_HP_RECOVERY = 1135, // Recover <Mod Value> HP on successful parry.
 
     // TODO: These mods are not yet implemented.
-    ENHANCES_FUTAE          = 1148, // TODO: Adds to the +50% bonus damage to elemental ninjutsu provided by Futae (percent)
-    ENHANCES_ELEMENTAL_SEAL = 1149, // TODO: Bonus magic damage when using Elemental Seal (percent)
-    ELEMENTAL_DEBUFF_EFFECT = 1150, // TODO: Increase stat reduction by +N, and DoT by N/2 HP per tick
-    ENF_MAG_DURATION        = 1151, // TODO: Increase enfeebling spell duraiton (percent)
-    REWARD_RECAST           = 1152, // TODO: Reward recast time reduction (seconds)
-    AUGMENTS_ABSORB_TP      = 1153, // TODO: Increases absorb-TP potency, stacks with AUGMENTS_ABSORB
+    ENF_MAG_DURATION   = 1151, // TODO: Increase enfeebling spell duration (percent)
+    REWARD_RECAST      = 1152, // TODO: Reward recast time reduction (seconds)
+    AUGMENTS_ABSORB_TP = 1153, // TODO: Increases absorb-TP potency, stacks with AUGMENTS_ABSORB
 
     // IF YOU ADD ANY NEW MODIFIER HERE, ADD IT IN scripts/enum/mod.lua ASWELL!
 
