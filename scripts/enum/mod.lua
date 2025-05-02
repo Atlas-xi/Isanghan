@@ -470,6 +470,8 @@ xi.mod =
     ADDITIVE_GUARD                  = 1092, -- Additive % bonus to final Guard rate (adds after clamp)
     AUGMENTS_IMPETUS                = 1097, -- see https://www.bg-wiki.com/ffxi/Impetus, adds Crit Hit Damage & Accuracy for Impetus
 
+    -- Black Mage
+
     -- Paladin
     ENHANCES_CHIVALRY               = 1061, -- Enhances "Chivalry" effect (increases the base TP modifier by the provided value / 100, e.g. mod value 5 = +0.05)
     ENHANCES_DIVINE_EMBLEM          = 1062, -- Enhances "Divine Emblem" effect/"Divine Emblem" + (increases the ability's special enmity bonus by the provided value)
@@ -499,6 +501,9 @@ xi.mod =
     ENHANCES_DIABOLIC_EYE           = 275,  -- Diabolic Eye duration + "modifier-value" seconds per Diabolic Eye merit.
     ENHANCES_NETHER_VOID            = 1083, -- Enhances "Nether Void" effect (Increases the potency of the next Absorb or Drain Dark Magic by <value>%
     ENHANCES_MUTED_SOUL             = 1084, -- Enhances "Muted Soul" effect (Adds 3% Zanshin rate per MUTED_SOUL merit level)
+    ENHANCES_ABSORB_EFFECTS         = 1136, -- Absorb Spell duration +x seconds (Enhances "Absorb" effects)
+    AUGMENTS_ABSORB                 = 1137, -- Non-Liberator Absorb Spell potency +x% (Augments "Absorb" effects)
+    ABSORB_EFFECT_DURATION          = 1138, -- Absorb Spell duration +% ("Absorb" effect duration +x%)
 
     -- Beastmaster
     TANDEM_STRIKE_POWER             = 271,  -- Grants a bonus to your and your pet's accuracy and magic accuracy when you and your pet are attacking the same target.
@@ -525,6 +530,11 @@ xi.mod =
 
     -- Puppetmaster
     AUTOMATON_LVL_BONUS             = 1044, -- Automaton: Lv. (Increases automaton's base level above 99)
+
+    -- Blue Mage
+    ENHANCES_BURST_AFFINITY         = 1139, -- Increases WSC bonus on spells cast with Burst Affinity (percent)
+    ENHANCES_CHAIN_AFFINITY         = 1140, -- TODO: Increases WSC bonus on spells cast with Chain Affinity (base damage +)
+    BLUE_MAGIC_RECAST               = 1147, -- Recast time for blue magic spells (percent, usually negative)
 
     -- Geomancer
     FULL_CIRCLE                     = 1025, -- Increases the initial multiplier on MP returned via Full Circle
@@ -1038,13 +1048,13 @@ xi.mod =
 
     PARRY_HP_RECOVERY = 1135, -- Recover <Mod Value> HP on successful parry.
 
-    ENHANCES_ABSORB_EFFECTS = 1136, -- Absorb Spell duration +x seconds (Enhances "Absorb" effects)
-    AUGMENTS_ABSORB         = 1337, -- Non-Liberator Absorb Spell potency +x% (Augments "Absorb" effects)
-    ABSORB_EFFECT_DURATION  = 1138, -- Absorb Spell duration +% ("Absorb" effect duration +x%)
-
-    ENHANCES_BURST_AFFINITY = 1139, -- Increases WSC bonus on spells cast with Burst Affinity (percent)
-    ENHANCES_CHAIN_AFFINITY = 1140, -- TODO: Increases WSC bonus on spells cast with Chain Affinity (base damage +)
-    BLUE_MAGIC_RECAST       = 1147, -- Recast time for blue magic spells (percent, usually negative)
+    -- TODO: These mods are not yet implemented.
+    ENHANCES_FUTAE                  = 1148, -- TODO: Adds to the +50% bonus damage to elemental ninjutsu provided by Futae (percent)
+    ENHANCES_ELEMENTAL_SEAL         = 1149, -- TODO: Bonus magic damage when using Elemental Seal (percent)
+    ELEMENTAL_DEBUFF_EFFECT         = 1150, -- TODO: Increase stat reduction by +N, and DoT by N/2 HP per tick
+    ENF_MAG_DURATION                = 1151, -- TODO: Increase enfeebling spell duration (percent)
+    REWARD_RECAST                   = 1152, -- TODO: Reduces Reward recast time (seconds)
+    AUGMENTS_ABSORB_TP              = 1153, -- TODO: Increases absorb-TP potency, stacks with AUGMENTS_ABSORB
 
     -- IF YOU ADD ANY NEW MODIFIER HERE, ADD IT IN src/map/modifier.h ASWELL!
 
