@@ -485,7 +485,7 @@ xi.znm.sanraku.handleTradeWithPlate = function(player, npc, item)
 end
 
 xi.znm.sanraku.platesTradedToday = function(player)
-    local currentDay = VanadielYear() * 360 + VanadielDayOfTheYear()
+    local currentDay = VanadielUniqueDay()
     local storedDay  = xi.znm.playerTradingDay(player)
 
     if currentDay ~= storedDay then
@@ -666,7 +666,7 @@ end
 
 xi.znm.sanraku.handleCompletedTradeWithPlate = function(player)
     player:tradeComplete()
-    xi.znm.setPlayerTradingDay(player, VanadielYear() * 360 + VanadielDayOfTheYear())
+    xi.znm.setPlayerTradingDay(player, VanadielUniqueDay())
     xi.znm.incrementTradedPlates(player)
 
     local zeniValue = xi.znm.sanraku.tradedPlateValue(player)
