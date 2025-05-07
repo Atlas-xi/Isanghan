@@ -44,6 +44,7 @@
 #include "instance.h"
 #include "ipc_client.h"
 #include "item_container.h"
+#include "items.h"
 #include "latent_effect_container.h"
 #include "linkshell.h"
 #include "map_server.h"
@@ -4696,7 +4697,7 @@ bool CLuaBaseEntity::addLinkpearl(std::string const& lsname, bool equip)
     return false;
 }
 
-auto CLuaBaseEntity::addSoulPlate(std::string const& name, uint16 mobFamily, uint8 zeni, uint16 skillIndex, uint8 fp) -> CItem*
+auto CLuaBaseEntity::addSoulPlate(std::string const& name, uint32 interestData, uint8 zeni, uint16 skillIndex, uint8 fp) -> CItem*
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -4712,7 +4713,7 @@ auto CLuaBaseEntity::addSoulPlate(std::string const& name, uint16 mobFamily, uin
         PChar->pushPacket<CInventoryFinishPacket>();
 
         // Used Soul Plate
-        CItem* PItem = itemutils::GetItem(2477);
+        CItem* PItem = itemutils::GetItem(ITEMID::SOUL_PLATE);
 
         if (PItem == nullptr)
         {
@@ -4721,7 +4722,7 @@ auto CLuaBaseEntity::addSoulPlate(std::string const& name, uint16 mobFamily, uin
         }
 
         PItem->setQuantity(1);
-        PItem->setSoulPlateData(name, mobFamily, zeni, skillIndex, fp);
+        PItem->setSoulPlateData(name, interestData, zeni, skillIndex, fp);
         auto SlotID = charutils::AddItem(PChar, LOC_INVENTORY, PItem, true);
         if (SlotID == ERROR_SLOTID)
         {
@@ -13123,21 +13124,16 @@ void CLuaBaseEntity::updateClaim(sol::object const& entity)
  *  Notes   :
  ************************************************************************/
 
-bool CLuaBaseEntity::hasClaim(CBattleEntity* PTarget)
+bool CLuaBaseEntity::hasClaim(CLuaBaseEntity* PTarget)
 {
-    if (m_PBaseEntity->objtype == TYPE_NPC)
+    auto* PBattleEntity = dynamic_cast<CBattleEntity*>(m_PBaseEntity);
+    if (!PBattleEntity)
     {
         ShowWarning("Attempting to check claim for invalid entity type (%s).", m_PBaseEntity->getName());
         return false;
     }
 
-    if (PTarget->objtype == TYPE_NPC)
-    {
-        ShowWarning("Attempting to check claim for invalid target type (%s).", PTarget->getName());
-        return false;
-    }
-
-    return battleutils::HasClaim(dynamic_cast<CBattleEntity*>(m_PBaseEntity), PTarget);
+    return battleutils::HasClaim(dynamic_cast<CBattleEntity*>(m_PBaseEntity), PBattleEntity);
 }
 
 /************************************************************************
