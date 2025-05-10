@@ -316,6 +316,7 @@ enum class SPECEFFECT : uint8
 {
     NONE         = 0x00,
     BLOOD        = 0x02,
+    SELFAOE_MISS = 0x04,
     HIT          = 0x10,
     RAISE        = 0x11,
     RECOIL       = 0x20,
