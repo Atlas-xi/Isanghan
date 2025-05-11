@@ -16073,8 +16073,8 @@ bool CLuaBaseEntity::hasAttachment(uint16 itemID)
 
 /************************************************************************
  *  Function: getAutomatonName()
- *  Purpose : Returns the string name of the automation pet
- *  Example : local name = pet:getAutomatonName()
+ *  Purpose : Returns the string name of the player's automaton
+ *  Example : local name = player:getAutomatonName()
  *  Notes   :
  ************************************************************************/
 
@@ -16088,7 +16088,7 @@ auto CLuaBaseEntity::getAutomatonName() -> std::string
 
     const auto rset = db::preparedStmt("SELECT name FROM "
                                        "char_pet LEFT JOIN pet_name ON automatonid = id "
-                                       "WHERE charid = %u LIMIT 1",
+                                       "WHERE charid = ? LIMIT 1",
                                        m_PBaseEntity->id);
 
     if (rset && rset->rowsCount() && rset->next())
