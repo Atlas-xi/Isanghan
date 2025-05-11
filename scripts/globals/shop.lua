@@ -12,7 +12,6 @@ xi.shop =
     -- stock cuts off after 16 items. if you add more, extras will not display
     -- stock is of form { itemId1, price1, itemId2, price2, ... }
     -- log is a fame area from xi.fameArea
-    -- TODO update all usage of this function to define stock as a properly-indexed table: for _, stockItem in ipairs(stock) do
     general = function(player, stock, log)
         local priceMultiplier = 1
 
@@ -22,10 +21,10 @@ xi.shop =
             log = -1
         end
 
-        player:createShop(#stock / 2, log)
+        player:createShop(#stock, log)
 
-        for i = 1, #stock, 2 do
-            player:addShopItem(stock[i], stock[i + 1] * priceMultiplier)
+        for _, stockItem in ipairs(stock) do
+            player:addShopItem(stockItem[1], stockItem[2] * priceMultiplier)
         end
 
         player:sendMenu(xi.menuType.SHOP)
@@ -86,14 +85,13 @@ xi.shop =
     nation = function(player, stock, nation)
         local rank = GetNationRank(nation)
         local newStock = {}
-        for i = 1, #stock, 3 do
+        for _, stockItem in ipairs(stock) do
             if
-                (stock[i + 2] == 1 and player:getNation() == nation and rank == 1) or
-                (stock[i + 2] == 2 and rank <= 2) or
-                (stock[i + 2] == 3)
+                (stockItem[3] == 1 and player:getNation() == nation and rank == 1) or
+                (stockItem[3] == 2 and rank <= 2) or
+                (stockItem[3] == 3)
             then
-                table.insert(newStock, stock[i])
-                table.insert(newStock, stock[i + 1])
+                table.insert(newStock, { stockItem[1], stockItem[2] })
             end
         end
 
@@ -104,11 +102,11 @@ xi.shop =
     outpost = function(player)
         local stock =
         {
-            xi.item.ANTIDOTE,               316, -- Antidote
-            xi.item.FLASK_OF_ECHO_DROPS,    800, -- Echo Drops
-            xi.item.ETHER,                  4832, -- Ether
-            xi.item.FLASK_OF_EYE_DROPS,     2595, -- Eye Drops
-            xi.item.POTION,                 910, -- Potion
+            { xi.item.ANTIDOTE,            316, },  -- Antidote
+            { xi.item.FLASK_OF_ECHO_DROPS, 800, },  -- Echo Drops
+            { xi.item.ETHER,               4832, }, -- Ether
+            { xi.item.FLASK_OF_EYE_DROPS,  2595, }, -- Eye Drops
+            { xi.item.POTION,              910, },  -- Potion
         }
         xi.shop.general(player, stock)
     end,
@@ -117,20 +115,20 @@ xi.shop =
     celebratory = function(player)
         local stock =
         {
-            xi.item.CRACKER,                 30, -- Cracker
-            xi.item.TWINKLE_SHOWER,          30, -- Twinkle Shower
-            xi.item.POPSTAR,                 60, -- Popstar
-            xi.item.BRILLIANT_SNOW,          60, -- Brilliant Snow
-            xi.item.OUKA_RANMAN,             30, -- Ouka Ranman
-            xi.item.LITTLE_COMET,            30, -- Little Comet
-            xi.item.POPPER,                 650, -- Popper
-            xi.item.WEDDING_BELL,          1000, -- Wedding Bell
-            xi.item.SERENE_SERINETTE,      6000, -- Serene Serinette
-            xi.item.JOYOUS_SERINETTE,      6000, -- Joyous Serinette
-            xi.item.BOTTLE_OF_GRAPE_JUICE, 1116, -- Grape Juice
-            xi.item.INFERNO_CRYSTAL,       3000, -- Inferno Crystal
-            xi.item.CYCLONE_CRYSTAL,       3000, -- Cyclone Crystal
-            xi.item.TERRA_CRYSTAL,         3000, -- Terra Crystal
+            { xi.item.CRACKER,                 30, }, -- Cracker
+            { xi.item.TWINKLE_SHOWER,          30, }, -- Twinkle Shower
+            { xi.item.POPSTAR,                 60, }, -- Popstar
+            { xi.item.BRILLIANT_SNOW,          60, }, -- Brilliant Snow
+            { xi.item.OUKA_RANMAN,             30, }, -- Ouka Ranman
+            { xi.item.LITTLE_COMET,            30, }, -- Little Comet
+            { xi.item.POPPER,                 650, }, -- Popper
+            { xi.item.WEDDING_BELL,          1000, }, -- Wedding Bell
+            { xi.item.SERENE_SERINETTE,      6000, }, -- Serene Serinette
+            { xi.item.JOYOUS_SERINETTE,      6000, }, -- Joyous Serinette
+            { xi.item.BOTTLE_OF_GRAPE_JUICE, 1116, }, -- Grape Juice
+            { xi.item.INFERNO_CRYSTAL,       3000, }, -- Inferno Crystal
+            { xi.item.CYCLONE_CRYSTAL,       3000, }, -- Cyclone Crystal
+            { xi.item.TERRA_CRYSTAL,         3000, }, -- Terra Crystal
         }
         xi.shop.general(player, stock)
     end,
