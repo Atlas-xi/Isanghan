@@ -33,8 +33,14 @@ mission.sections =
         [xi.zone.LOWER_DELKFUTTS_TOWER] =
         {
             onZoneIn = function(player, prevZone)
-                if not mission:isVarBitsSet(player, 'Option', 1) then
-                    return 15
+                local previousZone = player:getPreviousZone()
+                if
+                    previousZone == xi.zone.QUFIM_ISLAND and
+                    not mission:isVarBitsSet(player, 'Option', 1)
+                then
+                    return 15 -- Optional cutscene. Only triggers from qufim entrance.
+                elseif previousZone == xi.zone.MIDDLE_DELKFUTTS_TOWER then
+                    return 14 -- Ensure regular entering CS plays.
                 end
             end,
 
@@ -79,6 +85,8 @@ mission.sections =
                     return 0 -- Pre-Battle.
                 elseif player:getMissionStatus(mission.areaId) == 1 then
                     return 17 -- Post-Battle. Mission complete event.
+                elseif player:getPreviousZone() == xi.zone.UPPER_DELKFUTTS_TOWER then
+                    return 7 -- Ensure regular entering CS plays.
                 end
             end,
 
