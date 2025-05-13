@@ -2134,7 +2134,7 @@ void CBattleEntity::OnMobSkillFinished(CMobSkillState& state, action_t& action)
     uint16 targets  = static_cast<uint16>(PAI->TargetFind->m_targets.size());
     auto   skipSelf = false;
 
-    if ((PSkill->getValidTargets() & TARGET_MOB_AND_PLAYER) && (PSkill->getValidTargets() & TARGET_SELF))
+    if ((PSkill->getValidTargets() & TARGET_ANY_ALLEGIANCE) && (PSkill->getValidTargets() & TARGET_SELF))
     {
         // This ability targets self for aoe skills (such as Frozen Mist)
         // Should be impossible for self to not be in target list, but just in case
@@ -2152,6 +2152,7 @@ void CBattleEntity::OnMobSkillFinished(CMobSkillState& state, action_t& action)
         actionList.ActionTargetID = id;
 
         actionTarget_t& actionTarget = actionList.getNewActionTarget();
+        actionTarget.messageID       = 0;
 
         if (skipSelf)
         {
@@ -2159,7 +2160,6 @@ void CBattleEntity::OnMobSkillFinished(CMobSkillState& state, action_t& action)
             // And it found no valid targets in range, the skill and animation should still trigger
             // action.actiontype unchanged
             actionTarget.animation  = PSkill->getAnimationID();
-            actionTarget.messageID  = 0;
             actionTarget.reaction   = REACTION::MISS | REACTION::HIT | REACTION::GUARDED;
             actionTarget.speceffect = SPECEFFECT::SELFAOE_MISS;
         }
@@ -2168,7 +2168,6 @@ void CBattleEntity::OnMobSkillFinished(CMobSkillState& state, action_t& action)
             action.actiontype      = ACTION_MOBABILITY_INTERRUPT;
             action.actionid        = 28787; // Some hardcoded magic for interrupts
             actionTarget.animation = 0x1FC; // Hardcoded magic sent from the server
-            actionTarget.messageID = 0;
             actionTarget.reaction  = REACTION::ABILITY | REACTION::HIT;
         }
 

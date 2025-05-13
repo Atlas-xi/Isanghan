@@ -427,7 +427,7 @@ enum TARGETTYPE : uint16
     TARGET_PET                     = 0x0100,
     TARGET_PLAYER_PARTY_ENTRUST    = 0x0200,
     TARGET_IGNORE_BATTLEID         = 0x0400, // Can hit targets that do not have the same battle ID
-    TARGET_MOB_AND_PLAYER          = 0x0800, // Can hit targets from any allegiance simultaneously.
+    TARGET_ANY_ALLEGIANCE          = 0x0800, // Can hit targets from any allegiance simultaneously. To be used with other flags above and only makes sense for non-single-target skills
 };
 DECLARE_FORMAT_AS_UNDERLYING(TARGETTYPE);
 

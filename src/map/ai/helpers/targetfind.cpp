@@ -148,7 +148,7 @@ void CTargetFind::findWithinArea(CBattleEntity* PTarget, AOE_RADIUS radiusType, 
     else
     {
         // handle this as a mob
-        if (m_targetFlags & TARGET_MOB_AND_PLAYER)
+        if (m_targetFlags & TARGET_ANY_ALLEGIANCE)
         {
             m_findType = FIND_TYPE::MONSTER_PLAYER;
             if ((m_targetFlags & TARGET_SELF) && m_PBattleEntity->GetBattleTarget())
@@ -470,19 +470,19 @@ bool CTargetFind::validEntity(CBattleEntity* PTarget)
     }
 
     // short-circuit allegiance checks for aoe skills/abilities/spells that can hit players and mobs simultaneously
-    if (m_targetFlags & TARGET_MOB_AND_PLAYER)
+    if (m_targetFlags & TARGET_ANY_ALLEGIANCE)
     {
         if (m_targetFlags & TARGET_SELF)
         {
             if (m_PBattleEntity->allegiance == PTarget->allegiance)
             {
-                // TARGET_MOB_AND_PLAYER with TARGET_SELF means it should behave like TARGET_ENEMY
+                // TARGET_ANY_ALLEGIANCE with TARGET_SELF means it should behave like TARGET_ENEMY
                 return false;
             }
         }
         else if (m_PBattleEntity == PTarget)
         {
-            // Don't erroneously include self when using TARGET_MOB_AND_PLAYER
+            // Don't erroneously include self when using TARGET_ANY_ALLEGIANCE
             return false;
         }
     }

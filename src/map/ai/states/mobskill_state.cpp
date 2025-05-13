@@ -80,7 +80,7 @@ CMobSkillState::CMobSkillState(CBattleEntity* PEntity, uint16 targid, uint16 wsi
         actionTarget.param      = m_PSkill->getID();
         actionTarget.messageID  = 43;
 
-        if ((m_PSkill->getValidTargets() & TARGET_MOB_AND_PLAYER) && (m_PSkill->getValidTargets() & TARGET_SELF))
+        if ((m_PSkill->getValidTargets() & TARGET_ANY_ALLEGIANCE) && (m_PSkill->getValidTargets() & TARGET_SELF))
         {
             // This ability targets self for aoe skills (such as Frozen Mist)
             action.actiontype         = ACTION_WEAPONSKILL_START;
