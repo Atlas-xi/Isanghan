@@ -7169,6 +7169,10 @@ INSERT INTO `mob_pools` VALUES (7086,'Hrungnir_clone','Hrungnir',135,0x0000B0010
 INSERT INTO `mob_pools` VALUES (7087,'Alexander_WTC','Alexander',33,0x00002A0700000000000000000000000000000000,7,7,11,240,100,0,1,1,0,18,0,0,1,0,0,0,546,0,0,784,33);
 INSERT INTO `mob_pools` VALUES (7088,'Alexander_Image','Alexander_Image',33,0x00002B0700000000000000000000000000000000,7,7,11,240,100,0,1,1,0,26,0,0,1,1665,16,0,547,0,0,0,33);
 
+-- Beadeaux Quadav Quest NMs
+INSERT INTO `mob_pools` VALUES (7089,'Magnes_Quadav_NM','Magnes_Quadav_NM',202,0x0000950200000000000000000000000000000000,4,4,5,265,100,0,1,0,1,2,0,0,113,131,0,0,2,0,0,202,202);
+INSERT INTO `mob_pools` VALUES (7090,'Nickel_Quadav_NM','Nickel_Quadav_NM',202,0x00008B0200000000000000000000000000000000,7,7,3,265,100,0,1,0,1,2,0,0,1,131,0,0,4,0,0,202,202);
+
 -- ------------------------------------------------------------
 -- Start of Ambuscade section
 -- NOTE: The mobs are changed every update in the DATs, so using out-of-date
