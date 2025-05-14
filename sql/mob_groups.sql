@@ -345,10 +345,10 @@ INSERT INTO `mob_groups` VALUES (59,5723,7,'Muuts_Sacrifice',0,128,0,0,0,0,0,0);
 -- ------------------------------------------------------------
 
 INSERT INTO `mob_groups` VALUES (1,3601,8,'Shikaree_Z',0,128,0,2000,0,50,53,0);
-INSERT INTO `mob_groups` VALUES (2,3600,8,'Shikaree_Y',0,128,0,2000,0,50,53,0);
-INSERT INTO `mob_groups` VALUES (3,3598,8,'Shikaree_X',0,128,0,2000,0,50,53,0);
+INSERT INTO `mob_groups` VALUES (2,3600,8,'Shikaree_Y',0,128,0,3900,2000,74,74,0);
+INSERT INTO `mob_groups` VALUES (3,3598,8,'Shikaree_X',0,128,0,4100,0,74,74,0);
 INSERT INTO `mob_groups` VALUES (4,3602,8,'Shikaree_Zs_Wyvern',0,128,0,900,100,48,50,0);
-INSERT INTO `mob_groups` VALUES (5,3599,8,'Shikaree_Xs_Rabbit',0,128,0,900,0,48,50,0);
+INSERT INTO `mob_groups` VALUES (5,3599,8,'Shikaree_Xs_Rabbit',0,128,0,4500,0,73,74,0);
 INSERT INTO `mob_groups` VALUES (6,4046,8,'Tuchulcha',0,128,0,0,0,80,80,0);
 INSERT INTO `mob_groups` VALUES (7,3827,8,'Swift_Hunter',0,128,0,0,0,75,75,0);
 INSERT INTO `mob_groups` VALUES (8,3613,8,'Shrewd_Hunter',0,128,0,0,0,75,75,0);
