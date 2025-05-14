@@ -5,12 +5,11 @@ xi = xi or {}
 xi.mmm = xi.mmm or {}
 -----------------------------------
 -- Char Vars used in MMM:
--- '[MMM]Tabula'          -- Set on (successful) Tabula trade. Theory: Used along Voucher for Layout (and objective by extension) and difficulty.
--- '[MMM]Voucher'         -- Set on (successful) Tabula trade. Theory: Used along Voucher for Layout (and objective by extension) and difficulty.
--- '[MMM]Runes'           -- Set on (successful) Tabula trade. Verious effects.
--- '[MMM]exitTime'        -- Set on maze exit. Could be set in "Evergloom Hollow" onZoneOut directly. Used for CC points.
--- '[MMM]reEnterCooldown' -- Set on maze exit. Could be set in "Evergloom Hollow" onZoneOut directly. Used for CC points.
-
+-- '[MMM]Tabula'         -- Set on (successful) Tabula trade. Theory: Used along Voucher for Layout (and objective by extension) and difficulty.
+-- '[MMM]Voucher'        -- Set on (successful) Tabula trade. Theory: Used along Voucher for Layout (and objective by extension) and difficulty.
+-- '[MMM]Runes'          -- Set on (successful) Tabula trade. Verious effects.
+-- '[MMM]exitTime'       -- Set on maze exit. Could be set in "Evergloom Hollow" onZoneOut directly. Used for CC points.
+-- '[MMM]CompletedMazes' -- Set on successful maze completion. Tracks how many times you didn't fail.Used for title purchuase.
 -----------------------------------
 
 xi.mmm.calculateCCPoints = function(player)
