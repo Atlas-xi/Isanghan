@@ -1,5 +1,5 @@
 -----------------------------------
--- Moblin Maze Monglers: Shop
+-- Moblin Maze Mongers: Shop
 -----------------------------------
 require('scripts/globals/npc_util')
 -----------------------------------

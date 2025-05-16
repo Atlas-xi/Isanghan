@@ -1,5 +1,5 @@
 -----------------------------------
--- Moblin Maze Monglers: Tutorial (Goldagrik)
+-- Moblin Maze Mongers: Tutorial (Goldagrik)
 -----------------------------------
 require('scripts/globals/npc_util')
 -----------------------------------
@@ -7,7 +7,9 @@ xi = xi or {}
 xi.mmm = xi.mmm or {}
 
 xi.mmm.tutorialOnTrigger = function(player)
-    if player:hasKeyItem(xi.ki.TATTERED_MAZE_MONGER_POUCH) then
+    if xi.settings.main.ENABLE_MMM ~= 1 then
+        player:printToPlayer('This content is disabled.', xi.msg.channel.SYSTEM_3)
+    elseif player:hasKeyItem(xi.ki.TATTERED_MAZE_MONGER_POUCH) then
         local ccPoints = xi.mmm.calculateCCPoints(player)
 
         player:startEvent(20006, ccPoints)

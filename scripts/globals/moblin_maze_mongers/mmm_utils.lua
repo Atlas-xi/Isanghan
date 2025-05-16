@@ -1,5 +1,5 @@
 -----------------------------------
--- Moblin Maze Monglers: Utilities
+-- Moblin Maze Mongers: Utilities
 -----------------------------------
 xi = xi or {}
 xi.mmm = xi.mmm or {}
