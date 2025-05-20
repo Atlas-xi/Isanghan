@@ -2,8 +2,6 @@
 -- Area: Southern_San_dOria
 --  NPC: Valeriano
 -----------------------------------
-local ID = zones[xi.zone.SOUTHERN_SAN_DORIA]
------------------------------------
 ---@type TNpcEntity
 local entity = {}
 
@@ -25,7 +23,7 @@ entity.onTrigger = function(player, npc)
         { xi.item.SCROLL_OF_MAGES_BALLAD_III, 140039, },
     }
 
-    player:showText(npc, ID.text.VALERIANO_SHOP_DIALOG)
+    player:showText(npc, zones[xi.zone.SOUTHERN_SAN_DORIA].text.VALERIANO_SHOP_DIALOG)
     xi.shop.general(player, stock, xi.fameArea.SANDORIA)
 end
 
