@@ -7,9 +7,7 @@
 local entity = {}
 
 entity.onTrigger = function(player, npc)
-    if GetRegionOwner(xi.region.GUSTABERG) ~= xi.nation.BASTOK then
-        player:showText(npc, zones[xi.zone.PORT_BASTOK].text.EVELYN_CLOSED_DIALOG)
-    else
+    if GetRegionOwner(xi.region.GUSTABERG) == xi.nation.BASTOK then
         local stock =
         {
             { xi.item.PINCH_OF_SULFUR,  803 },
@@ -20,6 +18,8 @@ entity.onTrigger = function(player, npc)
 
         player:showText(npc, zones[xi.zone.PORT_BASTOK].text.EVELYN_OPEN_DIALOG)
         xi.shop.general(player, stock, xi.fameArea.BASTOK)
+    else
+        player:showText(npc, zones[xi.zone.PORT_BASTOK].text.EVELYN_CLOSED_DIALOG)
     end
 end
 
