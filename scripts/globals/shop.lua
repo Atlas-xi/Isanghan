@@ -789,13 +789,13 @@ local regionalStockTable =
         { xi.item.SARUTA_ORANGE,                   33 },
         { xi.item.CLUMP_OF_WINDURSTIAN_TEA_LEAVES, 20 },
     },
-    [xi.region.TAVNAZIANARCH] = -- TODO: Confirm and use enums.
+    [xi.region.TAVNAZIANARCH] =
     {
-        { 1523,  290 }, -- Apple Mint
-        { 5164, 1945 }, -- Ground Wasabi
-        { 17005,  99 }, -- Lufaise Fly
-        { 5195,  233 }, -- Misareaux Parsley
-        { 1695,  920 }, -- Habanero Peppers
+        { xi.item.SPRIG_OF_APPLE_MINT,         331 },
+        { xi.item.JAR_OF_GROUND_WASABI,       2724 },
+        { xi.item.LUFAISE_FLY,                 113 },
+        { xi.item.SPRIG_OF_MISAREAUX_PARSLEY,  331 },
+        { xi.item.BUNCH_OF_HABANERO_PEPPERS,  1050 },
     },
     [xi.region.VALDEAUNIA] =
     {
