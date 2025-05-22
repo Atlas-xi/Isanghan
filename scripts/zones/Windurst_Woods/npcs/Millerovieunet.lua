@@ -1,8 +1,6 @@
 -----------------------------------
 -- Area: Windurst_Woods
 --  NPC: Millerovieunet
--- Only sells when Windurst controlls Qufim Region
--- Confirmed shop stock, August 2013
 -----------------------------------
 ---@type TNpcEntity
 local entity = {}
@@ -12,17 +10,7 @@ entity.onTrade = function(player, npc, trade)
 end
 
 entity.onTrigger = function(player, npc)
-    if GetRegionOwner(xi.region.QUFIMISLAND) == xi.nation.WINDURST then
-        local stock =
-        {
-            { 954,  4032 }, -- Magic Pot Shard
-        }
-
-        player:showText(npc, zones[xi.zone.WINDURST_WOODS].text.MILLEROVIEUNET_OPEN_DIALOG)
-        xi.shop.general(player, stock, xi.fameArea.WINDURST)
-    else
-        player:showText(npc, zones[xi.zone.WINDURST_WOODS].text.MILLEROVIEUNET_CLOSED_DIALOG)
-    end
+    xi.shop.handleRegionalShop(player, npc)
 end
 
 return entity

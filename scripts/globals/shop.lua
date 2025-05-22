@@ -6,6 +6,16 @@ require('scripts/globals/conquest')
 xi = xi or {}
 xi.shop = xi.shop or {}
 -----------------------------------
+local marketsID    = zones[xi.zone.BASTOK_MARKETS]
+local metalworksID = zones[xi.zone.METALWORKS]
+local minesID      = zones[xi.zone.BASTOK_MINES]
+local northSandyID = zones[xi.zone.NORTHERN_SAN_DORIA]
+local portBastokID = zones[xi.zone.PORT_BASTOK]
+local portSandyID  = zones[xi.zone.PORT_SAN_DORIA]
+local portWindyID  = zones[xi.zone.PORT_WINDURST]
+local southSandyID = zones[xi.zone.SOUTHERN_SAN_DORIA]
+local watersID     = zones[xi.zone.WINDURST_WATERS]
+local woodsID      = zones[xi.zone.WINDURST_WOODS]
 
 -- send general shop dialog to player
 -- stock cuts off after 16 items. if you add more, extras will not display
@@ -588,3 +598,287 @@ xi.shop.curioVendorMoogleStock =
         { xi.item.PSOXJA_COFFER_KEY,     2500, xi.ki.RHAPSODY_IN_WHITE },
     },
 }
+
+-----------------------------------
+-- Regional Vendors
+-----------------------------------
+local regionParam =
+{
+    REGION           = 1,
+    NATION           = 2,
+    FAME_AREA        = 3,
+    TEXT_OPEN        = 4,
+    TEXT_CLOSED      = 5,
+    TEXT_UNAVAILABLE = 6,
+}
+
+local regionalVendorTable =
+{
+    ['Antonian'   ] = { xi.region.ARAGONEU, xi.nation.SANDORIA, xi.fameArea.SANDORIA, northSandyID.text.ANTONIAN_OPEN_DIALOG, northSandyID.text.ANTONIAN_CLOSED_DIALOG, 0 },
+    ['Oggodett'   ] = { xi.region.ARAGONEU, xi.nation.BASTOK,   xi.fameArea.BASTOK,   marketsID.text.OGGODETT_OPEN_DIALOG,    marketsID.text.OGGODETT_CLOSED_DIALOG,    0 },
+    ['Maqu_Molpih'] = { xi.region.ARAGONEU, xi.nation.WINDURST, xi.fameArea.WINDURST, watersID.text.MAQUMOLPIH_OPEN_DIALOG,   watersID.text.MAQUMOLPIH_CLOSED_DIALOG,   0 },
+
+    ['Pourette'       ] = { xi.region.DERFLAND, xi.nation.SANDORIA, xi.fameArea.SANDORIA, southSandyID.text.POURETTE_OPEN_DIALOG,  southSandyID.text.POURETTE_CLOSED_DIALOG,  0 },
+    ['Belka'          ] = { xi.region.DERFLAND, xi.nation.BASTOK,   xi.fameArea.BASTOK,   portBastokID.text.BELKA_OPEN_DIALOG,     portBastokID.text.BELKA_CLOSED_DIALOG,     0 },
+    ['Taraihi-Perunhi'] = { xi.region.DERFLAND, xi.nation.WINDURST, xi.fameArea.WINDURST, woodsID.text.TARAIHIPERUNHI_OPEN_DIALOG, woodsID.text.TARAIHIPERUNHI_CLOSED_DIALOG, 0 },
+
+    ['Nimia'     ] = { xi.region.ELSHIMO_LOWLANDS, xi.nation.SANDORIA, xi.fameArea.SANDORIA, portSandyID.text.NIMIA_OPEN_DIALOG,      portSandyID.text.NIMIA_CLOSED_DIALOG,      0 },
+    ['Zoby_Quhyo'] = { xi.region.ELSHIMO_LOWLANDS, xi.nation.BASTOK,   xi.fameArea.BASTOK,   portBastokID.text.ZOBYQUHYO_OPEN_DIALOG, portBastokID.text.ZOBYQUHYO_CLOSED_DIALOG, 0 },
+    ['Fomina'    ] = { xi.region.ELSHIMO_LOWLANDS, xi.nation.WINDURST, xi.fameArea.WINDURST, watersID.text.FOMINA_OPEN_DIALOG,        watersID.text.FOMINA_CLOSED_DIALOG,        0 },
+
+    ['Bonmaurieut'      ] = { xi.region.ELSHIMO_UPLANDS, xi.nation.SANDORIA, xi.fameArea.SANDORIA, portSandyID.text.BONMAURIEUT_OPEN_DIALOG,      portSandyID.text.BONMAURIEUT_CLOSED_DIALOG,      0 },
+    ['Dhen_Tevryukoh'   ] = { xi.region.ELSHIMO_UPLANDS, xi.nation.BASTOK,   xi.fameArea.BASTOK,   portBastokID.text.DHENTEVRYUKOH_OPEN_DIALOG,   portBastokID.text.DHENTEVRYUKOH_CLOSED_DIALOG,   0 },
+    ['Sattsuh_Ahkanpari'] = { xi.region.ELSHIMO_UPLANDS, xi.nation.WINDURST, xi.fameArea.WINDURST, portWindyID.text.SATTSUHAHKANPARI_OPEN_DIALOG, portWindyID.text.SATTSUHAHKANPARI_CLOSED_DIALOG, 0 },
+
+    ['Vichuel'           ] = { xi.region.FAUREGANDI, xi.nation.SANDORIA, xi.fameArea.SANDORIA, northSandyID.text.VICHUEL_OPEN_DIALOG,          northSandyID.text.VICHUEL_CLOSED_DIALOG,          0 },
+    ['Rodellieux'        ] = { xi.region.FAUREGANDI, xi.nation.BASTOK,   xi.fameArea.BASTOK,   minesID.text.RODELLIEUX_OPEN_DIALOG,            minesID.text.RODELLIEUX_CLOSED_DIALOG,            0 },
+    ['Sheia_Pohrichamaha'] = { xi.region.FAUREGANDI, xi.nation.WINDURST, xi.fameArea.WINDURST, portWindyID.text.SHEIAPOHRICHAMAHA_OPEN_DIALOG, portWindyID.text.SHEIAPOHRICHAMAHA_CLOSED_DIALOG, 0 },
+
+    ['Apairemant'  ] = { xi.region.GUSTABERG, xi.nation.SANDORIA, xi.fameArea.SANDORIA, southSandyID.text.APAIREMANT_OPEN_DIALOG, southSandyID.text.APAIREMANT_CLOSED_DIALOG, 0 },
+    ['Evelyn'      ] = { xi.region.GUSTABERG, xi.nation.BASTOK,   xi.fameArea.BASTOK,   portBastokID.text.EVELYN_OPEN_DIALOG,     portBastokID.text.EVELYN_CLOSED_DIALOG,     0 },
+    ['Nya_Labiccio'] = { xi.region.GUSTABERG, xi.nation.WINDURST, xi.fameArea.WINDURST, woodsID.text.NYALABICCIO_OPEN_DIALOG,     woodsID.text.NYALABICCIO_CLOSED_DIALOG,     0 },
+
+    ['Fiva'    ] = { xi.region.KOLSHUSHU, xi.nation.SANDORIA, xi.fameArea.SANDORIA, portSandyID.text.FIVA_OPEN_DIALOG,  portSandyID.text.FIVA_CLOSED_DIALOG,  0 },
+    ['Yafafa'  ] = { xi.region.KOLSHUSHU, xi.nation.BASTOK,   xi.fameArea.BASTOK,   marketsID.text.YAFAFA_OPEN_DIALOG,  marketsID.text.YAFAFA_CLOSED_DIALOG,  0 },
+    ['Ahyeekih'] = { xi.region.KOLSHUSHU, xi.nation.WINDURST, xi.fameArea.WINDURST, watersID.text.AHYEEKIH_OPEN_DIALOG, watersID.text.AHYEEKIH_CLOSED_DIALOG, 0 },
+
+    ['Patolle'     ] = { xi.region.KUZOTZ, xi.nation.SANDORIA, xi.fameArea.SANDORIA, portSandyID.text.PATOLLE_OPEN_DIALOG,  portSandyID.text.PATOLLE_CLOSED_DIALOG,  0 },
+    ['Vattian'     ] = { xi.region.KUZOTZ, xi.nation.BASTOK,   xi.fameArea.BASTOK,   portBastokID.text.VATTIAN_OPEN_DIALOG, portBastokID.text.VATTIAN_CLOSED_DIALOG, 0 },
+    ['Nhobi_Zalkia'] = { xi.region.KUZOTZ, xi.nation.WINDURST, xi.fameArea.WINDURST, woodsID.text.NHOBI_ZALKIA_OPEN_DIALOG, woodsID.text.NHOBI_ZALKIA_CLOSED_DIALOG, 0 },
+
+    ['Attarena'] = { xi.region.LITELOR, xi.nation.SANDORIA, xi.fameArea.SANDORIA, northSandyID.text.ATTARENA_OPEN_DIALOG, northSandyID.text.ATTARENA_CLOSED_DIALOG, 0 },
+    ['Galdeo'  ] = { xi.region.LITELOR, xi.nation.BASTOK,   xi.fameArea.BASTOK,   minesID.text.GALDEO_OPEN_DIALOG,        minesID.text.GALDEO_CLOSED_DIALOG,        0 },
+    ['Otete'   ] = { xi.region.LITELOR, xi.nation.WINDURST, xi.fameArea.WINDURST, watersID.text.OTETE_OPEN_DIALOG,        watersID.text.OTETE_CLOSED_DIALOG,        0 },
+
+    ['Vendavoq' ] = { xi.region.MOVALPOLOS, xi.nation.SANDORIA, xi.fameArea.SANDORIA, portSandyID.text.VENDAVOQ_OPEN_DIALOG,   portSandyID.text.VENDAVOQ_CLOSED_DIALOG,   0 },
+    ['Bagnobrok'] = { xi.region.MOVALPOLOS, xi.nation.BASTOK,   xi.fameArea.BASTOK,   portBastokID.text.BAGNOBROK_OPEN_DIALOG, portBastokID.text.BAGNOBROK_CLOSED_DIALOG, 0 },
+    ['Prestapiq'] = { xi.region.MOVALPOLOS, xi.nation.WINDURST, xi.fameArea.WINDURST, watersID.text.PRESTAPIQ_OPEN_DIALOG,     watersID.text.PRESTAPIQ_CLOSED_DIALOG,     0 },
+
+    ['Machielle'    ] = { xi.region.NORVALLEN, xi.nation.SANDORIA, xi.fameArea.SANDORIA, southSandyID.text.MACHIELLE_OPEN_DIALOG,   southSandyID.text.MACHIELLE_CLOSED_DIALOG,   0 },
+    ['Mille'        ] = { xi.region.NORVALLEN, xi.nation.BASTOK,   xi.fameArea.BASTOK,   minesID.text.MILLE_OPEN_DIALOG,            minesID.text.MILLE_CLOSED_DIALOG,            0 },
+    ['Posso_Ruhbini'] = { xi.region.NORVALLEN, xi.nation.WINDURST, xi.fameArea.WINDURST, portWindyID.text.POSSORUHBINI_OPEN_DIALOG, portWindyID.text.POSSORUHBINI_CLOSED_DIALOG, 0 },
+
+    ['Eugballion'    ] = { xi.region.QUFIMISLAND, xi.nation.SANDORIA, xi.fameArea.SANDORIA, northSandyID.text.EUGBALLION_OPEN_DIALOG, northSandyID.text.EUGBALLION_CLOSED_DIALOG, 0 },
+    ['Takiyah'       ] = { xi.region.QUFIMISLAND, xi.nation.BASTOK,   xi.fameArea.BASTOK,   metalworksID.text.TAKIYAH_OPEN_DIALOG,    metalworksID.text.TAKIYAH_CLOSED_DIALOG,    0 },
+    ['Millerovieunet'] = { xi.region.QUFIMISLAND, xi.nation.WINDURST, xi.fameArea.WINDURST, woodsID.text.MILLEROVIEUNET_OPEN_DIALOG,  woodsID.text.MILLEROVIEUNET_CLOSED_DIALOG,  0 },
+
+    ['Corua'   ] = { xi.region.RONFAURE, xi.nation.SANDORIA, xi.fameArea.SANDORIA, southSandyID.text.CORUA_OPEN_DIALOG, southSandyID.text.CORUA_CLOSED_DIALOG, 0 },
+    ['Faustin' ] = { xi.region.RONFAURE, xi.nation.BASTOK,   xi.fameArea.BASTOK,   minesID.text.FAUSTIN_OPEN_DIALOG,    minesID.text.FAUSTIN_CLOSED_DIALOG,    0 },
+    ['Jourille'] = { xi.region.RONFAURE, xi.nation.WINDURST, xi.fameArea.WINDURST, watersID.text.JOURILLE_OPEN_DIALOG,  watersID.text.JOURILLE_CLOSED_DIALOG,  0 },
+
+    ['Milva'      ] = { xi.region.SARUTABARUTA, xi.nation.SANDORIA, xi.fameArea.SANDORIA, portSandyID.text.MILVA_OPEN_DIALOG,   portSandyID.text.MILVA_CLOSED_DIALOG,   0 },
+    ['Somn-Paemn' ] = { xi.region.SARUTABARUTA, xi.nation.BASTOK,   xi.fameArea.BASTOK,   marketsID.text.SOMNPAEMN_OPEN_DIALOG, marketsID.text.SOMNPAEMN_CLOSED_DIALOG, 0 },
+    ['Baehu-Faehu'] = { xi.region.SARUTABARUTA, xi.nation.WINDURST, xi.fameArea.WINDURST, watersID.text.BAEHUFAEHU_OPEN_DIALOG, watersID.text.BAEHUFAEHU_CLOSED_DIALOG, 0 },
+
+    ['Deguerendars'] = { xi.region.TAVNAZIANARCH, xi.nation.SANDORIA, xi.fameArea.SANDORIA, portSandyID.text.DEGUERENDARS_OPEN_DIALOG, portSandyID.text.DEGUERENDARS_CLOSED_DIALOG, portSandyID.text.DEGUERENDARS_COP_NOT_COMPLETED },
+    ['Emaliveulaux'] = { xi.region.TAVNAZIANARCH, xi.nation.BASTOK,   xi.fameArea.BASTOK,   minesID.text.EMALIVEULAUX_OPEN_DIALOG,     minesID.text.EMALIVEULAUX_CLOSED_DIALOG,     minesID.text.EMALIVEULAUX_COP_NOT_COMPLETED     },
+    ['Alizabe'     ] = { xi.region.TAVNAZIANARCH, xi.nation.WINDURST, xi.fameArea.WINDURST, portWindyID.text.ALIZABE_OPEN_DIALOG,      portWindyID.text.ALIZABE_CLOSED_DIALOG,      portWindyID.text.ALIZABE_COP_NOT_COMPLETED      },
+
+    ['Palguevion'] = { xi.region.VALDEAUNIA, xi.nation.SANDORIA, xi.fameArea.SANDORIA, northSandyID.text.PALGUEVION_OPEN_DIALOG, northSandyID.text.PALGUEVION_CLOSED_DIALOG, 0 },
+    ['Tibelda'   ] = { xi.region.VALDEAUNIA, xi.nation.BASTOK,   xi.fameArea.BASTOK,   minesID.text.TIBELDA_OPEN_DIALOG,         minesID.text.TIBELDA_CLOSED_DIALOG,         0 },
+    ['Zoreen'    ] = { xi.region.VALDEAUNIA, xi.nation.WINDURST, xi.fameArea.WINDURST, portWindyID.text.ZOREEN_OPEN_DIALOG,      portWindyID.text.ZOREEN_CLOSED_DIALOG,      0 },
+
+    ['Millechuca'] = { xi.region.VOLLBOW, xi.nation.SANDORIA, xi.fameArea.SANDORIA, northSandyID.text.MILLECHUCA_OPEN_DIALOG, northSandyID.text.MILLECHUCA_CLOSED_DIALOG, 0 },
+    ['Aulavia'   ] = { xi.region.VOLLBOW, xi.nation.BASTOK,   xi.fameArea.BASTOK,   minesID.text.AULAVIA_OPEN_DIALOG,         minesID.text.AULAVIA_CLOSED_DIALOG,         0 },
+    ['Lebondur'  ] = { xi.region.VOLLBOW, xi.nation.WINDURST, xi.fameArea.WINDURST, portWindyID.text.LEBONDUR_OPEN_DIALOG,    portWindyID.text.LEBONDUR_CLOSED_DIALOG,    0 },
+
+    ['Phamelise'   ] = { xi.region.ZULKHEIM, xi.nation.SANDORIA, xi.fameArea.SANDORIA, southSandyID.text.PHAMELISE_OPEN_DIALOG, southSandyID.text.PHAMELISE_CLOSED_DIALOG, 0 },
+    ['Rosswald'    ] = { xi.region.ZULKHEIM, xi.nation.BASTOK,   xi.fameArea.BASTOK,   portBastokID.text.ROSSWALD_OPEN_DIALOG,  portBastokID.text.ROSSWALD_CLOSED_DIALOG,  0 },
+    ['Bin_Stejihna'] = { xi.region.ZULKHEIM, xi.nation.WINDURST, xi.fameArea.WINDURST, woodsID.text.BIN_STEJIHNA_OPEN_DIALOG,   woodsID.text.BIN_STEJIHNA_CLOSED_DIALOG,   0 },
+}
+
+local regionalStockTable =
+{
+    [xi.region.ARAGONEU] =
+    {
+        { xi.item.BAG_OF_HORO_FLOUR,           41 },
+        { xi.item.EAR_OF_MILLIONCORN,          49 },
+        { xi.item.EAR_OF_ROASTED_CORN,        128 },
+        { xi.item.YAGUDO_FEATHER,              41 },
+        { xi.item.HANDFUL_OF_SUNFLOWER_SEEDS, 104 },
+    },
+    [xi.region.DERFLAND] =
+    {
+        { xi.item.BUNCH_OF_GYSAHL_GREENS,   70 },
+        { xi.item.GINGER_ROOT,             161 },
+        { xi.item.FLASK_OF_OLIVE_OIL,       16 },
+        { xi.item.WIJNRUIT,                124 },
+        { xi.item.DERFLAND_PEAR,           145 },
+        { xi.item.OLIVE_FLOWER,           1872 },
+    },
+    [xi.region.ELSHIMO_LOWLANDS] =
+    {
+        { xi.item.BUNCH_OF_KAZHAM_PEPPERS,   62 },
+        { xi.item.KAZHAM_PINEAPPLE,          62 },
+        { xi.item.MITHRAN_TOMATO,            41 },
+        { xi.item.PINCH_OF_BLACK_PEPPER,    265 },
+        { xi.item.OGRE_PUMPKIN,              99 },
+        { xi.item.KUKURU_BEAN,              124 },
+        { xi.item.PHALAENOPSIS,            1872 },
+    },
+    [xi.region.ELSHIMO_UPLANDS] =
+    {
+        { xi.item.BUNCH_OF_PAMAMAS,         84 },
+        { xi.item.STICK_OF_CINNAMON,       273 },
+        { xi.item.PIECE_OF_RATTAN_LUMBER,  168 },
+        { xi.item.CATTLEYA,               1890 },
+    },
+    [xi.region.FAUREGANDI] =
+    {
+        { xi.item.MAPLE_LOG,            63 },
+        { xi.item.FAERIE_APPLE,         46 },
+        { xi.item.CLUMP_OF_BEAUGREENS, 105 },
+    },
+    [xi.region.GUSTABERG] =
+    {
+        { xi.item.PINCH_OF_SULFUR,  803 },
+        { xi.item.POPOTO,            50 },
+        { xi.item.BAG_OF_RYE_FLOUR,  42 },
+        { xi.item.EGGPLANT,          46 },
+    },
+    [xi.region.KOLSHUSHU] =
+    {
+        { xi.item.BULB_OF_MHAURA_GARLIC,      84 },
+        { xi.item.YAGUDO_CHERRY,              46 },
+        { xi.item.SLICE_OF_DHALMEL_MEAT,     252 },
+        { xi.item.BUNCH_OF_BUBURIMU_GRAPES,  210 },
+        { xi.item.CASABLANCA,               1890 },
+    },
+    [xi.region.KUZOTZ] =
+    {
+        { xi.item.THUNDERMELON,   341 },
+        { xi.item.CACTUAR_NEEDLE, 976 },
+        { xi.item.WATERMELON,     210 },
+    },
+    [xi.region.LITELOR] =
+    {
+        { xi.item.HANDFUL_OF_BAY_LEAVES,  135 },
+        { xi.item.FLASK_OF_HOLY_WATER,   3016 },
+    },
+    [xi.region.MOVALPOLOS] =
+    {
+        { xi.item.BOTTLE_OF_MOVALPOLOS_WATER,  840 },
+        { xi.item.CHUNK_OF_COPPER_ORE,          12 },
+        { xi.item.DANCESHROOM,                4704 },
+        { xi.item.CORAL_FUNGUS,                792 },
+        { xi.item.CHUNK_OF_KOPPARNICKEL_ORE,   840 },
+    },
+    [xi.region.NORVALLEN] =
+    {
+        { xi.item.ARROWWOOD_LOG,         20 },
+        { xi.item.POT_OF_CRYING_MUSTARD, 29 },
+        { xi.item.POD_OF_BLUE_PEAS,      29 },
+        { xi.item.ASH_LOG,               99 },
+    },
+    [xi.region.QUFIMISLAND] =
+    {
+        { xi.item.MAGIC_POT_SHARD, 4704 },
+    },
+    [xi.region.RONFAURE] =
+    {
+        { xi.item.SAN_DORIAN_CARROT,           33, },
+        { xi.item.BUNCH_OF_SAN_DORIAN_GRAPES,  79, },
+        { xi.item.RONFAURE_CHESTNUT,          124, },
+        { xi.item.BAG_OF_SAN_DORIAN_FLOUR,     62, },
+    },
+    [xi.region.SARUTABARUTA] =
+    {
+        { xi.item.RARAB_TAIL,                      24 },
+        { xi.item.LAUAN_LOG,                       37 },
+        { xi.item.POPOTO,                          49 },
+        { xi.item.SARUTA_ORANGE,                   33 },
+        { xi.item.CLUMP_OF_WINDURSTIAN_TEA_LEAVES, 20 },
+    },
+    [xi.region.TAVNAZIANARCH] = -- TODO: Confirm and use enums.
+    {
+        { 1523,  290 }, -- Apple Mint
+        { 5164, 1945 }, -- Ground Wasabi
+        { 17005,  99 }, -- Lufaise Fly
+        { 5195,  233 }, -- Misareaux Parsley
+        { 1695,  920 }, -- Habanero Peppers
+    },
+    [xi.region.VALDEAUNIA] =
+    {
+        { xi.item.SPRIG_OF_SAGE, 192 },
+        { xi.item.FROST_TURNIP,   33 },
+    },
+    [xi.region.VOLLBOW] =
+    {
+        { xi.item.CHUNK_OF_ROCK_SALT,       16 },
+        { xi.item.HANDFUL_OF_FISH_SCALES,   99 },
+        { xi.item.CHAMOMILE,               135 },
+        { xi.item.SWEET_WILLIAM,          1872 },
+    },
+    [xi.region.ZULKHEIM] =
+    {
+        { xi.item.SLICE_OF_GIANT_SHEEP_MEAT,   50 },
+        { xi.item.PINCH_OF_DRIED_MARJORAM,     50 },
+        { xi.item.BAG_OF_SAN_DORIAN_FLOUR,     63 },
+        { xi.item.BAG_OF_RYE_FLOUR,            42 },
+        { xi.item.BAG_OF_SEMOLINA,           2100 },
+        { xi.item.LA_THEINE_CABBAGE,           25 },
+        { xi.item.JUG_OF_SELBINA_MILK,         63 },
+    },
+}
+
+xi.shop.handleRegionalShop = function(player, npc)
+    local npcData = regionalVendorTable[npc:getName()]
+
+    -- CoP Mission check for Tavnazia vendors.
+    if
+        npcData[regionParam.REGION] == xi.region.TAVNAZIANARCH and
+        player:getCurrentMission(xi.mission.log_id.COP) < xi.mission.id.cop.THE_SAVAGE
+    then
+        player:showText(npc, npcData[regionParam.TEXT_UNAVAILABLE])
+        return
+    end
+
+    -- Region owner check.
+    if GetRegionOwner(npcData[regionParam.REGION]) ~= npcData[regionParam.NATION] then
+        player:showText(npc, npcData[regionParam.TEXT_CLOSED])
+        return
+    end
+
+    -- Build shop.
+    player:showText(npc, npcData[regionParam.TEXT_OPEN])
+    xi.shop.general(player, regionalStockTable[regionParam.REGION], npcData[regionParam.FAME_AREA])
+end
+
+-----------------------------------
+-- Valeriano Troupe Vendor
+-----------------------------------
+xi.shop.handleValerianoShop = function(player, npc)
+    local zoneTable =
+    {
+        [xi.zone.SOUTHERN_SAN_DORIA] = { xi.nation.SANDORIA, xi.fameArea.SANDORIA },
+        [xi.zone.PORT_BASTOK       ] = { xi.nation.BASTOK,   xi.fameArea.BASTOK   },
+        [xi.zone.WINDURST_WOODS    ] = { xi.nation.WINDURST, xi.fameArea.WINDURST },
+    }
+    local stock =
+    {
+        { xi.item.GINGER_COOKIE,                  12 },
+        { xi.item.FLUTE,                          49 },
+        { xi.item.PICCOLO,                      1144 },
+        { xi.item.SCROLL_OF_SCOPS_OPERETTA,      677 },
+        { xi.item.SCROLL_OF_PUPPETS_OPERETTA,  19552 },
+        { xi.item.SCROLL_OF_FOWL_AUBADE,        3369 },
+        { xi.item.SCROLL_OF_ADVANCING_MARCH,    2379 },
+        { xi.item.SCROLL_OF_GODDESSS_HYMNUS,  104000 },
+        { xi.item.SCROLL_OF_FIRE_CAROL_II,     37128 },
+        { xi.item.SCROLL_OF_WIND_CAROL_II,     34944 },
+        { xi.item.SCROLL_OF_EARTH_CAROL_II,    30680 },
+        { xi.item.SCROLL_OF_WATER_CAROL_II,    32240 },
+        { xi.item.SCROLL_OF_MAGES_BALLAD_III, 140039 },
+    }
+
+    local zoneId     = player:getZoneID()
+
+    -- Fail-safe in case npc didnt despawn.
+    if GetNationRank(zoneTable[zoneId][1]) ~= 1 then
+        return
+    end
+
+    -- Build shop.
+    player:showText(npc, zones[zoneId].text.VALERIANO_SHOP_DIALOG)
+    xi.shop.general(player, stock, zoneTable[zoneId][2])
+end
