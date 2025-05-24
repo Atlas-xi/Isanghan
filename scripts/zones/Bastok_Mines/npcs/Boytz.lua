@@ -21,13 +21,19 @@ entity.onTrigger = function(player, npc)
         { xi.item.REPUBLIC_WAYSTONE,   10500, 3 },
     }
 
-    local rank = GetNationRank(xi.nation.BASTOK)
-
-    if rank >= 2 then
+    -- Thief's tools.
+    if GetNationRank(player:getNation()) >= 2 then -- Player nation rank 2 or 3.
         table.insert(stock, { xi.item.SET_OF_THIEFS_TOOLS, 4158, 3 })
     end
 
-    if rank >= 3 then
+    -- Living Key.
+    local sandyNationRank  = GetNationRank(xi.nation.SANDORIA)
+    local bastokNationRank = GetNationRank(xi.nation.BASTOK)
+    local windyNationRank  = GetNationRank(xi.nation.WINDURST)
+    if
+        (bastokNationRank == sandyNationRank and bastokNationRank == windyNationRank) or                        -- All 3 nations tied.
+        (bastokNationRank ~= sandyNationRank and bastokNationRank ~= windyNationRank and bastokNationRank == 3) -- Nation not tied and nation last.
+    then
         table.insert(stock, { xi.item.LIVING_KEY, 5520, 3 })
     end
 
