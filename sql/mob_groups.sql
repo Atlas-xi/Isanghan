@@ -8056,7 +8056,7 @@ INSERT INTO `mob_groups` VALUES (22,1511,111,'Ghast_blm',330,0,953,0,0,40,40,0);
 INSERT INTO `mob_groups` VALUES (23,2447,111,'Lugat',330,0,264,0,0,39,42,0);
 INSERT INTO `mob_groups` VALUES (24,2919,111,'Nue',0,32,1827,0,0,41,42,0);
 INSERT INTO `mob_groups` VALUES (25,1701,111,'Goblin_Poacher',330,0,1138,0,0,40,43,0);
-INSERT INTO `mob_groups` VALUES (26,1741,111,'Goblin_Trader',330,0,2864,0,0,40,43,0);
+INSERT INTO `mob_groups` VALUES (26,1741,111,'Goblin_Trader',330,0,1179,0,0,40,43,0);
 INSERT INTO `mob_groups` VALUES (27,1709,111,'Goblin_Robber',330,0,1145,0,0,40,43,0);
 INSERT INTO `mob_groups` VALUES (28,1705,111,'Goblin_Reaper',330,0,1142,0,0,40,43,0);
 INSERT INTO `mob_groups` VALUES (29,3781,111,'Stone_Golem',330,0,505,0,0,40,42,0);
