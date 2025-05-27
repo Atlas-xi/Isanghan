@@ -100,6 +100,10 @@ xi.mobSkill =
 
     PHASE_SHIFT_3_EXOPLATES  = 1001,
 
+    ZEID_SUMMON_SHADOWS_1    = 1002, -- TODO: Investigate why was this in sql, where it came from and why wasnt it actually used in an scripted way.
+
+    ZEID_SUMMON_SHADOWS_2    = 1007, -- Captured. Bastok mission 9-2 BCNM, phase 2. No actual name in log.
+
     CALL_BEAST               = 1017, -- "Tango with a Tracker" Shikaree X
 
     RANGED_ATTACK_3          = 1154,
