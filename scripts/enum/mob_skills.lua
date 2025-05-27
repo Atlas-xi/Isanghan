@@ -94,6 +94,12 @@ xi.mobSkill =
     JUDGMENT_BOLT_2          =  918, -- Confirmed usage: Untargetable avatar astral flow. (Ex. Kirin) (Ramuh model avatar)
     SEARING_LIGHT_2          =  919, -- Confirmed usage: Untargetable avatar astral flow. (Ex. Kirin, Crimson-toothed Pawberry) (Carbuncle model avatar)
 
+    PHASE_SHIFT_1_EXOPLATES  =  993,
+
+    PHASE_SHIFT_2_EXOPLATES  =  997,
+
+    PHASE_SHIFT_3_EXOPLATES  = 1001,
+
     CALL_BEAST               = 1017, -- "Tango with a Tracker" Shikaree X
 
     RANGED_ATTACK_3          = 1154,
