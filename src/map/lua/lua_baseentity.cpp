@@ -4976,17 +4976,17 @@ void CLuaBaseEntity::equipItem(uint16 itemID, sol::object const& container)
 
 /************************************************************************
  *  Function: unequipItem()
- *  Purpose : Unequips an item from player
- *  Example : player:unequipItem(17845)
- *  Notes   :
+ *  Purpose : Unequips an item from player based on slot id
+ *  Example : player:unequipItem(4) -- Head
+ *  Notes   : Range 0 - 15
  ************************************************************************/
 
-void CLuaBaseEntity::unequipItem(uint8 itemID)
+void CLuaBaseEntity::unequipItem(uint8 slotID)
 {
     if (m_PBaseEntity->objtype == TYPE_PC)
     {
         auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
-        charutils::UnequipItem(PChar, itemID);
+        charutils::UnequipItem(PChar, slotID);
     }
 }
 
