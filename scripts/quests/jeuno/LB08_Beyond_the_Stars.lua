@@ -26,9 +26,7 @@ quest.sections =
     {
         check = function(player, status, vars)
             return status == xi.questStatus.QUEST_AVAILABLE and
-                player:getMainLvl() >= 81 and
                 player:getLevelCap() == 85 and
-                xi.settings.main.MAX_LEVEL >= 90
         end,
 
         [xi.zone.RULUDE_GARDENS] =
@@ -36,7 +34,23 @@ quest.sections =
             ['Nomad_Moogle'] =
             {
                 onTrigger = function(player, npc)
-                    return quest:progressEvent(10045, 0, 1, 3, 0)
+                    local playerLevel     = player:getMainLvl()
+                    local limitBreaker    = player:hasKeyItem(xi.ki.LIMIT_BREAKER) and 1 or 2
+                    local lastQuestNumber = 0
+                    local lastQuestStage  = 0
+                    if
+                        xi.settings.main.MAX_LEVEL > 85 and
+                        limitBreaker == 1
+                    then
+                        if playerLevel > 80 then
+                            lastQuestNumber = 3
+                        elseif playerLevel == 80 then
+                            lastQuestNumber = 2
+                            lastQuestStage  = 2
+                        end
+                    end
+
+                    return quest:progressEvent(10045, playerLevel, limitBreaker, lastQuestNumber, lastQuestStage)
                 end,
             },
 
@@ -61,22 +75,28 @@ quest.sections =
         {
             ['Nomad_Moogle'] =
             {
-                onTrigger = function(player, npc)
-                    if quest:getVar(player, 'Prog') == 1 then
-                        -- Rock, Paper, Scissor Minigame starting event.
-                        -- NOT CODED. WAITING FOR CAPS.
-                        return quest:progressEvent(10161)
-                    else
-                        return quest:event(10045, 0, 1, 3, 1)
-                    end
-                end,
-
                 onTrade = function(player, npc, trade)
                     if
                         npcUtil.tradeHasExactly(trade, { { xi.item.KINDREDS_CREST, 10 } }) and
                         player:getMeritCount() > 4
                     then
                         return quest:progressEvent(10137)
+                    end
+                end,
+
+                onTrigger = function(player, npc)
+                    -- Rock, Paper, Scissor Minigame.
+                    if quest:getVar(player, 'Prog') == 1 then
+                        return quest:progressEvent(10161)
+
+                    -- Reminder
+                    else
+                        local playerLevel     = player:getMainLvl()
+                        local limitBreaker    = player:hasKeyItem(xi.ki.LIMIT_BREAKER) and 1 or 2
+                        local lastQuestNumber = 3
+                        local lastQuestStage  = 1
+
+                        return quest:event(10045, playerLevel, limitBreaker, lastQuestNumber, lastQuestStage)
                     end
                 end,
             },
