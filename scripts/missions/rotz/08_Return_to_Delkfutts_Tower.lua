@@ -80,9 +80,10 @@ mission.sections =
         [xi.zone.STELLAR_FULCRUM] =
         {
             onZoneIn = function(player, prevZone)
-                if not mission:isVarBitsSet(player, 'Option', 2) then
+                local missionStatus = player:getMissionStatus(mission.areaId)
+                if missionStatus == 0 then
                     return 0 -- Pre-Battle.
-                elseif player:getMissionStatus(mission.areaId) == 2 then
+                elseif missionStatus == 2 then
                     return 17 -- Post-Battle. Mission complete event.
                 elseif player:getPreviousZone() == xi.zone.UPPER_DELKFUTTS_TOWER then
                     return 7 -- Ensure regular entering CS plays.
