@@ -1800,11 +1800,11 @@ INSERT INTO `item_latents` VALUES (17589,287,13,47,0);   -- Thyrsusstab DMG+13 w
 -- Primate Staff
 INSERT INTO `item_latents` VALUES (17590,25,10,49,4468);     -- Pamamas
 INSERT INTO `item_latents` VALUES (17590,25,10,49,4596);     -- Wild Pamamas
-INSERT INTO `item_latents` VALUES (17590,171,-1383,49,4468); -- DELAY: -1386, Pamamas
-INSERT INTO `item_latents` VALUES (17590,171,-1383,49,4596); -- DELAY: -1386, Wild Pamamas
+INSERT INTO `item_latents` VALUES (17590,171,-1383,49,4468); -- DELAY: -1383, Pamamas
+INSERT INTO `item_latents` VALUES (17590,171,-1383,49,4596); -- DELAY: -1383, Wild Pamamas
 
 -- Primate Staff +1
-INSERT INTO `item_latents` VALUES (17591,25,12,49,4468);     -- amamas
+INSERT INTO `item_latents` VALUES (17591,25,12,49,4468);     -- Pamamas
 INSERT INTO `item_latents` VALUES (17591,25,12,49,4596);     -- Wild Pamamas
 INSERT INTO `item_latents` VALUES (17591,171,-1333,49,4468); -- DELAY: -1333, Pamamas
 INSERT INTO `item_latents` VALUES (17591,171,-1333,49,4596); -- DELAY: -1333, Wild Pamamas
