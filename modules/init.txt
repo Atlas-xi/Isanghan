@@ -38,3 +38,9 @@
 
 custom/commands/
 custom/lua/test_npcs_in_gm_home.lua
+custom/lua/new_player_linkshell.lua
+custom/lua/persist_nm_time_of_deaths.lua
+custom/lua/conquest_regional_npcs_always_up.lua
+custom/lua/armor_shop_npc.lua
+custom/lua/dynamis_jeuno_custom.lua
+custom/sql/dyna_jeuno_drops.sql

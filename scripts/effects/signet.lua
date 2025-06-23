@@ -1,12 +1,11 @@
 -----------------------------------
 -- xi.effect.SIGNET
---   Signet is a a beneficial Status Effect that allows the acquisition of Conquest Points and Crystals
+--   Signet is a beneficial Status Effect that allows the acquisition of Conquest Points and Crystals
 --   from defeated enemies that grant Experience Points.
-
---   Increased Healing HP
---   No TP loss while resting
---   Bonus experience earned in smaller parties
---   Increased defense and evasion against attacks from your auto-attack target when even match or lower
+--
+--   Additional Custom Behavior:
+--     - Applies simulated Regen and Refresh each tick
+--     - Bonus DEF and EVA vs auto-attack targets
 -----------------------------------
 ---@type TEffect
 local effectObject = {}
@@ -17,6 +16,14 @@ effectObject.onEffectGain = function(target, effect)
 end
 
 effectObject.onEffectTick = function(target, effect)
+    -- Custom Regen and Refresh behavior
+    local hpRegen = 1    -- HP restored per tick
+    local mpRegen = 1    -- MP restored per tick
+
+    if target:getHP() > 0 then
+        target:addHP(hpRegen)
+        target:addMP(mpRegen)
+    end
 end
 
 effectObject.onEffectLose = function(target, effect)
